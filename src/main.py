@@ -1,5 +1,6 @@
 import pygame
 from Game import Game
+import constantes as ct
 
 def main():
     pygame.init()
@@ -9,7 +10,7 @@ def main():
     clock = pygame.time.Clock()
     running = True
     while running:
-        dt = clock.tick(60) / 1000  # Delta time en segundos
+        dt = clock.tick(ct.FPS) / 1000  # Delta time en segundos
 
         eventos = game.handle_events()  # Captura los eventos
         if eventos is None:  # Si se detecta un evento de salida

@@ -1,23 +1,29 @@
 from World import World
 from Graphics import Graphics
 from camara import Camera
+import pygame
 
 class Game:
     def __init__(self):
-        self.camara = Camera()
-        self.world = World(self.camara)
-        self.graphics = Graphics(self.world)
+        self.camara = Camera() # Inicializa la cámara
+        self.world = World(self.camara) # Inicializa el mundo, pasando la cámara
+        self.graphics = Graphics(self.world) # Inicializa los gráficos, pasando el mundo
 
+    """
+    Manejador de eventos del juego.
+    Captura eventos de entrada y verifica si el juego debe cerrarse.
+    """
     def handle_events(self):
-        import pygame
-        eventos = pygame.event.get()
-        for evento in eventos:
-            if evento.type == pygame.QUIT:
+        eventos = pygame.event.get() # Obtiene la lista de eventos
+        for evento in eventos: 
+            if evento.type == pygame.QUIT: # Si se recibe un evento de cierre
                 return None  # Indica que el juego debe cerrarse
         return eventos  # Devuelve la lista de eventos
 
-    def update(self, dt, eventos):       
+    "Actualiza el juego."
+    def update(self, dt, eventos):  
         self.world.update(dt, eventos)  # Actualiza el mundo con los eventos
 
-    def render(self):        
+    """Renderiza el juego en pantalla."""
+    def render(self):
         self.graphics.render()
