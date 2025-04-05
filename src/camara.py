@@ -1,6 +1,9 @@
 import constantes as ct
 
 class Camera:
+
+    screen_width = ct.ANCHO
+    screen_height = ct.ALTO
     def __init__(self):
         self.offset_x = 0
         self.offset_y = 0

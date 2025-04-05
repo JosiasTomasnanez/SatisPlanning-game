@@ -2,6 +2,7 @@ import pygame
 from Objeto import Objeto
 import constantes as ct
 from inventario import Inventario  # Import the Inventario class
+from camara import Camera
 
 class Personaje(Objeto):
     def __init__(self, x, y, width, height):
@@ -146,8 +147,8 @@ class Personaje(Objeto):
         Dibuja el personaje y delega el dibujo del inventario y hotbar al inventario.
         """
         # Calcular la posición centrada del personaje
-        personaje_centrado_x = 1 #(camera.screen_width // 2) - (self.width // 2)
-        personaje_centrado_y = 2 #(camera.screen_height // 2) - (self.height // 2)
+        personaje_centrado_x = (camera.screen_width // 2) - (self.width // 2)
+        personaje_centrado_y = (camera.screen_height // 2) - (self.height // 2)
 
         # Dibujar el personaje centrado
         pantalla.blit(self.image, (personaje_centrado_x, personaje_centrado_y))
