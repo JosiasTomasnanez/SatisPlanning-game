@@ -1,0 +1,4 @@
+# 🐍 Archivos compilados por Python
+__pycache__/
+*.py[cod]
+*.so
