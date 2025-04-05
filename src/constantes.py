@@ -1,11 +1,12 @@
 import pygame
 
-ANCHO = 800
-ALTO = 600
-TILE_SIZE = 32
+ANCHO = 1280
+ALTO = 720
+TILE_SIZE = 32 # tamaño de cada bloque
+FPS = 60  # Frames por segundo
 FILAS = ALTO // TILE_SIZE
 COLUMNAS = ANCHO // TILE_SIZE
-
+COlOR_FONDO = (0, 0, 0)  # Color de fondo de la pantalla
 # Font for rendering text
 pygame.init()  # Ensure pygame is initialized before creating the font
 FONT = pygame.font.Font(None, 24)  # Default font with size 24
@@ -26,9 +27,9 @@ COLORES = {
 }
 
 # texturas
-TEXTURA_TIERRA = "assets/tierra.png"
-TEXTURA_PIEDRA = "assets/piedra.png"
-TEXTURA_PASTO = "assets/pasto.png"  
+TEXTURA_TIERRA = "src\\assets\\tierra.png"
+TEXTURA_PIEDRA = "src\\assets\\piedra.png"
+TEXTURA_PASTO = "src\\assets\\pasto.png"  
 
 # Tipos de bloques sólidos
 BLOQUES_SOLIDOS = {1, 2, 3}  # Tierra, Piedra, Pasto
