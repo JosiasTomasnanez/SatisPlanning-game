@@ -1,4 +1,4 @@
-from Objeto import Objeto
+from SatisPlanning.Objeto import Objeto
 
 class Suelo(Objeto):
     def __init__(self, x, y, width, height, image_path):

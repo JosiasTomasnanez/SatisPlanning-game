@@ -1,4 +1,4 @@
 # 🐍 Archivos compilados por Python
-__pycache__/
+src/SatisPlanning/__pycache__/
 *.py[cod]
 *.so

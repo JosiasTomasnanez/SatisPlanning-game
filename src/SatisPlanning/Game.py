@@ -1,6 +1,7 @@
-from World import World
-from Graphics import Graphics
-from camara import Camera
+from SatisPlanning.World import World
+from SatisPlanning.Graphics import Graphics
+from SatisPlanning.camara import Camera
+
 import pygame
 
 class Game:

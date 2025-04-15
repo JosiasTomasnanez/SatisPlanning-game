@@ -1,0 +1,33 @@
+[project]
+name = "SatisPlanningGame"
+version = "1.0.0"
+description = "Un juego de aventura en 2d"
+authors = [
+  {name = "GloriousDevs", email = ""}
+]
+dependencies = [
+  "pygame",
+  "perlin-noise"
+
+]
+requires-python = ">=3.10"
+
+[tool.setuptools]
+packages = ["SatisPlanning"]
+
+[tool.briefcase]
+project-name = "SatisPlanning"
+bundle = ""
+version = "1.0.0"
+description = "Un juego de aventura en 2d"
+author = "Tu Nombre"
+author-email = "GloriousDevs"
+url = "https://github.com/JosiasTomasnanez/SatisPlanning-game.git"
+license = "GNU General Public License v3.0"
+
+[tool.briefcase.app.SatissPlanningGame]
+formal-name = "Satiss Planning Game"
+sources = ["src/SatisPlanning"]
+entry-point = "SatisPlanning.__main__"
+#icon = "icono.ico"  # opcional
+

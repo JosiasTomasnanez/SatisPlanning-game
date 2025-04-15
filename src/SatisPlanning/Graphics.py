@@ -1,5 +1,5 @@
 import pygame
-import constantes as ct
+import SatisPlanning.constantes as ct
 
 class Graphics:
     def __init__(self, world):

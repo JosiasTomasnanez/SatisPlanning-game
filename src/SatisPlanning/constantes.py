@@ -1,4 +1,5 @@
 import pygame
+from SatisPlanning.utils import asset_path
 
 ANCHO = 1280
 ALTO = 720
@@ -27,9 +28,9 @@ COLORES = {
 }
 
 # texturas
-TEXTURA_TIERRA = "src\\assets\\tierra.png"
-TEXTURA_PIEDRA = "src\\assets\\piedra.png"
-TEXTURA_PASTO = "src\\assets\\pasto.png"  
+TEXTURA_TIERRA = asset_path("tierra.png")
+TEXTURA_PIEDRA = asset_path("piedra.png")
+TEXTURA_PASTO = asset_path("pasto.png")   
 
 # Tipos de bloques sólidos
 BLOQUES_SOLIDOS = {1, 2, 3}  # Tierra, Piedra, Pasto
