@@ -27,7 +27,7 @@ jobs:
 
     - name: 🚀 Run game module (test)
       run: |
-        PYTHONPATH=src python -m SatisPlanning
+        timeout 600s PYTHONPATH=src python -m SatisPlanning  # 600s = 10 minutos
       working-directory: ./src
 
   clear-cache:
