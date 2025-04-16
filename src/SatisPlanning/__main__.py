@@ -1,6 +1,6 @@
 import pygame
-from Game import Game
-import constantes as ct
+from SatisPlanning.Game import Game
+import SatisPlanning.constantes as ct
 
 def main():
     pygame.init()

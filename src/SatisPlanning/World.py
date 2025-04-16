@@ -1,10 +1,10 @@
 import pygame
-from Objeto import Objeto  # Asegúrate de que la ruta sea correcta
-from personaje import Personaje  # Asegúrate de que la ruta sea correcta
-from mapa import Mapa  # Asegúrate de que la ruta sea correcta
-import constantes as ct
-from suelo import Suelo  # Asegúrate de que la ruta sea correcta
-from camara import Camera  # Import the new Camera class
+from SatisPlanning.Objeto import Objeto  # Asegúrate de que la ruta sea correcta
+from SatisPlanning.personaje import Personaje  # Asegúrate de que la ruta sea correcta
+from SatisPlanning.mapa import Mapa  # Asegúrate de que la ruta sea correcta
+import SatisPlanning.constantes as ct
+from SatisPlanning.suelo import Suelo  # Asegúrate de que la ruta sea correcta
+from SatisPlanning.camara import Camera  # Import the new Camera class
 
 #la clase world almacena todos los objetos y comprueba colisiones
 class World:

@@ -1,5 +1,5 @@
 import pygame
-import constantes as ct
+import SatisPlanning.constantes as ct
 class Objeto:
     def __init__(self, x, y, width, height, image_path, dinamico):
         """

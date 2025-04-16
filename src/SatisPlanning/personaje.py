@@ -1,21 +1,22 @@
 import pygame
-from Objeto import Objeto
-import constantes as ct
-from inventario import Inventario  # Import the Inventario class
-from camara import Camera
+from SatisPlanning.Objeto import Objeto
+import SatisPlanning.constantes as ct
+from SatisPlanning.inventario import Inventario  # Import the Inventario class
+from SatisPlanning.camara import Camera
+from SatisPlanning.utils import asset_path
 
 class Personaje(Objeto):
     def __init__(self, x, y, width, height):
         # Inicializar con el sprite p3 como predeterminado
 
-        super().__init__(x, y, width, height, "src\\assets\\p3.png", dinamico=True)
+        super().__init__(x, y, width, height, asset_path("p3.png"), dinamico=True)
         self.vel_x = self.vel_y = 0
         self.en_el_suelo = False
         self.direccion = 1  # 1 para derecha, -1 para izquierda
 
         # Cargar los sprites del personaje
         self.sprites = [
-            pygame.image.load(f"src\\assets\\p{i}.png") for i in range(1, 8)
+            pygame.image.load(asset_path(f"p{i}.png")) for i in range(1, 8)
         ]
         self.sprites = [pygame.transform.scale(sprite, (width, height)) for sprite in self.sprites]
         self.sprite_actual = 2  # Índice del sprite inicial (p3)

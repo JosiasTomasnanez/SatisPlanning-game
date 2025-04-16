@@ -1,6 +1,6 @@
 import pygame
-import constantes as ct
-from Objeto import Objeto
+import SatisPlanning.constantes as ct
+from SatisPlanning.Objeto import Objeto
 
 class Inventario:
     def __init__(self):

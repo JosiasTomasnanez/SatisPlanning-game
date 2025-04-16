@@ -1,6 +1,6 @@
 import random
 from perlin_noise import PerlinNoise
-import constantes as ct
+import SatisPlanning.constantes as ct
 
 class Mapa:
     def __init__(self):
