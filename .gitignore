@@ -2,3 +2,4 @@
 src/SatisPlanning/__pycache__/
 *.py[cod]
 *.so
+launch.json
