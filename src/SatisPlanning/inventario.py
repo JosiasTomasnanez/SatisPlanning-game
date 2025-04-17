@@ -1,13 +1,13 @@
 import pygame
 import SatisPlanning.constantes as ct
-from SatisPlanning.Objeto import Objeto
+from SatisPlanning.objeto import Objeto
 
 class Inventario:
     def __init__(self):
-        # Tamaño deseado para las imágenes en el inventario y la hotbar
-        self.icon_size = (30, 30)
+        # Tamaño deseado para las imágenes en el inventario y la barra rápida
+        self.tamanio_icono = (30, 30)  # Cambiado de icon_size a tamanio_icono
 
-        # Inventario inicializado con bloques de tierra, piedra y pasto en la hotbar
+        # Inventario inicializado con bloques de tierra, piedra y pasto en la barra rápida
         self.items = [
             Objeto(0, 0, 30, 30, ct.TEXTURA_TIERRA, dinamico=False),  # Bloque de tierra
             Objeto(0, 0, 30, 30, ct.TEXTURA_PIEDRA, dinamico=False),  # Bloque de piedra
@@ -37,12 +37,12 @@ class Inventario:
             return self.items[self.item_seleccionado]
         return None
 
-    def draw(self, pantalla, font):
+    def dibujar(self, pantalla, fuente):
         """
-        Dibuja el inventario y la hotbar en la pantalla.
+        Dibuja el inventario y la barra rápida en la pantalla.
         """
-        # Dibujar la hotbar (siempre visible)
-        self._dibujar_hotbar(pantalla, font)
+        # Dibujar la barra rápida (siempre visible)
+        self._dibujar_barra_rapida(pantalla, fuente)
 
         # Dibujar el inventario completo si está visible
         if not self.visible:
@@ -58,15 +58,15 @@ class Inventario:
         pantalla.blit(fondo, self.posicion)
 
         # Dibujar selector de categorías
-        self._dibujar_categorias(pantalla, font)
+        self._dibujar_categorias(pantalla, fuente)
 
         # Dibujar items
         y_pos = self.posicion[1] + self.alto_categoria + 10
         for index, item in enumerate(self.items):
-            self._dibujar_item(pantalla, font, item, y_pos, index)
+            self._dibujar_item(pantalla, fuente, item, y_pos, index)
             y_pos += self.alto_item + self.margen
 
-    def _dibujar_categorias(self, pantalla, font):
+    def _dibujar_categorias(self, pantalla, fuente):
         x_pos = self.posicion[0]
         ancho_cat = self.ancho // len(ct.CATEGORIAS)
         
@@ -75,12 +75,12 @@ class Inventario:
             pygame.draw.rect(pantalla, color, 
                            (x_pos + i * ancho_cat, self.posicion[1], ancho_cat, self.alto_categoria))
             
-            texto = font.render(categoria, True, (255, 255, 255))
-            texto_rect = texto.get_rect(center=(x_pos + i * ancho_cat + ancho_cat//2, 
-                                              self.posicion[1] + self.alto_categoria//2))
+            texto = fuente.render(categoria, True, (255, 255, 255))
+            texto_rect = texto.get_rect(center=(x_pos + i * ancho_cat + ancho_cat // 2, 
+                                              self.posicion[1] + self.alto_categoria // 2))
             pantalla.blit(texto, texto_rect)
 
-    def _dibujar_item(self, pantalla, font, item, y_pos, index):
+    def _dibujar_item(self, pantalla, fuente, item, y_pos, index):
         """
         Dibuja un item individual del inventario.
         :param item: Instancia de la clase Objeto.
@@ -94,32 +94,32 @@ class Inventario:
                            (self.posicion[0], y_pos, self.ancho, self.alto_item))
         
         # Dibujar icono del objeto
-        pantalla.blit(item.image, (self.posicion[0] + 5, y_pos + 5))
+        pantalla.blit(item.imagen, (self.posicion[0] + 5, y_pos + 5))
 
         # Dibujar nombre del objeto
-        texto = font.render(item.__class__.__name__, True, (255, 255, 255))
+        texto = fuente.render(item.__class__.__name__, True, (255, 255, 255))
         pantalla.blit(texto, (self.posicion[0] + 40, y_pos + 10))
 
-    def seleccionar_hotbar(self, indice):
+    def seleccionar_barra_rapida(self, indice):
         """
-        Selecciona un elemento de la hotbar basado en el índice.
-        :param indice: Índice del elemento en la hotbar (0-8).
+        Selecciona un elemento de la barra rápida basado en el índice.
+        :param indice: Índice del elemento en la barra rápida (0-8).
         """
-        if 0 <= indice < 9:  # Asegurarse de que el índice esté dentro del rango de la hotbar
+        if 0 <= indice < 9:  # Asegurarse de que el índice esté dentro del rango de la barra rápida
             self.item_seleccionado = indice
 
-    def _dibujar_hotbar(self, pantalla, font):
+    def _dibujar_barra_rapida(self, pantalla, fuente):
         """
-        Dibuja la hotbar en la parte inferior de la pantalla.
+        Dibuja la barra rápida en la parte inferior de la pantalla.
         """
-        num_slots = 9  # Número fijo de slots en la hotbar
-        hotbar_width = num_slots * 50 + (num_slots - 1) * 5
-        hotbar_x = (ct.ANCHO - hotbar_width) // 2
-        hotbar_y = ct.ALTO - 60
+        num_slots = 9  # Número fijo de slots en la barra rápida
+        ancho_barra = num_slots * 50 + (num_slots - 1) * 5
+        barra_x = (ct.ANCHO - ancho_barra) // 2
+        barra_y = ct.ALTO - 60
 
         for i in range(num_slots):
-            x = hotbar_x + i * 55
-            y = hotbar_y
+            x = barra_x + i * 55
+            y = barra_y
 
             # Dibujar fondo del slot
             pygame.draw.rect(pantalla, (60, 60, 70), (x, y, 50, 50))
@@ -132,7 +132,7 @@ class Inventario:
             # Dibujar el icono del item si existe
             if i < len(self.items):
                 item = self.items[i]
-                pantalla.blit(item.image, (x + 10, y + 10))
+                pantalla.blit(item.imagen, (x + 10, y + 10))
 
     def manejar_evento(self, evento):
         """
@@ -166,7 +166,7 @@ class Inventario:
 
     def soltar_item_seleccionado(self):
         """
-        Elimina el elemento actualmente seleccionado de la hotbar y lo devuelve.
+        Elimina el elemento actualmente seleccionado de la barra rápida y lo devuelve.
         :return: El objeto eliminado o None si no hay un objeto seleccionado.
         """
         if self.item_seleccionado is not None and self.item_seleccionado < len(self.items):
@@ -176,3 +176,5 @@ class Inventario:
                 self.item_seleccionado = max(0, len(self.items) - 1)
             return elemento_soltado  # Devolver el elemento eliminado
         return None  # No hay elemento para soltar
+
+#esta hecho a modo de pueba , pero en un futuro hay que definir como deseamos que sea nuestro inventario , hay que diseñar, y tener otra clase aparte que se relacione a esta para craftear, y agregar funciones para ordenar inventario a nuestro antojo y que la barra rapida no funcione como una pila, tambien poder generar stacks de elementos , los cuales el tamaño del stack es algo definido por el objeto en si y no por el inventario

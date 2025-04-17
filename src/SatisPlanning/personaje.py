@@ -1,58 +1,65 @@
 import pygame
-from SatisPlanning.Objeto import Objeto
+from SatisPlanning.objeto import Objeto
 import SatisPlanning.constantes as ct
-from SatisPlanning.inventario import Inventario  # Import the Inventario class
-from SatisPlanning.camara import Camera
-from SatisPlanning.utils import asset_path
+from SatisPlanning.inventario import Inventario
+from SatisPlanning.camara import Camara
+from SatisPlanning.utilidades import obtener_ruta_asset
 
 class Personaje(Objeto):
-    def __init__(self, x, y, width, height):
-        # Inicializar con el sprite p3 como predeterminado
+    def __init__(self, x, y, ancho, alto):
+        """
+        Inicializa el personaje con posición, sprites y un inventario.
 
-        super().__init__(x, y, width, height, asset_path("p3.png"), dinamico=True)
+        :param x: Posición X inicial.
+        :param y: Posición Y inicial.
+        :param ancho: Ancho del personaje.
+        :param alto: Altura del personaje.
+        """
+        super().__init__(x, y, ancho, alto, obtener_ruta_asset("p3.png"), dinamico=True)
         self.vel_x = self.vel_y = 0
         self.en_el_suelo = False
         self.direccion = 1  # 1 para derecha, -1 para izquierda
 
         # Cargar los sprites del personaje
         self.sprites = [
-            pygame.image.load(asset_path(f"p{i}.png")) for i in range(1, 8)
+            pygame.image.load(obtener_ruta_asset(f"p{i}.png")) for i in range(1, 8)
         ]
-        self.sprites = [pygame.transform.scale(sprite, (width, height)) for sprite in self.sprites]
+        self.sprites = [pygame.transform.scale(sprite, (ancho, alto)) for sprite in self.sprites]
         self.sprite_actual = 2  # Índice del sprite inicial (p3)
 
         # Contador para animación
         self.contador_animacion = 0
 
-        self.inventario = Inventario()  # Add an inventory to the character
-        self.inventario.visible = False  # Start with the inventory hidden
+        # Inventario del personaje
+        self.inventario = Inventario()
+        self.inventario.visible = False
 
-    def mover(self, teclas, world):
+    def mover(self, teclas, mundo):
         """
         Mueve el personaje basado en las teclas presionadas y verifica colisiones con el mundo.
         """
         # Movimiento horizontal
         self.vel_x = (teclas[pygame.K_d] - teclas[pygame.K_a]) * ct.VELOCIDAD_PERSONAJE
-        nueva_hitbox = self.hitbox.move(self.vel_x, 0)  # Nueva posición horizontal
-        if not world.colisiona(nueva_hitbox):  # Verificar colisión horizontal
+        nueva_hitbox = self.hitbox.move(self.vel_x, 0)
+        if not mundo.colisiona(nueva_hitbox):
             self.hitbox = nueva_hitbox
 
         # Actualizar la dirección del personaje
         if self.vel_x > 0:
-            self.direccion = 1  # Derecha
+            self.direccion = 1
         elif self.vel_x < 0:
-            self.direccion = -1  # Izquierda
+            self.direccion = -1
 
         # Gravedad y salto
         if not self.en_el_suelo:
-            self.vel_y += ct.GRAVEDAD  # Aplicar gravedad si no está en el suelo
+            self.vel_y += ct.GRAVEDAD
         if (teclas[pygame.K_w] or teclas[pygame.K_SPACE]) and self.en_el_suelo:
-            self.vel_y = -ct.FUERZA_SALTO  # Aplicar fuerza de salto
-            self.en_el_suelo = False  # Ya no está en el suelo después de saltar
+            self.vel_y = -ct.FUERZA_SALTO
+            self.en_el_suelo = False
 
         # Movimiento vertical
-        nueva_hitbox = self.hitbox.move(0, self.vel_y)  # Nueva posición vertical
-        if not world.colisiona(nueva_hitbox):  # Verificar colisión vertical
+        nueva_hitbox = self.hitbox.move(0, self.vel_y)
+        if not mundo.colisiona(nueva_hitbox):
             self.hitbox = nueva_hitbox
             self.en_el_suelo = False
         else:
@@ -65,26 +72,27 @@ class Personaje(Objeto):
         # Actualizar la animación si el personaje se mueve
         if self.vel_x != 0:
             self._actualizar_animacion()
-
+        """IMPORTANTE:no deberiamos usar la constante gravedad, ni fuerza, sino que pueda
+        ser variables modificables desde otras clases, por ejemplo desde una pocion""" 
+        
     def _actualizar_animacion(self):
         """
         Actualiza el sprite del personaje para animar el movimiento.
         """
         self.contador_animacion += 1
-        if self.contador_animacion >= 10:  # Cambiar sprite cada 10 frames (más lento)
+        if self.contador_animacion >= 10:
             self.sprite_actual = (self.sprite_actual + 1) % len(self.sprites)
             self.contador_animacion = 0
 
         # Actualizar la imagen del sprite actual según la dirección
-        self.image = self.sprites[self.sprite_actual]
-        if self.direccion == -1:  # Si va a la izquierda, voltear horizontalmente
-            self.image = pygame.transform.flip(self.image, True, False)
+        self.imagen = self.sprites[self.sprite_actual]
+        if self.direccion == -1:
+            self.imagen = pygame.transform.flip(self.imagen, True, False)
 
     def notificar_colision(self, objeto):
         """
         Maneja la colisión con un objeto estático, diferenciando entre colisiones horizontales y verticales.
         """
-        # Determinar si la colisión es horizontal o vertical
         colision_horizontal = (
             self.hitbox.right > objeto.hitbox.left and self.hitbox.left < objeto.hitbox.right
         )
@@ -94,68 +102,59 @@ class Personaje(Objeto):
 
         # Manejar colisión vertical
         if colision_vertical:
-            if self.vel_y > 0:  # Cayendo
-                self.vel_y = 0  # Detener movimiento vertical
-                self.en_el_suelo = True  # Ahora está en el suelo
-                self.y = objeto.hitbox.top - self.height  # Ajustar posición para estar justo encima del objeto
-            elif self.vel_y < 0:  # Saltando
-                self.vel_y = 0  # Detener movimiento vertical
-                self.y = objeto.hitbox.bottom  # Ajustar posición para estar justo debajo del objeto
+            if self.vel_y > 0:
+                self.vel_y = 0
+                self.en_el_suelo = True
+                self.y = objeto.hitbox.top - self.alto
+            elif self.vel_y < 0:
+                self.vel_y = 0
+                self.y = objeto.hitbox.bottom
 
         # Manejar colisión horizontal
         if colision_horizontal:
-            if self.vel_x > 0:  # Moviéndose a la derecha
-                self.vel_x = 0  # Detener movimiento horizontal
-                self.x = objeto.hitbox.left - self.width  # Ajustar posición para estar justo a la izquierda del objeto
-            elif self.vel_x < 0:  # Moviéndose a la izquierda
-                self.vel_x = 0  # Detener movimiento horizontal
-                self.x = objeto.hitbox.right  # Ajustar posición para estar justo a la derecha del objeto
+            if self.vel_x > 0:
+                self.vel_x = 0
+                self.x = objeto.hitbox.left - self.ancho
+            elif self.vel_x < 0:
+                self.vel_x = 0
+                self.x = objeto.hitbox.right
 
-        # Actualizar la hitbox
         self.hitbox.topleft = (self.x, self.y)
 
     def manejar_evento(self, evento, mundo):
         """
-        Maneja eventos relacionados con el personaje, como abrir/cerrar el inventario y seleccionar elementos de la hotbar.
+        Maneja eventos relacionados con el personaje, como abrir/cerrar el inventario y seleccionar elementos de la barra rápida.
         """
         if evento.type == pygame.KEYDOWN:
-            # Alternar la visibilidad del inventario con la tecla "I"
             if evento.key == pygame.K_i:
                 self.inventario.visible = not self.inventario.visible
 
-            # Seleccionar elementos de la hotbar con las teclas del 1 al 9
             if pygame.K_1 <= evento.key <= pygame.K_9:
-                indice_hotbar = evento.key - pygame.K_1  # Convertir la tecla en índice (0-8)
-                self.inventario.seleccionar_hotbar(indice_hotbar)
+                indice_barra = evento.key - pygame.K_1
+                self.inventario.seleccionar_barra_rapida(indice_barra)
 
-            # Soltar el elemento seleccionado con la tecla "G"
             if evento.key == pygame.K_g:
-                item_soltado = self.inventario.soltar_item_seleccionado()  # Obtener el elemento soltado
+                item_soltado = self.inventario.soltar_item_seleccionado()
                 if item_soltado:
-                    # Actualizar la posición del objeto soltado a la posición del personaje (20 píxeles más arriba)
-                    item_soltado.update_position(self.x, self.y - 10)
-                    mundo.agregar_objeto(item_soltado)  # Agregar el objeto al mundo
+                    item_soltado.actualizar_posicion(self.x, self.y - 10)
+                    mundo.agregar_objeto(item_soltado)
 
-    def update(self, teclas, world):
+    def actualizar(self, teclas, mundo):
         """
-        Actualiza el estado del personaje, manejando movimiento.
+        Actualiza el estado del personaje, manejando movimiento y colisiones.
         """
-        # Manejar movimiento
-        self.mover(teclas, world)
+        self.mover(teclas, mundo)
 
-    def draw(self, pantalla, font, camera):
+    def dibujar(self, pantalla, fuente, camara):
         """
-        Dibuja el personaje y delega el dibujo del inventario y hotbar al inventario.
+        Dibuja el personaje y delega el dibujo del inventario y barra rápida al inventario.
         """
-        # Calcular la posición centrada del personaje
-        personaje_centrado_x = (camera.screen_width // 2) - (self.width // 2)
-        personaje_centrado_y = (camera.screen_height // 2) - (self.height // 2)
+        personaje_centrado_x = (camara.ancho_pantalla // 2) - (self.ancho // 2)
+        personaje_centrado_y = (camara.alto_pantalla // 2) - (self.alto // 2)
 
-        # Dibujar el personaje centrado
-        pantalla.blit(self.image, (personaje_centrado_x, personaje_centrado_y))
+        pantalla.blit(self.imagen, (personaje_centrado_x, personaje_centrado_y))
+        self.inventario.dibujar(pantalla, fuente)
 
-        # Delegar el dibujo del inventario y hotbar al inventario
-        self.inventario.draw(pantalla, font)
-
+#el manejo de coliciones y manejo de movimientos o ataques o demas, estaria bueno hacerlo como compoonentes , como usando el patron stratagy,  ya que hay muchos objetos u personajes que van a tener las mismas fisicas de movimiento pero con variables como la gravedad , entre otras diferentes, entonces seria hacer clases que se encarguen de dichos comportamientos, de las cuales los objetos puedan o no hacer uso, mandandole sus caracteristicas, y queda mucho mas modular y extendible el codigo
 
 

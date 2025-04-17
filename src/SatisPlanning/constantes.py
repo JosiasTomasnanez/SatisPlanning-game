@@ -1,16 +1,17 @@
 import pygame
-from SatisPlanning.utils import asset_path
+from SatisPlanning.utilidades import obtener_ruta_asset
 
-ANCHO = 1280
-ALTO = 720
-TILE_SIZE = 32 # tamaño de cada bloque
-FPS = 60  # Frames por segundo
-FILAS = ALTO // TILE_SIZE
-COLUMNAS = ANCHO // TILE_SIZE
-COlOR_FONDO = (0, 0, 0)  # Color de fondo de la pantalla
-# Font for rendering text
-pygame.init()  # Ensure pygame is initialized before creating the font
-FONT = pygame.font.Font(None, 24)  # Default font with size 24
+ANCHO = 1280  # Ancho de la pantalla
+ALTO = 720  # Alto de la pantalla
+TAMANIO_BLOQUE = 32  # Tamaño de cada bloque
+FPS = 60  # Cuadros por segundo
+FILAS = ALTO // TAMANIO_BLOQUE
+COLUMNAS = ANCHO // TAMANIO_BLOQUE
+COLOR_FONDO = (0, 0, 0)  # Color de fondo de la pantalla
+
+# Fuente para renderizar texto
+pygame.init()  # Asegura que pygame esté inicializado antes de crear la fuente
+FUENTE = pygame.font.Font(None, 24)  # Fuente predeterminada con tamaño 24
 
 # Sistema de física
 GRAVEDAD = 0.5
@@ -27,10 +28,10 @@ COLORES = {
     5: (45, 45, 45)      # Carbón (para futuro)
 }
 
-# texturas
-TEXTURA_TIERRA = asset_path("tierra.png")
-TEXTURA_PIEDRA = asset_path("piedra.png")
-TEXTURA_PASTO = asset_path("pasto.png")   
+# Texturas
+TEXTURA_TIERRA = obtener_ruta_asset("tierra.png")
+TEXTURA_PIEDRA = obtener_ruta_asset("piedra.png")
+TEXTURA_PASTO = obtener_ruta_asset("pasto.png")   
 
 # Tipos de bloques sólidos
 BLOQUES_SOLIDOS = {1, 2, 3}  # Tierra, Piedra, Pasto
@@ -42,4 +43,7 @@ HERRAMIENTAS = {
     "pala": {"color": (160, 82, 45), "durabilidad": 100, "bloques_efectivos": [1, 3]}
 }
 
+# Categorías
 CATEGORIAS = ["Bloques", "Herramientas"]
+
+#hay que modificar por que va a quedar un poco obsoleto muchas de estas variables, ya que tenemos que pensar que de verdad queremos que sea constante y que deseamos que sea modificable, la gravedad, salto, velocidad del personaje, son cosas que no deberian ir por que son modificables desde otros lados, por lo tanto solo usar esta clase cuando realmente lo amerite y para cosas inmovibles
