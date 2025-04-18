@@ -1,22 +1,25 @@
 import SatisPlanning.constantes as ct
 
-class Camera:
+class Camara:
 
-    screen_width = ct.ANCHO
-    screen_height = ct.ALTO
+    ancho_pantalla = ct.ANCHO
+    alto_pantalla = ct.ALTO
+
     def __init__(self):
-        self.offset_x = 0
-        self.offset_y = 0
+        self.desplazamiento_x = 0
+        self.desplazamiento_y = 0
 
-    def update(self, target_x, target_y):
+    def actualizar(self, objetivo_x, objetivo_y):
         """
-        Update the camera's offset to center on the target position.
+        Actualiza el desplazamiento de la cámara para centrarse en la posición objetivo.
         """
-        self.offset_x = target_x - (ct.ANCHO // 2)
-        self.offset_y = target_y - (ct.ALTO // 2)
+        self.desplazamiento_x = objetivo_x - (ct.ANCHO // 2)
+        self.desplazamiento_y = objetivo_y - (ct.ALTO // 2)
 
-    def apply(self, x, y):
+    def aplicar(self, x, y):
         """
-        Apply the camera's offset to a given position.
+        Aplica el desplazamiento de la cámara a una posición dada.
         """
-        return x - self.offset_x, y - self.offset_y
+        return x - self.desplazamiento_x, y - self.desplazamiento_y
+
+#Esta clase va a ser mas compleja , para poder realizar zoom usando teclas, hay que ver como se puede implementar eso en un futuro, quizas cambiando el valor del tamaño de los bloques y a la vez el valor del tamaño de los chunks a voluntad
