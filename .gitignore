@@ -1,0 +1,5 @@
+# 🐍 Archivos compilados por Python
+src/SatisPlanning/__pycache__/
+*.py[cod]
+*.so
+.vscode/launch.json
