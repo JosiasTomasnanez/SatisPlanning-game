@@ -43,7 +43,6 @@
      ```
    Generara una Pull Request en github a la espera de que supere las pruebas y sea aprobado por miembros del grupo de desarrollo. Hay que corroborar que la rama con la que se realizara el merge sea la rama **Develop**
 
-
    Una vez aprobada la revision, se realizara el merge con la rama develop, debemos cerrar la rama en nuestro repo local utilizando 
    ```bash
    git flow feature finish nombre-feature
