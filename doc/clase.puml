@@ -1,0 +1,55 @@
+@startuml Juego
+
+class __main{
+    + main()
+}
+
+class camara{
+    + int ancho_pantalla
+    + int alto_pantalla
+    + __init__()
+    + actualizar(objetivo_x, objetivo_y)
+    + aplicar(x: Coordenada X, y: Coordenada Y) : Int
+}
+
+class constantes{
+    + int ANCHO
+    + int ALTO
+    + int TAMANIO_BLOQUE
+    + int FPS
+    + int FILAS
+    + int COLUMNAS
+    + set COLOR_FONDO
+    + FUENTE
+    + int GRAVEDAD
+    + int FUERZA_SALTO
+    + int VELOCIDAD_PERSONAJE
+    + diccionario COLORES
+    + TEXTURA_TIERRA
+    + TEXTURA_PIEDRA
+    + TEXTURA_PASTO
+    + BLOQUES_SOLIDOS
+    + HERRAMIENTAS
+    + CATEGORIAS
+}
+
+class interfaz_grafica{
+
+}
+
+class inventario{}
+
+class juego{}
+
+class mapa{}
+
+class mundo{}
+
+class objeto{}
+
+class personaje{}
+
+class suelo{}
+
+class utilidades{}
+
