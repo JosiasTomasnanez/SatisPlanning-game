@@ -1,4 +1,13 @@
 @startuml Juego
+scale 1.5
+' Pagina de plantuml: https://plantuml.com/es/class-diagram
+'scale 1.5 | scale 200 width | scale 100 height | scale [max] 200x100
+main --> juego
+main --> constantes
+camara --> constantes
+interfaz_grafica --> constantes
+inventario --> objecto
+inventario --> constantes
 
 class __main{
     + main()
@@ -12,7 +21,7 @@ class camara{
     + aplicar(x: Coordenada X, y: Coordenada Y) : Int
 }
 
-class constantes{
+class constantes <<constantes>>{
     + int ANCHO
     + int ALTO
     + int TAMANIO_BLOQUE
@@ -29,15 +38,27 @@ class constantes{
     + TEXTURA_PIEDRA
     + TEXTURA_PASTO
     + BLOQUES_SOLIDOS
-    + HERRAMIENTAS
-    + CATEGORIAS
+    + diccionario HERRAMIENTAS
+    + list CATEGORIAS
 }
 
 class interfaz_grafica{
-
+    + __init__(mundo: Mundo)
+    + dibujar()
 }
 
-class inventario{}
+class inventario{
+    + __init__()
+    + agregar_objeto(objeto)
+    + obtener_item_actual() : objeto or None
+    + dibujar(pantalla, fuente)
+    - _dibujar_categorias(pantalla, fuente)
+    - _dibujar_item(pantalla, fuente, item, y_pos, index)
+    + seleccionar_barra_rapida(indice)
+    - _dibujar_barra_rapida(pantalla, fuente)
+    + manejar_evento(evento)
+    + soltar_item_seleccionado()
+}
 
 class juego{}
 
@@ -53,3 +74,4 @@ class suelo{}
 
 class utilidades{}
 
+@enduml
