@@ -1,47 +1,81 @@
-@startuml DiagrmaSecuencia
+@startuml DiagramaSecuencia
 !pragma teoz true
 actor usuario
+
 participant Main
 participant Juego
 participant Mundo
 participant Graficos
 participant Pygame
+participant Personaje
+participant Inventario
+participant Camara
+participant Mapa
+participant Suelo
+
 activate usuario
 usuario -> Main : main()
+
 activate Main
 activate Juego
 activate Pygame
 
 loop "Hasta cerrar Juego"
     Main -> Juego : manejar_eventos()
+    Juego -> Pygame : event.get()
+    Juego <-- Pygame : Eventos
     Main <-- Juego: Eventos
-    ||5||
-    Main -> Juego : Actualizar(dt, Eventos) 
-    & Juego-> Mundo : Actualizar(dt, Eventos)
+
+    Main -> Juego : actualizar(dt, eventos)
     activate Mundo
-    ||5||
-    Mundo -> Personaje: manejar_evento(Eventos)
+    Juego -> Mundo : actualizar(dt, eventos)
+
+    Mundo -> Personaje : manejar_evento(eventos, mundo)
     activate Personaje
-    Mundo -> Pygame : get_pressed()
-    Mundo <-- Pygame : Teclas
-    Mundo -> Personaje: Actualizar(Teclas)
-    Mundo -> Mundo : generar_mapa()
+    alt Evento relacionado con inventario
+        Personaje -> Inventario : manejar_evento(eventos)
+    else Otro evento
+        Personaje -> Personaje : manejar_evento(eventos)
+    end
+    deactivate Inventario
+
+    Mundo -> Pygame : key.get_pressed()
+    Mundo <-- Pygame : teclas
+    Mundo -> Personaje : actualizar(teclas, mundo)
+
+    Personaje -> Personaje : mover(teclas, mundo)
+    alt Colisión detectada
+        Personaje -> Mundo : colisiona(hitbox)
+        Mundo -> Suelo : verificar_colision(hitbox)
+    else Sin colisión
+        Personaje -> Personaje : continuar_movimiento()
+    end
+    deactivate Suelo
+
+    Mundo -> Mapa : generar_mapa()
+    activate Mapa
+    Mapa -> Mapa : obtener_chunk(chunk_x)
+    deactivate Mapa
+
     Mundo -> Camara : actualizar(personaje.x, personaje.y)
-    activate Camara
-    ||5||
-    Main -> Juego : Dibujar()
-    & Juego -> Graficos : Dibujar() 
+    deactivate Camara
+
+    Main -> Juego : dibujar()
     activate Graficos
-    & Graficos -> Pygame: crearPantalla()
-    ||5||
-    Graficos <-- Pygame: Pantalla
-    ||5||
-    Graficos -> Mundo: Dibujar(Pantalla)
+    Juego -> Graficos : dibujar()
+    Graficos -> Pygame : display.set_mode()
+    Graficos -> Mundo : dibujar(pantalla)
+    Mundo -> Personaje : dibujar(pantalla, fuente, camara)
+    Mundo -> Suelo : dibujar(pantalla)
+    Mundo -> Camara : aplicar(objeto.x, objeto.y)
+    deactivate Suelo
+    deactivate Personaje
+    deactivate Mundo
+    Graficos -> Pygame : display.flip()
+    deactivate Graficos
 end
-    
 
-
-
-
-
+deactivate Pygame
+deactivate Juego
+deactivate Main
 @enduml
