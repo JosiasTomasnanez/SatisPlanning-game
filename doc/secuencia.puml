@@ -3,24 +3,37 @@ actor usuario
 participant Main
 participant Juego
 participant Mundo
+participant Graficos
+participant Pygame
 
 activate usuario
 
 usuario -> Main : main()
 activate Main
 activate Juego
+activate Pygame
 
 Main -> Juego : manejar_eventos()
 ||15||
-Main <-- Juego: eventos
+Main <-- Juego: Eventos
 ||15||
-Main -> Juego : Actualizar(dt, eventos)
-Juego-> Mundo : Actualizar(dt, eventos)
+Main -> Juego : Actualizar(dt, Eventos)
+Juego-> Mundo : Actualizar(dt, Eventos)
 activate Mundo
+Mundo -> Personaje: manejar_evento(Eventos)
+activate Personaje
+Mundo -> Pygame : get_pressed()
+Mundo <-- Pygame : Teclas
+Mundo -> Personaje: Actualizar(Teclas)
+Mundo -> Mundo : generar_mapa()
+Mundo -> Camara : actualizar(personaje.x, personaje.y)
 ||15||
 Main -> Juego : Dibujar()
 Juego -> Graficos : Dibujar()
 activate Graficos
+Graficos -> Pygame: crearPantalla()
+Graficos <-- Pygame: Pantalla
+Graficos -> Mundo: Dibujar(Pantalla)
 ||15||
 
 
