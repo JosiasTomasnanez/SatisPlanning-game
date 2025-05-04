@@ -2,10 +2,27 @@
 actor usuario
 participant Main
 participant Juego
+participant Mundo
+
+activate usuario
+
 usuario -> Main : main()
+activate Main
+activate Juego
+
 Main -> Juego : manejar_eventos()
+||15||
 Main <-- Juego: eventos
-Main -> Juego : actualizar(dt, eventos)
-Main -> Juego : dibujar()
+||15||
+Main -> Juego : Actualizar(dt, eventos)
+Juego-> Mundo : Actualizar(dt, eventos)
+activate Mundo
+||15||
+Main -> Juego : Dibujar()
+Juego -> Graficos : Dibujar()
+activate Graficos
+||15||
+
+
 
 @enduml
