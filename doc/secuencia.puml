@@ -1,0 +1,11 @@
+@startuml DiagrmaSecuencia
+actor usuario
+participant Main
+participant Juego
+usuario -> Main : main()
+Main -> Juego : manejar_eventos()
+Main <-- Juego: eventos
+Main -> Juego : actualizar(dt, eventos)
+Main -> Juego : dibujar()
+
+@enduml
