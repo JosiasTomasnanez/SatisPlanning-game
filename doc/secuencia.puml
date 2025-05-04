@@ -1,40 +1,46 @@
 @startuml DiagrmaSecuencia
+!pragma teoz true
 actor usuario
 participant Main
 participant Juego
 participant Mundo
 participant Graficos
 participant Pygame
-
 activate usuario
-
 usuario -> Main : main()
 activate Main
 activate Juego
 activate Pygame
 
-Main -> Juego : manejar_eventos()
-||15||
-Main <-- Juego: Eventos
-||15||
-Main -> Juego : Actualizar(dt, Eventos)
-Juego-> Mundo : Actualizar(dt, Eventos)
-activate Mundo
-Mundo -> Personaje: manejar_evento(Eventos)
-activate Personaje
-Mundo -> Pygame : get_pressed()
-Mundo <-- Pygame : Teclas
-Mundo -> Personaje: Actualizar(Teclas)
-Mundo -> Mundo : generar_mapa()
-Mundo -> Camara : actualizar(personaje.x, personaje.y)
-||15||
-Main -> Juego : Dibujar()
-Juego -> Graficos : Dibujar()
-activate Graficos
-Graficos -> Pygame: crearPantalla()
-Graficos <-- Pygame: Pantalla
-Graficos -> Mundo: Dibujar(Pantalla)
-||15||
+loop "Hasta cerrar Juego"
+    Main -> Juego : manejar_eventos()
+    Main <-- Juego: Eventos
+    ||5||
+    Main -> Juego : Actualizar(dt, Eventos) 
+    & Juego-> Mundo : Actualizar(dt, Eventos)
+    activate Mundo
+    ||5||
+    Mundo -> Personaje: manejar_evento(Eventos)
+    activate Personaje
+    Mundo -> Pygame : get_pressed()
+    Mundo <-- Pygame : Teclas
+    Mundo -> Personaje: Actualizar(Teclas)
+    Mundo -> Mundo : generar_mapa()
+    Mundo -> Camara : actualizar(personaje.x, personaje.y)
+    activate Camara
+    ||5||
+    Main -> Juego : Dibujar()
+    & Juego -> Graficos : Dibujar() 
+    activate Graficos
+    & Graficos -> Pygame: crearPantalla()
+    ||5||
+    Graficos <-- Pygame: Pantalla
+    ||5||
+    Graficos -> Mundo: Dibujar(Pantalla)
+end
+    
+
+
 
 
 
