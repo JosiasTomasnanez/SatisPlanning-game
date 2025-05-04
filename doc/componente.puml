@@ -1,0 +1,13 @@
+@startuml DiagramaComponente
+[Juego]
+[Camara]
+[Interfaz Grafica]
+[Inventario]
+[Mapa]
+[Mundo]
+[Objeto]
+[Personaje]
+[Suelo]
+[Utilidades]
+
+@enduml
