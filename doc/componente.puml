@@ -1,13 +1,19 @@
 @startuml DiagramaComponente
 [Juego]
 [Camara]
-[Interfaz Grafica]
+[Interfaz_Grafica]
 [Inventario]
 [Mapa]
 [Mundo]
-[Objeto]
 [Personaje]
-[Suelo]
-[Utilidades]
-
+[Pygame]
+[Mundo]
+Jugador --(0-- Juego : computadora
+Juego  <--> Mundo: actualizar_eventos
+Interfaz_Grafica --> Juego: dibuja
+Pygame --> Interfaz_Grafica: metodos
+Camara <-- Mundo: requiere
+Personaje <--> Mundo: actualiza_estado
+Mundo <-- Mapa: cambia
+Inventario <-- Personaje: cambia
 @enduml
