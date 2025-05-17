@@ -2,7 +2,7 @@ import pygame
 import SatisPlanning.constantes as ct
 
 class Objeto:
-    def __init__(self, x, y, ancho, alto, ruta_imagen, dinamico):
+    def __init__(self, x, y, ancho, alto, ruta_imagen, dinamico, tangible=True):
         """
         Inicializa un objeto con posición, hitbox, una imagen y un cuerpo físico en el mundo.
 
@@ -12,6 +12,7 @@ class Objeto:
         :param alto: Altura del hitbox.
         :param ruta_imagen: Ruta de la imagen en la carpeta assets.
         :param dinamico: Define si el objeto es dinámico (True) o estático (False).
+        :param tangible: Define si el objeto es tangible (True) o no (False).
         """
         self.x, self.y = x, y
         self.vel_x = self.vel_y = 0
@@ -21,6 +22,9 @@ class Objeto:
         self.hitbox = pygame.Rect(x + 17, y + 20, ancho - 4, alto)
         self.imagen = pygame.image.load(ruta_imagen)
         self.imagen = pygame.transform.scale(self.imagen, (ancho, alto))  # Ajustar tamaño de la imagen
+        self.dinamico = dinamico
+        self.tangible = tangible  # Nuevo atributo tangible
+        self.componentes = []  # Lista de componentes asociadas al objeto
 
     def dibujar(self, pantalla):
         """
@@ -31,14 +35,15 @@ class Objeto:
 
     def actualizar_posicion(self, x, y):
         """
-        Actualiza la posición del objeto y su hitbox.
+        Actualiza la posición del objeto y centra su hitbox.
 
         :param x: Nueva posición X.
         :param y: Nueva posición Y.
         """
         self.x = x
         self.y = y
-        self.hitbox.topleft = (self.x, self.y)  # Actualizar la hitbox con la nueva posición
+        # Ajustar la hitbox respetando los desplazamientos iniciales
+        self.hitbox.topleft = (self.x + 17, self.y + 20)
 
     def dibujar_con_desplazamiento(self, pantalla, desplazamiento_x, desplazamiento_y):
         """
@@ -50,5 +55,31 @@ class Objeto:
         """
         pantalla.blit(self.imagen, (desplazamiento_x, desplazamiento_y))
         # pygame.draw.rect(pantalla, (255, 0, 0), self.hitbox.move(desplazamiento_x - self.x, desplazamiento_y - self.y), 2)  # Opcional para depuración
+
+    def agregar_componente(self, componente):
+        """
+        Agrega un componente al objeto.
+
+        :param componente: Instancia de una subclase de Componente.
+        """
+        self.componentes.append(componente)
+
+    def notificar_colision(self, objeto):
+        """
+        Notifica al personaje sobre una colisión con otro objeto.
+
+        :param objeto: Objeto con el que colisiona.
+        """
+       
+        pass
+
+    def actualizar(self, dt):
+        """
+        Actualiza todos los componentes del objeto.
+
+        :param dt: Delta time (tiempo transcurrido desde el último frame).
+        """
+        for componente in self.componentes:
+            componente.actualizar(dt)
 
 #yo creo que esta bien no se me ocurre algo que sea bien general que pueda agregarse aca
