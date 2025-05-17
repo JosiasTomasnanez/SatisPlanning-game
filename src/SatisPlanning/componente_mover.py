@@ -1,0 +1,65 @@
+import pygame
+import SatisPlanning.constantes as ct
+
+class ComponenteMover:
+    def __init__(self, personaje, componente_animacion):
+        """
+        Inicializa el componente de movimiento.
+
+        :param personaje: Instancia del personaje que usará este componente.
+        :param componente_animacion: Instancia del componente de animación asociado.
+        """
+        self.personaje = personaje
+        self.componente_animacion = componente_animacion
+
+    def mover(self, teclas, mundo):
+        """
+        Maneja el movimiento del personaje, incluyendo gravedad, salto y colisiones.
+        """
+        personaje = self.personaje
+
+        # Movimiento horizontal
+        personaje.vel_x = (teclas[pygame.K_d] - teclas[pygame.K_a]) * ct.VELOCIDAD_PERSONAJE
+        nueva_hitbox = personaje.hitbox.move(personaje.vel_x, 0)
+        if not mundo.colisiona(nueva_hitbox,personaje):
+            personaje.hitbox = nueva_hitbox
+
+        # Actualizar la dirección del personaje
+        if personaje.vel_x > 0:
+            personaje.direccion = 1
+        elif personaje.vel_x < 0:
+            personaje.direccion = -1
+
+        # Gravedad y salto
+        if not personaje.en_el_suelo:
+            personaje.vel_y += ct.GRAVEDAD
+        if (teclas[pygame.K_w] or teclas[pygame.K_SPACE]) and personaje.en_el_suelo:
+            personaje.vel_y = -ct.FUERZA_SALTO
+            personaje.en_el_suelo = False
+
+        # Movimiento vertical
+        nueva_hitbox = personaje.hitbox.move(0, personaje.vel_y)
+        if not mundo.colisiona(nueva_hitbox,personaje):
+            personaje.hitbox = nueva_hitbox
+            personaje.en_el_suelo = False
+        else:
+            personaje.vel_y = 0
+            personaje.en_el_suelo = True
+
+        # Actualizar la posición del personaje
+        personaje.x, personaje.y = personaje.hitbox.topleft
+
+        # Notificar al componente de animación si el personaje se mueve
+        if personaje.vel_x != 0:
+            self.componente_animacion.notificar_movimiento()
+
+    def actualizar(self, teclas, mundo):
+        """
+        Actualiza el estado del componente de movimiento.
+        """
+        self.mover(teclas, mundo)
+
+# hacer que este componente pueda ser modificado por algun metodo
+#de notificacion para que pueda cambiar su comportamiento
+#por ejemplo , manejo de gravedad,salto,etc
+#tambien otro de colision por si un arma pega 
