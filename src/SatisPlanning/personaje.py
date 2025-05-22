@@ -6,8 +6,6 @@ from SatisPlanning.camara import Camara
 from SatisPlanning.utilidades import obtener_ruta_asset
 from SatisPlanning.componente_mover import ComponenteMover
 from SatisPlanning.componente_animacion import ComponenteAnimacion
-from SatisPlanning.componente_agregar_objeto import ComponenteAgregarObjeto
-
 class Personaje(Objeto):
     def __init__(self, x, y, ancho, alto, sprite, dinamico=True, tangible=True):
         super().__init__(x, y, ancho, alto, sprite, dinamico=dinamico, tangible=tangible)
@@ -41,15 +39,16 @@ class Personaje(Objeto):
 
         # Componente para manejar el movimiento
         self.componente_mover = ComponenteMover(self, self.componente_animacion)
-
-        # Componente para agregar objetos al mundo
-        self.componente_agregar_objeto = ComponenteAgregarObjeto(self)
-
-    def actualizar(self, teclas, mundo):
+   
+    def set_mundo(self, mundo):
+        self.mundo = mundo
+        self.componente_mover.set_mundo(mundo)
+  
+    def actualizar(self, teclas):
         """
         Actualiza el estado del personaje, delegando el movimiento y la animación a los componentes.
         """
-        self.componente_mover.actualizar(teclas, mundo)
+        self.componente_mover.actualizar(teclas)
         self.componente_animacion.actualizar()
 
     def dibujar(self, pantalla, fuente, camara):

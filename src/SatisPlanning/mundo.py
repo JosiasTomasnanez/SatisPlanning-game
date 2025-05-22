@@ -1,6 +1,6 @@
 import pygame
 from SatisPlanning.objeto import Objeto
-from SatisPlanning.personaje import Personaje
+from SatisPlanning.personaje_jugador import PersonajeJugador
 from SatisPlanning.mapa import Mapa
 import SatisPlanning.constantes as ct
 from SatisPlanning.camara import Camara
@@ -9,7 +9,8 @@ from SatisPlanning.manejador_chunks import ManjeadorChunks
 class Mundo:
     def __init__(self, camara):
         self.mapa = Mapa()  # Instancia de la clase Mapa
-        self.personaje = Personaje(100, 100, 40, 40)  # Personaje principal
+        self.personaje = PersonajeJugador(100, 100, 40, 40)  # Personaje principal
+        self.personaje.set_mundo(self)
         self.camara = camara  # Instancia de la cámara
         self.manejador_chunks = ManjeadorChunks(self.mapa)  # Instancia del manejador de chunks
 
@@ -21,10 +22,10 @@ class Mundo:
         Actualiza la lógica del mundo.
         """
         for evento in eventos:
-            self.personaje.manejar_evento(evento, self)
+            self.personaje.manejar_evento(evento)
 
         teclas = pygame.key.get_pressed()
-        self.personaje.actualizar(teclas, self)
+        self.personaje.actualizar(teclas)
 
         # Actualizar chunks visibles y procesar submatrices
         self.manejador_chunks.actualizar_chunks_visibles(self.personaje)
