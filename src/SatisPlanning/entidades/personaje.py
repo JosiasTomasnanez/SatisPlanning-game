@@ -1,11 +1,11 @@
 import pygame
-from SatisPlanning.objeto import Objeto
+from SatisPlanning.entidades.objeto import Objeto
 import SatisPlanning.constantes as ct
-from SatisPlanning.inventario import Inventario
-from SatisPlanning.camara import Camara
+from SatisPlanning.entidades.inventario import Inventario
+from SatisPlanning.entidades.camara import Camara
 from SatisPlanning.utilidades import obtener_ruta_asset
-from SatisPlanning.componente_mover import ComponenteMover
-from SatisPlanning.componente_animacion import ComponenteAnimacion
+from SatisPlanning.componentes.componente_mover import ComponenteMover
+from SatisPlanning.componentes.componente_animacion import ComponenteAnimacion
 class Personaje(Objeto):
     def __init__(self, x, y, ancho, alto, sprite, dinamico=True, tangible=True):
         super().__init__(x, y, ancho, alto, sprite, dinamico=dinamico, tangible=tangible)
@@ -50,16 +50,6 @@ class Personaje(Objeto):
         """
         self.componente_mover.actualizar(teclas)
         self.componente_animacion.actualizar()
-
-    def dibujar(self, pantalla, fuente, camara):
-        """
-        Dibuja el personaje y delega el dibujo del inventario y barra rápida al inventario.
-        """
-        personaje_centrado_x = (camara.ancho_pantalla // 2) - (self.ancho // 2)
-        personaje_centrado_y = (camara.alto_pantalla // 2) - (self.alto // 2)
-
-        pantalla.blit(self.componente_animacion.imagen_actual, (personaje_centrado_x, personaje_centrado_y))
-        #self.inventario.dibujar(pantalla, fuente) 
 
 #el manejo de coliciones y manejo de movimientos o ataques o demas, estaria bueno hacerlo como compoonentes , como usando el patron stratagy,  ya que hay muchos objetos u personajes que van a tener las mismas fisicas de movimiento pero con variables como la gravedad , entre otras diferentes, entonces seria hacer clases que se encarguen de dichos comportamientos, de las cuales los objetos puedan o no hacer uso, mandandole sus caracteristicas, y queda mucho mas modular y extendible el codigo
 

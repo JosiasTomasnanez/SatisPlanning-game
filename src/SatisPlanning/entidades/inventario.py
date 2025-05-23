@@ -1,6 +1,6 @@
 import pygame
 import SatisPlanning.constantes as ct
-from SatisPlanning.objeto import Objeto
+from SatisPlanning.entidades.objeto import Objeto
 
 class Inventario:
     def __init__(self):
@@ -37,69 +37,6 @@ class Inventario:
             return self.items[self.item_seleccionado]
         return None
 
-    def dibujar(self, pantalla, fuente):
-        """
-        Dibuja el inventario y la barra rápida en la pantalla.
-        """
-        # Dibujar la barra rápida (siempre visible)
-        self._dibujar_barra_rapida(pantalla, fuente)
-
-        # Dibujar el inventario completo si está visible
-        if not self.visible:
-            return
-
-        # Calcular altura total
-        altura_total = len(self.items) * (self.alto_item + self.margen) + self.alto_categoria + 20
-
-        # Fondo del inventario
-        fondo = pygame.Surface((self.ancho, altura_total))
-        fondo.set_alpha(220)
-        fondo.fill((60, 60, 70))
-        pantalla.blit(fondo, self.posicion)
-
-        # Dibujar selector de categorías
-        self._dibujar_categorias(pantalla, fuente)
-
-        # Dibujar items
-        y_pos = self.posicion[1] + self.alto_categoria + 10
-        for index, item in enumerate(self.items):
-            self._dibujar_item(pantalla, fuente, item, y_pos, index)
-            y_pos += self.alto_item + self.margen
-
-    def _dibujar_categorias(self, pantalla, fuente):
-        x_pos = self.posicion[0]
-        ancho_cat = self.ancho // len(ct.CATEGORIAS)
-        
-        for i, categoria in enumerate(ct.CATEGORIAS):
-            color = (100, 100, 200) if categoria == self.categoria_actual else (70, 70, 80)
-            pygame.draw.rect(pantalla, color, 
-                           (x_pos + i * ancho_cat, self.posicion[1], ancho_cat, self.alto_categoria))
-            
-            texto = fuente.render(categoria, True, (255, 255, 255))
-            texto_rect = texto.get_rect(center=(x_pos + i * ancho_cat + ancho_cat // 2, 
-                                              self.posicion[1] + self.alto_categoria // 2))
-            pantalla.blit(texto, texto_rect)
-
-    def _dibujar_item(self, pantalla, fuente, item, y_pos, index):
-        """
-        Dibuja un item individual del inventario.
-        :param item: Instancia de la clase Objeto.
-        :param y_pos: Posición Y para dibujar el item.
-        :param index: Índice del item en la lista.
-        """
-        # Resaltar item seleccionado
-        seleccionado = (self.item_seleccionado == index)
-        if seleccionado:
-            pygame.draw.rect(pantalla, (100, 100, 200), 
-                           (self.posicion[0], y_pos, self.ancho, self.alto_item))
-        
-        # Dibujar icono del objeto
-        pantalla.blit(item.imagen, (self.posicion[0] + 5, y_pos + 5))
-
-        # Dibujar nombre del objeto
-        texto = fuente.render(item.__class__.__name__, True, (255, 255, 255))
-        pantalla.blit(texto, (self.posicion[0] + 40, y_pos + 10))
-
     def seleccionar_barra_rapida(self, indice):
         """
         Selecciona un elemento de la barra rápida basado en el índice.
@@ -108,32 +45,7 @@ class Inventario:
         if 0 <= indice < 9:  # Asegurarse de que el índice esté dentro del rango de la barra rápida
             self.item_seleccionado = indice
 
-    def _dibujar_barra_rapida(self, pantalla, fuente):
-        """
-        Dibuja la barra rápida en la parte inferior de la pantalla.
-        """
-        num_slots = 9  # Número fijo de slots en la barra rápida
-        ancho_barra = num_slots * 50 + (num_slots - 1) * 5
-        barra_x = (ct.ANCHO - ancho_barra) // 2
-        barra_y = ct.ALTO - 60
-
-        for i in range(num_slots):
-            x = barra_x + i * 55
-            y = barra_y
-
-            # Dibujar fondo del slot
-            pygame.draw.rect(pantalla, (60, 60, 70), (x, y, 50, 50))
-
-            # Resaltar el item seleccionado
-            if self.item_seleccionado == i:
-                # Dibujar un contorno amarillo para el elemento seleccionado
-                pygame.draw.rect(pantalla, (255, 255, 0), (x - 2, y - 2, 54, 54), 3)
-
-            # Dibujar el icono del item si existe
-            if i < len(self.items):
-                item = self.items[i]
-                pantalla.blit(item.imagen, (x + 10, y + 10))
-
+  
     def manejar_evento(self, evento):
         """
         Maneja eventos relacionados con el inventario.

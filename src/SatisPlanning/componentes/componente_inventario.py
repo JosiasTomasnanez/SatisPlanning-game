@@ -1,4 +1,4 @@
-from SatisPlanning.componente import Componente
+from SatisPlanning.componentes.componente import Componente
 import pygame
 # Este componente actúa como interfaz entre el personaje (o quien use el inventario)
 # y el inventario en sí. Recibe eventos y modifica el estado del inventario según corresponda.
@@ -11,9 +11,6 @@ class ComponenteInventario(Componente):
     def set_mundo(self, mundo):
         self.mundo = mundo
         
-    def dibujar(self, pantalla, fuente):
-       self.inventario.dibujar(pantalla, fuente)
-
     def actualizar(self, teclas):
         if teclas.type == pygame.KEYDOWN:
             if teclas.key == pygame.K_i:
@@ -31,4 +28,7 @@ class ComponenteInventario(Componente):
                         item_soltado.actualizar_posicion(self.propietario.x + 45, self.propietario.y - 10)
                     else:
                         item_soltado.actualizar_posicion(self.propietario.x - 60, self.propietario.y - 10)
+                    # Ajustar posición en Y para evitar colisiones
+                    while self.mundo.colisiona(item_soltado.hitbox,item_soltado):
+                        item_soltado.actualizar_posicion(item_soltado.x, item_soltado.y - 1)
                     self.mundo.agregar_objeto(item_soltado, True)
