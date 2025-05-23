@@ -11,7 +11,7 @@ class Suelo(Objeto):
         :param alto: Altura del suelo.
         :param ruta_imagen: Ruta de la imagen en la carpeta assets.
         """
-        super().__init__(x, y, ancho, alto, ruta_imagen, dinamico=False)
+        super().__init__(x, y, ancho, alto, ruta_imagen, dinamico=False, tangible=True)
         # Configuramos todos los fixtures como sensores
 
 # en principio esta bien esta clase, bien general, pero los que hereden de esta clase pueden implementar cosas como buff ante ciertos materiales de suelos al perosnaje, o como en terraria, que la piedra infernal queme al personaje, pero esas son extenciones hacia las subclases

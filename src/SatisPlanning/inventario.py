@@ -9,9 +9,9 @@ class Inventario:
 
         # Inventario inicializado con bloques de tierra, piedra y pasto en la barra rápida
         self.items = [
-            Objeto(0, 0, 30, 30, ct.TEXTURA_TIERRA, dinamico=False),  # Bloque de tierra
-            Objeto(0, 0, 30, 30, ct.TEXTURA_PIEDRA, dinamico=False),  # Bloque de piedra
-            Objeto(0, 0, 30, 30, ct.TEXTURA_PASTO, dinamico=False)    # Bloque de pasto
+            Objeto(0, 0, 30, 30, ct.TEXTURA_TIERRA, dinamico=False,tangible=True),  # Bloque de tierra
+            Objeto(0, 0, 30, 30, ct.TEXTURA_PIEDRA, dinamico=False, tangible=True),  # Bloque de piedra
+            Objeto(0, 0, 30, 30, ct.TEXTURA_PASTO, dinamico=False,tangible=True)    # Bloque de pasto
         ]
         self.categoria_actual = "Bloques"
         self.item_seleccionado = 0  # Inicializar con el primer slot seleccionado

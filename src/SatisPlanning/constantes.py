@@ -5,7 +5,7 @@ ANCHO = 1280  # Ancho de la pantalla
 ALTO = 720  # Alto de la pantalla
 TAMANIO_BLOQUE = 32  # Tamaño de cada bloque
 FPS = 60  # Cuadros por segundo
-FILAS = ALTO // TAMANIO_BLOQUE
+FILAS = (ALTO // TAMANIO_BLOQUE)+6
 COLUMNAS = ANCHO // TAMANIO_BLOQUE
 COLOR_FONDO = (0, 0, 0)  # Color de fondo de la pantalla
 
