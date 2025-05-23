@@ -1,0 +1,27 @@
+import pygame
+from SatisPlanning.utilidades import obtener_posicion_mouse
+
+class ComponenteDisparo:
+    def __init__(self, personaje):
+        """
+        Inicializa el componente de disparo.
+
+        :param personaje: Referencia al personaje que utiliza este componente.
+        """
+        self.personaje = personaje
+
+    def disparar(self, mundo):
+        """
+        Dispara un proyectil hacia la posición del ratón.
+
+        :param mundo: Referencia al mundo para agregar el proyectil.
+        """
+        posicion_mouse = obtener_posicion_mouse()
+        posicion_inicial = (self.personaje.x, self.personaje.y)
+
+        # Crear un proyectil y agregarlo al mundo
+        proyectil = Proyectil(posicion_inicial, posicion_mouse)
+        mundo.agregar_objeto(proyectil)
+        
+        
+        #esto es un ejemplo mapeo de mause

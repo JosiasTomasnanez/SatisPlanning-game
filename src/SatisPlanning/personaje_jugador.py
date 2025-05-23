@@ -1,0 +1,50 @@
+import pygame
+from .personaje import Personaje  
+from SatisPlanning.inventario import Inventario
+from SatisPlanning.utilidades import obtener_ruta_asset
+from SatisPlanning.componente_mover import ComponenteMover
+from SatisPlanning.componente_animacion import ComponenteAnimacion
+from SatisPlanning.componente_inventario import ComponenteInventario
+
+class PersonajeJugador(Personaje):
+    def __init__(self, x, y, ancho, alto):
+        """
+        Inicializa el personaje jugador con posición, sprites y un inventario.
+
+        :param x: Posición X inicial.
+        :param y: Posición Y inicial.
+        :param ancho: Ancho del personaje.
+        :param alto: Altura del personaje.
+        """
+        super().__init__(x, y, ancho, alto, obtener_ruta_asset("p3.png"), dinamico=True, tangible=True)
+        
+        # Posicion inicial
+        self.vel_x = self.vel_y = 0
+        self.en_el_suelo = False
+        self.direccion = 1  # 1 para derecha, -1 para izquierda
+
+        # Inventario del personaje
+        self.componente_inventario = ComponenteInventario(self,Inventario())
+
+        # Componente para manejar la animación
+        self.componente_animacion = ComponenteAnimacion(self, self.sprites)
+
+        # Componente para manejar el movimiento
+        self.componente_mover = ComponenteMover(self, self.componente_animacion)
+
+    def set_mundo(self, mundo):
+       self.componente_inventario.set_mundo(mundo)
+       super().set_mundo(mundo)
+
+    def actualizar(self, teclas):
+        # Actualiza el movimiento según teclas presionadas
+        super().actualizar(teclas)
+
+    def manejar_evento(self, evento):
+        # Actualiza el inventario según eventos individuales
+        self.componente_inventario.actualizar(evento)
+        # Puedes agregar aquí otros componentes que reaccionen a eventos
+    def dibujar(self, pantalla, fuente, camara):
+        # Dibuja el personaje y delega el dibujo del inventario y barra rápida al inventario.
+        super().dibujar(pantalla, fuente, camara)
+        self.componente_inventario.dibujar(pantalla, fuente)
