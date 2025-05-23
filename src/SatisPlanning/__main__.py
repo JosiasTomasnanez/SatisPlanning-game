@@ -1,24 +1,30 @@
 import pygame
-from SatisPlanning.juego import Juego 
+from SatisPlanning.presentador_juego import PresentadorJuego
 import SatisPlanning.constantes as ct
+from SatisPlanning.persistencia.gestor_db import GestorDB
+from SatisPlanning.entidades.mundo import Mundo  # Cambiado de World a Mundo
+from SatisPlanning.vista_juego import VistaJuego
+from SatisPlanning.entidades.camara import Camara
 
 def main():
+    coneDB= GestorDB()
     pygame.init()
-    juego = Juego()
+    pantalla = pygame.display.set_mode((ct.ANCHO, ct.ALTO))
+    presentador_juego = PresentadorJuego(Mundo(),VistaJuego(Camara(),pantalla))
 
     pygame.display.set_caption("SatisPlanning")
     reloj = pygame.time.Clock()
     corriendo = True
+    
     while corriendo:
         dt = reloj.tick(ct.FPS) / 1000  # Delta time en segundos
 
-        eventos = juego.manejar_eventos()
+        eventos = presentador_juego.manejar_eventos()
         if eventos is None:  # Si se detecta un evento de salida
             corriendo = False
             continue
 
-        juego.actualizar(dt, eventos) 
-        juego.dibujar()  
+        presentador_juego.actualizar(dt, eventos) 
 
     pygame.quit()
 

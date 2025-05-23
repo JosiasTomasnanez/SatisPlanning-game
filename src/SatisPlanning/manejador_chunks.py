@@ -1,6 +1,6 @@
-from SatisPlanning.mapa import Mapa
+from SatisPlanning.entidades.mapa import Mapa
 import SatisPlanning.constantes as ct
-from SatisPlanning.suelo import Suelo
+from SatisPlanning.entidades.suelo import Suelo
 
 class ManjeadorChunks:
     def __init__(self, mapa):
