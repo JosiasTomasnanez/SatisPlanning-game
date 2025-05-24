@@ -1,5 +1,4 @@
 import pygame
-import SatisPlanning.constantes as ct
 
 class Objeto:
     def __init__(self, x, y, ancho, alto, ruta_imagen, dinamico, tangible=True):

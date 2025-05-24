@@ -1,4 +1,4 @@
-from SatisPlanning.objeto import Objeto
+from SatisPlanning.entidades.objeto import Objeto
 
 class Suelo(Objeto):
     def __init__(self, x, y, ancho, alto, ruta_imagen):

@@ -1,22 +1,24 @@
 import pygame
-from SatisPlanning.objeto import Objeto
-from SatisPlanning.personaje_jugador import PersonajeJugador
-from SatisPlanning.mapa import Mapa
-import SatisPlanning.constantes as ct
-from SatisPlanning.camara import Camara
+from SatisPlanning.entidades.personaje_jugador import PersonajeJugador
+from SatisPlanning.entidades.mapa import Mapa
 from SatisPlanning.manejador_chunks import ManjeadorChunks
 
 class Mundo:
-    def __init__(self, camara):
+    def __init__(self):
         self.mapa = Mapa()  # Instancia de la clase Mapa
         self.personaje = PersonajeJugador(100, 100, 40, 40)  # Personaje principal
         self.personaje.set_mundo(self)
-        self.camara = camara  # Instancia de la cámara
         self.manejador_chunks = ManjeadorChunks(self.mapa)  # Instancia del manejador de chunks
 
         # Cargar los chunks iniciales
         self.manejador_chunks.cargar_chunks_iniciales(self.personaje)
-
+    def obtener_personaje(self):
+        """
+        Devuelve el personaje principal.
+        """
+        return self.personaje
+    
+    
     def actualizar(self, dt, eventos):
         """
         Actualiza la lógica del mundo.
@@ -30,8 +32,6 @@ class Mundo:
         # Actualizar chunks visibles y procesar submatrices
         self.manejador_chunks.actualizar_chunks_visibles(self.personaje)
         self.manejador_chunks.procesar_submatriz()
-
-        self.camara.actualizar(self.personaje.x, self.personaje.y)
 
   
     def colisiona(self, hitbox, obj):
@@ -54,13 +54,11 @@ class Mundo:
         objeto.tangible = tangible
         self.manejador_chunks.agregar_objeto(objeto)
 
-    def dibujar(self, pantalla):
+    def obtener_objetos_a_dibujar(self):
         """
-        Dibuja el mundo y los objetos en la pantalla.
+        Devuelve los objetos y el personaje para ser dibujados.
         """
+        objetos = []
         for chunk_x in self.manejador_chunks.obtener_chunks_visibles():
-            for objeto in self.manejador_chunks.obtener_objetos_por_chunk(chunk_x):
-                objeto_x, objeto_y = self.camara.aplicar(objeto.x, objeto.y)
-                objeto.dibujar_con_desplazamiento(pantalla, objeto_x, objeto_y)
-
-        self.personaje.dibujar(pantalla, ct.FUENTE, self.camara)
+            objetos.extend(self.manejador_chunks.obtener_objetos_por_chunk(chunk_x))
+        return objetos, self.personaje

@@ -1,10 +1,10 @@
 import pygame
-from .personaje import Personaje  
-from SatisPlanning.inventario import Inventario
+from SatisPlanning.entidades.personaje import Personaje  
+from SatisPlanning.entidades.inventario import Inventario
 from SatisPlanning.utilidades import obtener_ruta_asset
-from SatisPlanning.componente_mover import ComponenteMover
-from SatisPlanning.componente_animacion import ComponenteAnimacion
-from SatisPlanning.componente_inventario import ComponenteInventario
+from SatisPlanning.componentes.componente_mover import ComponenteMover
+from SatisPlanning.componentes.componente_animacion import ComponenteAnimacion
+from SatisPlanning.componentes.componente_inventario import ComponenteInventario
 
 class PersonajeJugador(Personaje):
     def __init__(self, x, y, ancho, alto):
@@ -32,6 +32,9 @@ class PersonajeJugador(Personaje):
         # Componente para manejar el movimiento
         self.componente_mover = ComponenteMover(self, self.componente_animacion)
 
+    def obtener_inventario(self):
+        return self.componente_inventario.inventario
+    
     def set_mundo(self, mundo):
        self.componente_inventario.set_mundo(mundo)
        super().set_mundo(mundo)
@@ -44,7 +47,3 @@ class PersonajeJugador(Personaje):
         # Actualiza el inventario según eventos individuales
         self.componente_inventario.actualizar(evento)
         # Puedes agregar aquí otros componentes que reaccionen a eventos
-    def dibujar(self, pantalla, fuente, camara):
-        # Dibuja el personaje y delega el dibujo del inventario y barra rápida al inventario.
-        super().dibujar(pantalla, fuente, camara)
-        self.componente_inventario.dibujar(pantalla, fuente)
