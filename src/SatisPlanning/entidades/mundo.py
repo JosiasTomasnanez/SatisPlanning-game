@@ -2,6 +2,7 @@ import pygame
 from SatisPlanning.entidades.personaje_jugador import PersonajeJugador
 from SatisPlanning.entidades.mapa import Mapa
 from SatisPlanning.manejador_chunks import ManjeadorChunks
+from SatisPlanning.entidades.personaje_enemigo import PersonajeEnemigo
 
 class Mundo:
     def __init__(self):
@@ -12,6 +13,12 @@ class Mundo:
 
         # Cargar los chunks iniciales
         self.manejador_chunks.cargar_chunks_iniciales(self.personaje)
+        
+        # Enemigos
+        self.enemigos = [PersonajeEnemigo(300, 100, 40, 40)]  # Puedes agregar más enemigos aquí
+        for enemigo in self.enemigos:
+            enemigo.set_mundo(self)
+
     def obtener_personaje(self):
         """
         Devuelve el personaje principal.
@@ -28,6 +35,10 @@ class Mundo:
 
         teclas = pygame.key.get_pressed()
         self.personaje.actualizar(teclas)
+
+        # Actualizar enemigos
+        for enemigo in self.enemigos:
+            enemigo.actualizar()
 
         # Actualizar chunks visibles y procesar submatrices
         self.manejador_chunks.actualizar_chunks_visibles(self.personaje)
@@ -54,11 +65,17 @@ class Mundo:
         objeto.tangible = tangible
         self.manejador_chunks.agregar_objeto(objeto)
 
+    def obtener_enemigos(self):
+        """
+        Devuelve la lista de enemigos.
+        """
+        return self.enemigos
+
     def obtener_objetos_a_dibujar(self):
         """
-        Devuelve los objetos y el personaje para ser dibujados.
+        Devuelve los objetos, el personaje y los enemigos para ser dibujados.
         """
         objetos = []
         for chunk_x in self.manejador_chunks.obtener_chunks_visibles():
             objetos.extend(self.manejador_chunks.obtener_objetos_por_chunk(chunk_x))
-        return objetos, self.personaje
+        return objetos, self.personaje, self.enemigos

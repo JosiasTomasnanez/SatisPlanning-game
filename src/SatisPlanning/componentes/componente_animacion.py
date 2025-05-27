@@ -10,7 +10,8 @@ class ComponenteAnimacion:
         """
         self.personaje = personaje
         self.sprites = sprites
-        self.sprite_actual = 2  # Índice del sprite inicial
+        # Si hay menos de 3 sprites, usar el primero disponible
+        self.sprite_actual = 0 if len(sprites) < 3 else 2
         self.contador_animacion = 0
         self.imagen_actual = sprites[self.sprite_actual]
 
