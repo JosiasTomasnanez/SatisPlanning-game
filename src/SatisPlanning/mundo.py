@@ -1,6 +1,6 @@
 import pygame
 from SatisPlanning.entidades.personaje_jugador import PersonajeJugador
-from SatisPlanning.entidades.mapa import Mapa
+from SatisPlanning.mapa import Mapa
 from SatisPlanning.manejador_chunks import ManjeadorChunks
 
 class Mundo:
