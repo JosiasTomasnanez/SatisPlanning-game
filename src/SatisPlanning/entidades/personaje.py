@@ -1,8 +1,5 @@
 import pygame
 from SatisPlanning.entidades.objeto import Objeto
-import SatisPlanning.constantes as ct
-from SatisPlanning.entidades.inventario import Inventario
-from SatisPlanning.entidades.camara import Camara
 from SatisPlanning.utilidades import obtener_ruta_asset
 from SatisPlanning.componentes.componente_mover import ComponenteMover
 from SatisPlanning.componentes.componente_animacion import ComponenteAnimacion

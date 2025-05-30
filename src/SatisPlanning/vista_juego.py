@@ -2,6 +2,8 @@ import pygame
 import SatisPlanning.constantes as ct
 
 class VistaJuego:
+    QUIT = pygame.QUIT  # Para que el presentador pueda comparar sin importar pygame
+
     def __init__(self, camara, pantalla):
         self.pantalla = pantalla
         self.camara = camara
@@ -96,3 +98,9 @@ class VistaJuego:
             if i < len(inventario.items):
                 item = inventario.items[i]
                 self.pantalla.blit(item.imagen, (x + 10, y + 10))
+
+    def obtener_eventos(self):
+        """
+        Captura los eventos de pygame y los retorna.
+        """
+        return pygame.event.get()

@@ -1,2 +1,3 @@
 pygame
 perlin_noise
+pytest

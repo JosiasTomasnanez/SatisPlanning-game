@@ -1,4 +1,4 @@
-from SatisPlanning.entidades.mapa import Mapa
+from SatisPlanning.mapa import Mapa
 import SatisPlanning.constantes as ct
 from SatisPlanning.entidades.suelo import Suelo
 
