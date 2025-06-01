@@ -1,5 +1,5 @@
 from SatisPlanning.componentes.componente import Componente
-import constantes as ct 
+import SatisPlanning.constantes as ct 
 import pygame
 import math
 # Este componente actúa como interfaz entre el personaje (o quien use el inventario)
