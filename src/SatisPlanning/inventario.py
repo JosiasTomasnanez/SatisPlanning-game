@@ -11,9 +11,11 @@ class Inventario:
         self.items = [
             Objeto(0, 0, 30, 30, ct.TEXTURA_TIERRA, dinamico=False,tangible=True),  # Bloque de tierra
             Objeto(0, 0, 30, 30, ct.TEXTURA_PIEDRA, dinamico=False, tangible=True),  # Bloque de piedra
+            
             Objeto(0, 0, 30, 30, ct.TEXTURA_PASTO, dinamico=False,tangible=True)    # Bloque de pasto
         ]
         self.categoria_actual = "Bloques"
+        
         self.item_seleccionado = 0  # Inicializar con el primer slot seleccionado
         self.visible = False
         self.posicion = (ct.ANCHO - 220, 50)
