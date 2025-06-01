@@ -11,7 +11,7 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "cwd": "${fileDirname}",
-            "env": {"PYTHONPATH": "${workspaceFolder}/mySubdir${pathSeparator}${env:PYTHONPATH}"}
+            "env": {"PYTHONPATH": "${workspaceFolder}/src${pathSeparator}${env:PYTHONPATH}"}
         },
         {
             "name": "Python Debugger: Current File",

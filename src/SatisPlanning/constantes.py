@@ -31,7 +31,8 @@ COLORES = {
 # Texturas
 TEXTURA_TIERRA = obtener_ruta_asset("tierra.png")
 TEXTURA_PIEDRA = obtener_ruta_asset("piedra.png")
-TEXTURA_PASTO = obtener_ruta_asset("pasto.png")   
+TEXTURA_PASTO = obtener_ruta_asset("pasto.png")
+
 
 # Tipos de bloques sólidos
 BLOQUES_SOLIDOS = {1, 2, 3}  # Tierra, Piedra, Pasto
