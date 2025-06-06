@@ -1,229 +1,178 @@
-@startuml Juego
+@startuml SatisPlanning
 scale 1.5
 
-' Relaciones generales entre las clases principales
-main --> Juego  
-' La clase principal que inicia el juego
-Juego --> Mundo  
-' El juego contiene el mundo donde se desarrolla la lógica principal
-Juego --> InterfazGrafica  
-' El juego utiliza la interfaz gráfica para dibujar elementos
-Juego --> Camara  
-' La cámara se usa para manejar el desplazamiento y el enfoque
-Juego ..> pygame    
-' Usa dependencia externa de pygame
-Juego --> Constantes  
-' Usa constantes globales para configuraciones
+' Relaciones principales
+__main__ --> PresentadorJuego
+PresentadorJuego --> Mundo
+PresentadorJuego --> VistaJuego
+VistaJuego --> Camara
+VistaJuego --> Constantes
+VistaJuego --> pygame
 
-' Relaciones dentro del mundo del juego
-Mundo --> Mapa  
-' El mundo utiliza el mapa para generar y gestionar los chunks
-Mundo --> Personaje  
-' El personaje principal está contenido en el mundo
-Mundo --> Suelo  
-' El suelo es parte del mundo y se utiliza para colisiones
-Mundo --> Camara  
-' La cámara se usa para ajustar la vista del mundo
-Mundo --> Constantes  
-' Usa constantes globales
-Mundo --> Objeto  
-' Los objetos son elementos interactivos del mundo
+Mundo --> Mapa
+Mundo --> ManjeadorChunks
+Mundo --> PersonajeJugador
+Mundo --> Objeto
+Mundo --> Constantes
 
-' Relaciones del mapa
-Mapa --> Constantes  
-' Usa constantes para generar el terreno
-Mapa ..> perlin_noise : usa  
-' Dependencia externa para generar ruido Perlin
-Mapa ..> random : usa  
-' Dependencia externa para generar valores aleatorios
+ManjeadorChunks --> Mapa
+ManjeadorChunks --> Suelo
+ManjeadorChunks --> Constantes
 
-' Relaciones del personaje
-Personaje --> Objeto  
-' El personaje hereda de la clase Objeto
-Personaje --> Inventario  
-' El personaje tiene un inventario
-Personaje --> Camara  
-' Usa la cámara para ajustar su posición en pantalla
-Personaje --> Constantes  
-' Usa constantes para configuraciones como velocidad y gravedad
-Personaje --> Utilidades  
-' Utiliza funciones auxiliares como obtener rutas de assets
+Mapa --> Constantes
+Mapa ..> perlin_noise
+Mapa ..> random
 
-' Relaciones del inventario
-Inventario --> Objeto  
-' El inventario contiene objetos
-Inventario --> Constantes  
-' Usa constantes para configuraciones visuales
+PersonajeJugador -|> Personaje
+Personaje --> Objeto
+PersonajeJugador --> ComponenteMover
+PersonajeJugador --> ComponenteAnimacion
+PersonajeJugador --> ComponenteInventario
+PersonajeJugador --> Inventario
 
-' Relaciones del suelo
-Suelo --> Objeto  
-' El suelo hereda de la clase Objeto
+ComponenteMover --> Componente
+ComponenteAnimacion --> Componente
+ComponenteInventario --> Componente
+ComponenteInventario --> Inventario
 
-' Relaciones de la interfaz gráfica
-InterfazGrafica --> Mundo  
-' La interfaz gráfica dibuja el mundo
-InterfazGrafica --> Constantes  
-' Usa constantes para configuraciones visuales
-InterfazGrafica ..> pygame : usa  
-' Dependencia externa de pygame
+Inventario --> Objeto
+Inventario --> Constantes
 
-' Relaciones de la cámara
-Camara --> Constantes  
-' Usa constantes para configuraciones de pantalla
+Suelo -|> Objeto
 
-' Relaciones de utilidades
-Utilidades ..> os : usa  
-' Dependencia externa para manejar rutas de archivos
+Objeto --> pygame
 
-' Clases principales con sus métodos y atributos
-class main {
-    ' Punto de entrada del programa
-    + main()  
+GestorDB ..> sqlite3
+GestorDB ..> os
+
+Camara --> Constantes
+
+Constantes ..> pygame
+Constantes ..> obtener_ruta_asset
+
+' Clases principales
+class __main__ {
+    + main()
 }
 
-class Juego {
-    ' Maneja los eventos del juego
+class PresentadorJuego {
     + manejar_eventos()
-    ' Actualiza el estado del juego
     + actualizar(dt, eventos)
-    ' Dibuja los elementos del juego
-    + dibujar()  
+}
+
+class VistaJuego {
+    + dibujar(objetos, personaje)
+    + dibujar_objetos_mapa(objetos)
+    + dibujar_personaje_centrado(personaje)
+    + dibujar_inventario(inventario)
 }
 
 class Mundo {
-    ' Carga los chunks iniciales del mapa
-    - _cargar_chunks_iniciales()
-    ' Carga un chunk completo  
-    - _cargar_chunk_completo()
-    ' Inicia la carga progresiva de chunks
-    - _iniciar_carga_progresiva()
-    ' Procesa una submatriz de un chunk  
-    - _procesar_submatriz()
-    ' Actualiza el estado del mundo  
+    + obtener_personaje()
     + actualizar(dt, eventos)
-    ' Genera el mapa visible
-    + generar_mapa()  
-    ' Actualiza los chunks visibles
-    - _actualizar_chunks_visibles()  
-    ' Verifica colisiones con objetos
-    + colisiona(hitbox)  
-    ' Agrega un objeto al mundo
-    + agregar_objeto(objeto)  
-    ' Dibuja el mundo en la pantalla
-    + dibujar(pantalla)  
+    + colisiona(hitbox, obj)
+    + agregar_objeto(objeto, tangible)
+    + obtener_objetos_a_dibujar()
+}
+
+class ManjeadorChunks {
+    + cargar_chunks_iniciales(personaje)
+    + iniciar_carga_progresiva(chunk_index, chunk_x)
+    + procesar_submatriz()
+    + actualizar_chunks_visibles(personaje)
+    + obtener_chunks_visibles()
+    + obtener_objetos_por_chunk(chunk_x)
+    + agregar_objeto(objeto)
 }
 
 class Mapa {
-    ' Obtiene un chunk basado en su posición
-    + obtener_chunk(chunk_x)  
-    ' Genera un nuevo chunk
-    - _generar_chunk(chunk_x)  
+    + obtener_chunk(chunk_x)
+    - _generar_chunk(chunk_x)
 }
 
 class Personaje {
-    ' Maneja el movimiento del personaje
-    + mover(teclas, mundo)  
-    ' Actualiza la animación del personaje
-    - _actualizar_animacion() 
-    ' Notifica colisiones con otros objetos
-    + notificar_colision(objeto)  
-    ' Maneja eventos relacionados con el personaje
-    + manejar_evento(evento, mundo)  
-    ' Actualiza el estado del personaje
-    + actualizar(teclas, mundo)  
-    ' Dibuja el personaje en pantalla
-    + dibujar(pantalla, fuente, camara)  
+    + set_mundo(mundo)
+    + actualizar(teclas)
+}
+
+class PersonajeJugador {
+    + obtener_inventario()
+    + set_mundo(mundo)
+    + actualizar(teclas)
+    + manejar_evento(evento)
 }
 
 class Inventario {
-    ' Agrega un objeto al inventario
-    + agregar_objeto(objeto)  
-    ' Obtiene el objeto actualmente seleccionado
-    + obtener_item_actual()  
-    ' Dibuja el inventario en pantalla
-    + dibujar(pantalla, fuente)  
-    ' Selecciona un elemento de la barra rápida
-    + seleccionar_barra_rapida(indice)  
-    ' Maneja eventos relacionados con el inventario
-    + manejar_evento(evento)  
-    ' Suelta el objeto seleccionado
-    + soltar_item_seleccionado()  
-    ' Dibuja la barra rápida
-    - _dibujar_barra_rapida(pantalla, fuente)  
-    ' Dibuja las categorías del inventario
-    - _dibujar_categorias(pantalla, fuente)  
-    ' Dibuja un item individual
-    - _dibujar_item(pantalla, fuente, item, y_pos, index)  
-}
-
-class Suelo {
-    <<inherits>> Objeto  
-    ' Hereda de la clase Objeto
+    + agregar_objeto(objeto)
+    + obtener_item_actual()
+    + seleccionar_barra_rapida(indice)
+    + manejar_evento(evento)
+    + soltar_item_seleccionado()
 }
 
 class Objeto {
-    ' Dibuja el objeto en pantalla
-    + dibujar(pantalla)  
-    ' Actualiza la posición del objeto
-    + actualizar_posicion(x, y)  
-    ' Dibuja el objeto con desplazamiento
-    + dibujar_con_desplazamiento(pantalla, desplazamiento_x, desplazamiento_y)  
+    + dibujar(pantalla)
+    + actualizar_posicion(x, y)
+    + dibujar_con_desplazamiento(pantalla, dx, dy)
+    + agregar_componente(componente)
+    + notificar_colision(objeto)
+    + actualizar(dt)
 }
 
-class InterfazGrafica {
-    ' Dibuja los elementos gráficos en pantalla
-    + dibujar()  
+class Suelo {
+    <<inherits>> Objeto
 }
 
 class Camara {
-    ' Actualiza el desplazamiento de la cámara
-    + actualizar(objetivo_x, objetivo_y)  
-    ' Aplica el desplazamiento de la cámara a una posición
-    + aplicar(x, y)  
-}
-
-class Utilidades {
-    ' Obtiene la ruta absoluta de un asset
-    + obtener_ruta_asset(ruta_relativa)  
+    + actualizar(objetivo_x, objetivo_y)
+    + aplicar(x, y)
 }
 
 class Constantes <<constantes>> {
-    ' Ancho de la pantalla
-    + ANCHO : int  
-    ' Alto de la pantalla
-    + ALTO : int  
-    ' Tamaño de cada bloque
-    + TAMANIO_BLOQUE : int  
-    ' Cuadros por segundo
-    + FPS : int  
-    ' Número de filas en el mapa
-    + FILAS : int  
-    ' Número de columnas en el mapa
-    + COLUMNAS : int  
-    ' Color de fondo de la pantalla
-    + COLOR_FONDO : tuple  
-    ' Fuente para renderizar texto
-    + FUENTE  
-    ' Valor de la gravedad
-    + GRAVEDAD : float  
-    ' Fuerza del salto del personaje
-    + FUERZA_SALTO : int  
-    ' Velocidad del personaje
-    + VELOCIDAD_PERSONAJE : int 
-     ' Colores de los bloques
-    + COLORES : dict  
-    ' Ruta de la textura de tierra
-    + TEXTURA_TIERRA : str  
-    ' Ruta de la textura de piedra
-    + TEXTURA_PIEDRA : str  
-    ' Ruta de la textura de pasto
-    + TEXTURA_PASTO : str  
-    ' Tipos de bloques sólidos
-    + BLOQUES_SOLIDOS : set  
-    ' Configuración de herramientas
-    + HERRAMIENTAS : dict  
-    ' Categorías del inventario
-    + CATEGORIAS : list  
+    + ANCHO : int
+    + ALTO : int
+    + TAMANIO_BLOQUE : int
+    + FPS : int
+    + FILAS : int
+    + COLUMNAS : int
+    + COLOR_FONDO : tuple
+    + FUENTE
+    + GRAVEDAD : float
+    + FUERZA_SALTO : int
+    + VELOCIDAD_PERSONAJE : int
+    + COLORES : dict
+    + TEXTURA_TIERRA : str
+    + TEXTURA_PIEDRA : str
+    + TEXTURA_PASTO : str
+    + BLOQUES_SOLIDOS : set
+    + HERRAMIENTAS : dict
+    + CATEGORIAS : list
+}
+
+class Componente {
+    + actualizar(dt)
+}
+
+class ComponenteMover {
+    + set_mundo(mundo)
+    + mover(teclas)
+    + actualizar(teclas)
+}
+
+class ComponenteAnimacion {
+    + notificar_movimiento()
+    + actualizar()
+}
+
+class ComponenteInventario {
+    + set_mundo(mundo)
+    + actualizar(teclas)
+}
+
+class GestorDB {
+    + agregar_jugador(nombre, experiencia, nivel)
+    + obtener_jugadores()
+    + cerrar()
 }
 
 @enduml

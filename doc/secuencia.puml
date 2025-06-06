@@ -3,79 +3,67 @@
 actor usuario
 
 participant Main
-participant Juego
+participant PresentadorJuego
+participant VistaJuego
 participant Mundo
-participant Graficos
-participant Pygame
-participant Personaje
+participant ManjeadorChunks
+participant PersonajeJugador
 participant Inventario
 participant Camara
 participant Mapa
-participant Suelo
+participant Pygame
 
 activate usuario
 usuario -> Main : main()
 
 activate Main
-activate Juego
+activate PresentadorJuego
 activate Pygame
 
 loop "Hasta cerrar Juego"
-    Main -> Juego : manejar_eventos()
-    Juego -> Pygame : event.get()
-    Juego <-- Pygame : Eventos
-    Main <-- Juego: Eventos
+    Main -> PresentadorJuego : manejar_eventos()
+    PresentadorJuego -> Pygame : event.get()
+    PresentadorJuego <-- Pygame : eventos
+    Main <-- PresentadorJuego : eventos
 
-    Main -> Juego : actualizar(dt, eventos)
+    Main -> PresentadorJuego : actualizar(dt, eventos)
+    PresentadorJuego -> Mundo : actualizar(dt, eventos)
     activate Mundo
-    Juego -> Mundo : actualizar(dt, eventos)
 
-    Mundo -> Personaje : manejar_evento(eventos, mundo)
-    activate Personaje
-    alt Evento relacionado con inventario
-        Personaje -> Inventario : manejar_evento(eventos)
-    else Otro evento
-        Personaje -> Personaje : manejar_evento(eventos)
-    end
+    Mundo -> PersonajeJugador : manejar_evento(evento)
+    activate PersonajeJugador
+    PersonajeJugador -> Inventario : actualizar(evento)
     deactivate Inventario
+    deactivate PersonajeJugador
 
     Mundo -> Pygame : key.get_pressed()
     Mundo <-- Pygame : teclas
-    Mundo -> Personaje : actualizar(teclas, mundo)
+    Mundo -> PersonajeJugador : actualizar(teclas)
+    PersonajeJugador -> ComponenteMover : actualizar(teclas)
+    PersonajeJugador -> ComponenteAnimacion : actualizar()
+    deactivate ComponenteMover
+    deactivate ComponenteAnimacion
 
-    Personaje -> Personaje : mover(teclas, mundo)
-    alt Colisión detectada
-        Personaje -> Mundo : colisiona(hitbox)
-        Mundo -> Suelo : verificar_colision(hitbox)
-    else Sin colisión
-        Personaje -> Personaje : continuar_movimiento()
-    end
-    deactivate Suelo
-
-    Mundo -> Mapa : generar_mapa()
-    activate Mapa
-    Mapa -> Mapa : obtener_chunk(chunk_x)
+    Mundo -> ManjeadorChunks : actualizar_chunks_visibles(personaje)
+    Mundo -> ManjeadorChunks : procesar_submatriz()
+    ManjeadorChunks -> Mapa : obtener_chunk(chunk_x)
     deactivate Mapa
 
     Mundo -> Camara : actualizar(personaje.x, personaje.y)
     deactivate Camara
 
-    Main -> Juego : dibujar()
-    activate Graficos
-    Juego -> Graficos : dibujar()
-    Graficos -> Pygame : display.set_mode()
-    Graficos -> Mundo : dibujar(pantalla)
-    Mundo -> Personaje : dibujar(pantalla, fuente, camara)
-    Mundo -> Suelo : dibujar(pantalla)
-    Mundo -> Camara : aplicar(objeto.x, objeto.y)
-    deactivate Suelo
-    deactivate Personaje
+    PresentadorJuego -> VistaJuego : dibujar(objetos, personaje)
+    activate VistaJuego
+    VistaJuego -> Camara : actualizar(personaje.x, personaje.y)
+    VistaJuego -> VistaJuego : dibujar_objetos_mapa(objetos)
+    VistaJuego -> VistaJuego : dibujar_personaje_centrado(personaje)
+    VistaJuego -> VistaJuego : dibujar_inventario(inventario)
+    VistaJuego -> Pygame : display.flip()
+    deactivate VistaJuego
     deactivate Mundo
-    Graficos -> Pygame : display.flip()
-    deactivate Graficos
 end
 
 deactivate Pygame
-deactivate Juego
+deactivate PresentadorJuego
 deactivate Main
 @enduml
