@@ -1,0 +1,69 @@
+@startuml DiagramaSecuencia
+!pragma teoz true
+actor usuario
+
+participant Main
+participant PresentadorJuego
+participant VistaJuego
+participant Mundo
+participant ManjeadorChunks
+participant PersonajeJugador
+participant Inventario
+participant Camara
+participant Mapa
+participant Pygame
+
+activate usuario
+usuario -> Main : main()
+
+activate Main
+activate PresentadorJuego
+activate Pygame
+
+loop "Hasta cerrar Juego"
+    Main -> PresentadorJuego : manejar_eventos()
+    PresentadorJuego -> Pygame : event.get()
+    PresentadorJuego <-- Pygame : eventos
+    Main <-- PresentadorJuego : eventos
+
+    Main -> PresentadorJuego : actualizar(dt, eventos)
+    PresentadorJuego -> Mundo : actualizar(dt, eventos)
+    activate Mundo
+
+    Mundo -> PersonajeJugador : manejar_evento(evento)
+    activate PersonajeJugador
+    PersonajeJugador -> Inventario : actualizar(evento)
+    deactivate Inventario
+    deactivate PersonajeJugador
+
+    Mundo -> Pygame : key.get_pressed()
+    Mundo <-- Pygame : teclas
+    Mundo -> PersonajeJugador : actualizar(teclas)
+    PersonajeJugador -> ComponenteMover : actualizar(teclas)
+    PersonajeJugador -> ComponenteAnimacion : actualizar()
+    deactivate ComponenteMover
+    deactivate ComponenteAnimacion
+
+    Mundo -> ManjeadorChunks : actualizar_chunks_visibles(personaje)
+    Mundo -> ManjeadorChunks : procesar_submatriz()
+    ManjeadorChunks -> Mapa : obtener_chunk(chunk_x)
+    deactivate Mapa
+
+    Mundo -> Camara : actualizar(personaje.x, personaje.y)
+    deactivate Camara
+
+    PresentadorJuego -> VistaJuego : dibujar(objetos, personaje)
+    activate VistaJuego
+    VistaJuego -> Camara : actualizar(personaje.x, personaje.y)
+    VistaJuego -> VistaJuego : dibujar_objetos_mapa(objetos)
+    VistaJuego -> VistaJuego : dibujar_personaje_centrado(personaje)
+    VistaJuego -> VistaJuego : dibujar_inventario(inventario)
+    VistaJuego -> Pygame : display.flip()
+    deactivate VistaJuego
+    deactivate Mundo
+end
+
+deactivate Pygame
+deactivate PresentadorJuego
+deactivate Main
+@enduml

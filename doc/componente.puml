@@ -1,0 +1,61 @@
+@startuml DiagramaComponente
+
+' Componentes principales
+[__main__] as Main
+[PresentadorJuego]
+[VistaJuego]
+[Camara]
+[Mundo]
+[ManjeadorChunks]
+[Mapa]
+[PersonajeJugador]
+[Inventario]
+[GestorDB]
+[Objeto]
+[Suelo]
+[Pygame]
+
+' Relaciones de flujo principal
+Main --> PresentadorJuego : inicia
+PresentadorJuego --> Mundo : controla lógica
+PresentadorJuego --> VistaJuego : ordena dibujar
+VistaJuego --> Camara : usa para desplazamiento
+VistaJuego --> Pygame : renderiza
+VistaJuego --> Inventario : dibuja
+VistaJuego --> PersonajeJugador : dibuja
+VistaJuego --> Objeto : dibuja
+VistaJuego --> Suelo : dibuja
+
+Mundo --> ManjeadorChunks : gestiona chunks
+Mundo --> Mapa : genera terreno
+Mundo --> PersonajeJugador : contiene
+Mundo --> GestorDB : puede persistir datos
+
+ManjeadorChunks --> Mapa : obtiene datos de terreno
+ManjeadorChunks --> Suelo : instancia bloques
+ManjeadorChunks --> Objeto : instancia objetos
+
+PersonajeJugador --> Inventario : tiene
+PersonajeJugador --> Objeto : hereda
+PersonajeJugador --> Camara : usa para posición
+PersonajeJugador --> Pygame : entrada usuario
+
+Inventario --> Objeto : contiene items
+
+GestorDB ..> sqlite3 : persistencia
+GestorDB ..> os : rutas
+
+Objeto --> Pygame : imagenes, hitbox
+
+' Componentes secundarios y dependencias
+[ComponenteMover] ..> PersonajeJugador : modifica movimiento
+[ComponenteAnimacion] ..> PersonajeJugador : modifica animación
+[ComponenteInventario] ..> Inventario : controla inventario
+
+' Relaciones de dependencias externas
+Pygame ..> Main
+Pygame ..> VistaJuego
+Pygame ..> Objeto
+Pygame ..> PersonajeJugador
+
+@enduml
