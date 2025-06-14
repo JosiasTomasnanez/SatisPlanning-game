@@ -1,10 +1,10 @@
-from SatisPlanning.entidades.personaje import Personaje  
+from .personaje import Personaje  
 from SatisPlanning.inventario import Inventario
 from SatisPlanning.utilidades import obtener_ruta_asset
 from SatisPlanning.componentes.componente_mover import ComponenteMover
 from SatisPlanning.componentes.componente_animacion import ComponenteAnimacion
 from SatisPlanning.componentes.componente_inventario import ComponenteInventario
-import pygame
+#import pygame
 
 class PersonajeJugador(Personaje):
     def __init__(self, x, y, ancho, alto):

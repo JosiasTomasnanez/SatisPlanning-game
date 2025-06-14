@@ -1,8 +1,10 @@
 import pygame
-from SatisPlanning.entidades.objeto import Objeto
+from .objeto import Objeto
+from abc import abstractmethod
 from SatisPlanning.utilidades import obtener_ruta_asset
 from SatisPlanning.componentes.componente_mover import ComponenteMover
 from SatisPlanning.componentes.componente_animacion import ComponenteAnimacion
+
 class Personaje(Objeto):
     def __init__(self, x, y, ancho, alto, sprite, dinamico=True, tangible=True):
         super().__init__(x, y, ancho, alto, sprite, dinamico=dinamico, tangible=tangible)
@@ -36,11 +38,13 @@ class Personaje(Objeto):
 
         # Componente para manejar el movimiento
         self.componente_mover = ComponenteMover(self, self.componente_animacion)
-   
+    
+    @abstractmethod
     def set_mundo(self, mundo):
         self.mundo = mundo
         self.componente_mover.set_mundo(mundo)
-  
+    
+    @abstractmethod
     def actualizar(self, teclas):
         """
         Actualiza el estado del personaje, delegando el movimiento y la animación a los componentes.

@@ -1,6 +1,7 @@
 import pygame
+from abc import ABC, abstractmethod
 
-class Objeto:
+class Objeto(ABC):
     def __init__(self, x, y, ancho, alto, ruta_imagen, dinamico, tangible=True):
         """
         Inicializa un objeto con posición, hitbox, una imagen y un cuerpo físico en el mundo.
@@ -25,6 +26,7 @@ class Objeto:
         self.tangible = tangible  # Nuevo atributo tangible
         self.componentes = []  # Lista de componentes asociadas al objeto
 
+    
     def dibujar(self, pantalla):
         """
         Dibuja el objeto en la pantalla y su hitbox para depuración.
@@ -32,6 +34,7 @@ class Objeto:
         pantalla.blit(self.imagen, (self.x, self.y))
         pygame.draw.rect(pantalla, (255, 0, 0), self.hitbox, 2)  # Dibuja el hitbox (opcional para depuración)
 
+    
     def actualizar_posicion(self, x, y):
         """
         Actualiza la posición del objeto y centra su hitbox.
@@ -53,7 +56,8 @@ class Objeto:
         :param desplazamiento_y: Desplazamiento en el eje Y.
         """
         pantalla.blit(self.imagen, (desplazamiento_x, desplazamiento_y))
-        # pygame.draw.rect(pantalla, (255, 0, 0), self.hitbox.move(desplazamiento_x - self.x, desplazamiento_y - self.y), 2)  # Opcional para depuración
+        # Opcional para depuración
+        # pygame.draw.rect(pantalla, (255, 0, 0), self.hitbox.move(desplazamiento_x - self.x, desplazamiento_y - self.y), 2)  
 
     def agregar_componente(self, componente):
         """
@@ -71,7 +75,8 @@ class Objeto:
         """
        
         pass
-
+    
+    @abstractmethod
     def actualizar(self, dt):
         """
         Actualiza todos los componentes del objeto.
