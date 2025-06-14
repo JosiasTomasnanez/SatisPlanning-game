@@ -1,7 +1,7 @@
 import pygame
-from abc import ABC, abstractmethod
 
-class Objeto(ABC):
+
+class Objeto:
     def __init__(self, x, y, ancho, alto, ruta_imagen, dinamico, tangible=True):
         """
         Inicializa un objeto con posición, hitbox, una imagen y un cuerpo físico en el mundo.
@@ -76,7 +76,7 @@ class Objeto(ABC):
        
         pass
     
-    @abstractmethod
+
     def actualizar(self, dt):
         """
         Actualiza todos los componentes del objeto.
