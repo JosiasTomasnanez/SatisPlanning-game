@@ -2,6 +2,7 @@
 scale 1.5
 skinparam linetype ortho
 
+' --- Página 1: Relaciones principales y arquitectura ---
 ' Relaciones principales
 __main__ -right-> PresentadorJuego : crea
 PresentadorJuego -down-> Mundo : controla
@@ -64,7 +65,9 @@ class Proyectil {
     + dibujar(pantalla)
 }
 
-' Clases principales
+newpage
+
+' --- Página 2: Detalle de clases principales ---
 class __main__ {
     + main()
 }
@@ -189,7 +192,6 @@ class GestorDB {
     + cerrar()
 }
 
-' Extensiones y notas
 note right of ComponenteDisparo
   Puede ser usado por cualquier personaje
   para disparar proyectiles.
