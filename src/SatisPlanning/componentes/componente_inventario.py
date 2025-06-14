@@ -1,4 +1,4 @@
-from SatisPlanning.componentes.componente import Componente
+from .componente import Componente
 import pygame
 # Este componente actúa como interfaz entre el personaje (o quien use el inventario)
 # y el inventario en sí. Recibe eventos y modifica el estado del inventario según corresponda.

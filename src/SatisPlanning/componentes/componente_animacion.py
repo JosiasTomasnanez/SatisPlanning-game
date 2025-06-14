@@ -1,6 +1,7 @@
 import pygame
+from .componente import Componente
 
-class ComponenteAnimacion:
+class ComponenteAnimacion(Componente):
     def __init__(self, personaje, sprites):
         """
         Inicializa el componente de animación.
@@ -8,7 +9,7 @@ class ComponenteAnimacion:
         :param personaje: Instancia del personaje que usará este componente.
         :param sprites: Lista de sprites para la animación.
         """
-        self.personaje = personaje
+        super().__init__(personaje)
         self.sprites = sprites
         self.sprite_actual = 2  # Índice del sprite inicial
         self.contador_animacion = 0

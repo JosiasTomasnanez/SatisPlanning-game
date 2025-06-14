@@ -1,6 +1,6 @@
 import pygame
 import SatisPlanning.constantes as ct
-from SatisPlanning.componentes.componente import Componente
+from .componente import Componente
 
 class ComponenteMover(Componente):
     def __init__(self, personaje, componente_animacion):
