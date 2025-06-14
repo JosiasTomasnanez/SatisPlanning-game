@@ -1,73 +1,56 @@
 @startuml SatisPlanning
 scale 1.5
-skinparam linetype ortho
 
-' --- Página 1: Relaciones principales y arquitectura ---
 ' Relaciones principales
-__main__ -right-> PresentadorJuego : crea
-PresentadorJuego -down-> Mundo : controla
-PresentadorJuego -down-> VistaJuego : controla
-VistaJuego -right-> Camara
-VistaJuego -right-> Constantes
-VistaJuego ..> pygame
+__main__ --> PresentadorJuego
+PresentadorJuego --> Mundo
+PresentadorJuego --> VistaJuego
+VistaJuego --> Camara
+VistaJuego --> Constantes
+VistaJuego --> pygame
 
-Mundo -down-> Mapa
-Mundo -down-> ManjeadorChunks
-Mundo -down-> PersonajeJugador
-Mundo -down-> Objeto
-Mundo -right-> Constantes
+Mundo --> Mapa
+Mundo --> ManjeadorChunks
+Mundo --> PersonajeJugador
+Mundo --> Objeto
+Mundo --> Constantes
 
-ManjeadorChunks -down-> Mapa
-ManjeadorChunks -down-> Suelo
-ManjeadorChunks -right-> Constantes
+ManjeadorChunks --> Mapa
+ManjeadorChunks --> Suelo
+ManjeadorChunks --> Constantes
 
-Mapa -right-> Constantes
+Mapa --> Constantes
 Mapa ..> perlin_noise
 Mapa ..> random
 
-PersonajeJugador --|> Personaje
-Personaje --|> Objeto
-PersonajeJugador -down-> ComponenteMover
-PersonajeJugador -down-> ComponenteAnimacion
-PersonajeJugador -down-> ComponenteInventario
-PersonajeJugador -down-> Inventario
-PersonajeJugador -down-> ComponenteDisparo
+PersonajeJugador -|> Personaje
+Personaje --> Objeto
+PersonajeJugador --> ComponenteMover
+PersonajeJugador --> ComponenteAnimacion
+PersonajeJugador --> ComponenteInventario
+PersonajeJugador --> Inventario
 
-ComponenteMover --|> Componente
-ComponenteAnimacion --|> Componente
-ComponenteInventario --|> Componente
-ComponenteInventario -down-> Inventario
-ComponenteDisparo ..> obtener_posicion_mouse
+ComponenteMover --> Componente
+ComponenteAnimacion --> Componente
+ComponenteInventario --> Componente
+ComponenteInventario --> Inventario
 
-Inventario -down-> Objeto
-Inventario -right-> Constantes
+Inventario --> Objeto
+Inventario --> Constantes
 
-Suelo --|> Objeto
+Suelo -|> Objeto
 
-Objeto ..> pygame
+Objeto --> pygame
 
 GestorDB ..> sqlite3
 GestorDB ..> os
 
-Camara -right-> Constantes
+Camara --> Constantes
 
 Constantes ..> pygame
 Constantes ..> obtener_ruta_asset
 
-' Nuevas clases/componentes
-class ComponenteDisparo {
-    + disparar(mundo)
-}
-ComponenteDisparo -down-> Proyectil
-
-class Proyectil {
-    + actualizar(dt)
-    + dibujar(pantalla)
-}
-
-newpage
-
-' --- Página 2: Detalle de clases principales ---
+' Clases principales
 class __main__ {
     + main()
 }
@@ -187,19 +170,9 @@ class ComponenteInventario {
 }
 
 class GestorDB {
-    + insertar_jugador(...)
-    + insertar_inventario(...)
+    + agregar_jugador(nombre, experiencia, nivel)
+    + obtener_jugadores()
     + cerrar()
 }
-
-note right of ComponenteDisparo
-  Puede ser usado por cualquier personaje
-  para disparar proyectiles.
-end note
-
-note right of Proyectil
-  Ejemplo de objeto disparado.
-  Puede tener lógica de colisión, daño, etc.
-end note
 
 @enduml

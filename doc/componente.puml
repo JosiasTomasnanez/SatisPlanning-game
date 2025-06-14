@@ -3,6 +3,8 @@ skinparam componentStyle rectangle
 skinparam linetype ortho
 skinparam shadowing true
 skinparam arrowColor DarkSlateGray
+skinparam ArrowFontSize 14
+skinparam ArrowFontColor #222266
 
 package "Componentes de Personaje" {
     [ComponenteMover]
@@ -37,7 +39,7 @@ Main --> PresentadorJuego : inicia
 PresentadorJuego --> Mundo : controla lógica
 PresentadorJuego --> VistaJuego : ordena dibujar
 VistaJuego --> Camara : usa para desplazamiento
-VistaJuego --> Constantes : usa config
+VistaJuego --> Constantes : usa configuración
 VistaJuego ..> Pygame : renderiza
 VistaJuego --> Inventario : dibuja
 VistaJuego --> PersonajeJugador : dibuja
@@ -80,27 +82,5 @@ Pygame ..> Main
 Pygame ..> VistaJuego
 Pygame ..> Objeto
 Pygame ..> PersonajeJugador
-
-@enduml
-    CompAnimacion
-    CompInventario
-    CompDisparo
-}
-
-package "Entidades" {
-    PersonajeJugador
-    Objeto
-    Suelo
-    Proyectil
-}
-
-package "Infraestructura" {
-    Mundo
-    ManjeadorChunks
-    Mapa
-    GestorDB
-    Constantes
-    Camara
-}
 
 @enduml
