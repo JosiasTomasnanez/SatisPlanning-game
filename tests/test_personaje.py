@@ -6,11 +6,12 @@ class TestPersonaje(unittest.TestCase):
     @patch('SatisPlanning.entidades.objeto.pygame.image.load', return_value=MagicMock())
     @patch('SatisPlanning.entidades.objeto.pygame.transform.scale', return_value=MagicMock())
     @patch('SatisPlanning.entidades.personaje.pygame')
-    @patch('SatisPlanning.entidades.personaje.obtener_ruta_asset', return_value='fake_path')
-    def test_init(self, mock_ruta, mock_pygame, mock_scale, mock_load):
+    @patch('SatisPlanning.utilidades.obtener_ruta_asset')
+    def test_init(self, mock_obtener_ruta_asset, mock_pygame, mock_scale, mock_load):
         mock_pygame.image.load.return_value = MagicMock()
         mock_pygame.transform.scale.return_value = MagicMock()
-        personaje = Personaje(10, 20, 30, 40, 'fake_path')
+        # Pasa una lista de mocks como sprites
+        personaje = Personaje(10, 20, 30, 40, 'fake_path', sprites=[MagicMock(), MagicMock()])
         self.assertEqual(personaje.x, 10)
         self.assertEqual(personaje.y, 20)
         self.assertEqual(personaje.ancho, 30)

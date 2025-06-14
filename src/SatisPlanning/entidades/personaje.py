@@ -1,10 +1,10 @@
 import pygame
 from SatisPlanning.entidades.objeto import Objeto
-from SatisPlanning.utilidades import obtener_ruta_asset
 from SatisPlanning.componentes.componente_mover import ComponenteMover
 from SatisPlanning.componentes.componente_animacion import ComponenteAnimacion
+
 class Personaje(Objeto):
-    def __init__(self, x, y, ancho, alto, sprite, dinamico=True, tangible=True):
+    def __init__(self, x, y, ancho, alto, sprite, sprites, dinamico=True, tangible=True):
         super().__init__(x, y, ancho, alto, sprite, dinamico=dinamico, tangible=tangible)
         """
         Inicializa el personaje con posición, sprites y un inventario.
@@ -13,23 +13,10 @@ class Personaje(Objeto):
         :param y: Posición Y inicial.
         :param ancho: Ancho del personaje.
         :param alto: Altura del personaje.
+        :param sprite: Sprite principal.
+        :param sprites: Lista de sprites para animación.
         """
-        '''
-        Esto deberia inciarce en cada sublclase ya que es particular de cada personaje.
-
-        super().__init__(x, y, ancho, alto, obtener_ruta_asset("p3.png"), dinamico=True, tangible=True)
-        
-        Esto deberia iniciarce en cada subclase, ya que cada personaje tiene 
-        self.vel_x = self.vel_y = 0
-        self.en_el_suelo = False
-        self.direccion = 1  # 1 para derecha, -1 para izquierda
-        '''
-
-        # Cargar los sprites del personaje, TAL VEZ DEBERIA MODIFICARSE CUANDO SE AGREGUEN TEXTURAS DE ENEMI
-        self.sprites = [
-            pygame.image.load(obtener_ruta_asset(f"p{i}.png")) for i in range(1, 8)
-        ]
-        self.sprites = [pygame.transform.scale(sprite, (ancho, alto)) for sprite in self.sprites]
+        self.sprites = sprites
 
         # Componente para manejar la animación
         self.componente_animacion = ComponenteAnimacion(self, self.sprites)
