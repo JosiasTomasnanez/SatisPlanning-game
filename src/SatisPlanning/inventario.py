@@ -5,39 +5,198 @@ from .entidades.objeto import Objeto
 class Inventario:
     def __init__(self):
         # Tamaño deseado para las imágenes en el inventario y la barra rápida
+        self.posicion_inventario_actual= (1,1) 
+        self.item_seleccionado_barra=0
+        self.tamanio_filas=10
+        self.tamanio_col=6
         self.tamanio_icono = (30, 30)  # Cambiado de icon_size a tamanio_icono
-
-        # Inventario inicializado con bloques de tierra, piedra y pasto en la barra rápida
-        self.items = [
-            Objeto(0, 0, 30, 30, ct.TEXTURA_TIERRA, dinamico=False,tangible=True),  # Bloque de tierra
-            Objeto(0, 0, 30, 30, ct.TEXTURA_PIEDRA, dinamico=False, tangible=True),  # Bloque de piedra
-            
-            Objeto(0, 0, 30, 30, ct.TEXTURA_PASTO, dinamico=False,tangible=True)    # Bloque de pasto
-        ]
-        self.categoria_actual = "Bloques"
+        self.textura_vacia=""
         
-        self.item_seleccionado = 0  # Inicializar con el primer slot seleccionado
+        
+        # Inventario inicializado con bloques de tierra, piedra y pasto en la barra rápida
+        
+        self.matrix = [[[] for _ in range(self.tamanio_col)] for _ in range(self.tamanio_filas)] 
+        
+
+        self.matrix[0][0].append(Objeto(0, 0, 30, 30, ct.TEXTURA_TIERRA, dinamico=False,tangible=True))
+        self.matrix[0][0].append(Objeto(0, 0, 30, 30, ct.TEXTURA_TIERRA, dinamico=False,tangible=True))
+        self.matrix[0][0].append(Objeto(0, 0, 30, 30, ct.TEXTURA_TIERRA, dinamico=False,tangible=True))
+
+        self.matrix[0][1].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PIEDRA, dinamico=False, tangible=True))
+        self.matrix[0][1].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PIEDRA, dinamico=False, tangible=True))
+        self.matrix[0][1].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PIEDRA, dinamico=False, tangible=True))
+        
+        self.matrix[0][2].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PASTO, dinamico=False,tangible=True))
+        self.matrix[0][2].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PASTO, dinamico=False,tangible=True))
+        self.matrix[0][2].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PASTO, dinamico=False,tangible=True))
+
+        self.matrix[0][3].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PASTO, dinamico=False,tangible=True))
+
+        self.matrix[0][4].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PASTO, dinamico=False,tangible=True))
+
+        self.matrix[0][5].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PIEDRA, dinamico=False,tangible=True))
+
+        
+        #columnas
+        self.matrix[1][0].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PIEDRA, dinamico=False, tangible=True))
+        self.matrix[1][0].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PIEDRA, dinamico=False, tangible=True))
+        self.matrix[1][0].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PIEDRA, dinamico=False, tangible=True))
+        
+        self.matrix[2][0].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PASTO, dinamico=False,tangible=True))
+        self.matrix[2][0].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PASTO, dinamico=False,tangible=True))
+        self.matrix[2][0].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PASTO, dinamico=False,tangible=True))
+
+        self.matrix[3][0].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PASTO, dinamico=False,tangible=True))
+
+        self.matrix[4][0].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PASTO, dinamico=False,tangible=True))
+
+        self.matrix[5][0].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PASTO, dinamico=False,tangible=True))
+
+        self.matrix[6][0].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PASTO, dinamico=False,tangible=True))
+        
+        self.matrix[7][0].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PASTO, dinamico=False,tangible=True))
+
+        self.matrix[8][0].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PASTO, dinamico=False,tangible=True))
+
+        self.matrix[9][0].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PASTO, dinamico=False,tangible=True))
+
+        self.matrix[8][3].append(Objeto(0, 0, 30, 30, ct.TEXTURA_TIERRA, dinamico=False,tangible=True))
+        
+        
+        
+        self.barra_rapida =[] 
+        self.barra_rapida.append(self.matrix[0][0]) 
+        self.barra_rapida.append(self.matrix[0][1])
+        #self.categoria_actual = "Bloques"        
         self.visible = False
         self.posicion = (ct.ANCHO - 220, 50)
-        self.ancho = 200
+        
         self.alto_item = 40
         self.margen = 5
-        self.alto_categoria = 30
+        self.ancho = (self.tamanio_icono[0] + self.margen)*self.tamanio_col
+        self.altura_total =  (self.tamanio_icono[0] + self.margen)*self.tamanio_filas-4
 
-    def agregar_objeto(self, objeto):
-        """
-        Agrega un objeto al inventario.
-        :param objeto: Instancia de la clase Objeto.
-        """
-        self.items.append(objeto)
+    def  cantidad_items_posicion(self, x, y):
+        if self._posicion_ocupada_cuadricula(x,y):
+            return len(self.matrix[x][y])
+        
+        return   0
+    
+    def existeItemEnPosicion(self,x,y, objeto):
+        #devuelve verdadero si en la posición x,y hay una referencia al objeto pasado por parámetro
+        if not self._posicion_ocupada_cuadricula(x,y):
+            return False
+        if any(elem is objeto for elem in self.matrix[x][y]):
+            return True
+        return False
+    
+    def itemsMismoTipoEnPosicion(self,x,y, objeto):
+        #devuelve true si en la posición hay items del mismo tipo que el pasado por parametro
+        if not self._posicion_ocupada_cuadricula(x,y):
+            return False
+        return objeto.tipo_igual(self.matrix[x][y][0])
+    
+    def existeTipoItemInventario(self,objeto):
+        #devuelve true si en el inventario existen items del mismo tipo que el pasado por parámetro
+        encontrado = False
+        i = 0
+        while not encontrado and i < self.tamanio_filas:
+            j = 0
+            while not encontrado and j < self.tamanio_col:
+                for obj in self.matrix[i][j]:
+                    if obj.tipo_igual(objeto):  # obj es buscado para comparar referencia
+                        encontrado = True
+                        break
+                j += 1
+            i += 1
+        return encontrado 
+    
+    def agregar_item(self,objeto):
+        encontrado=False
+        pos_i = pos_j = -1
+        i=0
+        while not encontrado and i < self.tamanio_filas:
+            j = 0
+            while not encontrado and j < self.tamanio_col:
+                for obj in self.matrix[i][j]:
+                    if obj.tipo_igual(objeto):
+                        encontrado = True
+                        pos_i, pos_j = i, j
+                        break
+                j += 1
+            i += 1
 
+        if encontrado:
+            if objeto in self.matrix[pos_i][pos_j]:
+                print(" item ya existe en el inventario")
+                return False
+            else:
+                self.matrix[pos_i][pos_j].append(objeto)
+                return True
+    
+    def posicion_ocupada_cuadricula(self,x,y):
+        if not self.pos_inventario_valida(x,y):
+            return False
+        return len(self.matrix[x][y])
+    
+    def agregar_en_posicion(self,x,y,objeto):
+        #agrega solo si la posición está libre o es del mismo tipo que objeto
+        if  not self.pos_inventario_valida(x,y):
+            return False
+        if self.itemsMismoTipoEnPosicion(x,y,objeto):
+            if not self.existeItemEnPosicion(x,y,objeto):
+                #agregar en esa posicion si en esa posición no existe ese mismo objeto
+                self.matrix[x][y].append(objeto)
+                return True
+            else:
+                #el item ya existe
+                return False
+        else:
+            if self.cantidad_items_posicion(x,y)==0:
+                self.matrix[x][y].append(objeto)
+                return True
+            else:
+                return False
+
+
+    def pos_inventario_valida(self,x,y):
+        return x<self.tamanio_filas and x>=0 and y>=0 and y<self.tamanio_col
+
+    def establecer_posicion_inventario_actual(self,x,y):
+        if self.pos_inventario_valida(x,y):
+            self.posicion_inventario_actual=(x,y)
+            return True
+        else:
+            print('no se puede establecer la posicion solicitada en el inventario')
+            return False
+        
+    def obtener_posicion_inventario_actual(self):
+        return self.posicion_inventario_actual
+    
     def obtener_item_actual(self):
         """
         Devuelve el objeto actualmente seleccionado.
         """
-        if self.item_seleccionado is not None and self.item_seleccionado < len(self.items):
-            return self.items[self.item_seleccionado]
+        x= self.posicion_inventario_actual[0]
+        y= self.posicion_inventario_actual[1]
+        if len(self.matrix[x][y])>0:
+            return self.matrix[x][y][0]
         return None
+    
+    def soltar_item_seleccionado_matrix(self):
+        x= self.posicion_inventario_actual[0]
+        y= self.posicion_inventario_actual[1]
+        if len(self.matrix[x][y])>0:
+            return self.matrix[x][y].pop()
+        return None
+    
+    def sacar_grupo_items_matrix(self,x,y):
+        if self.pos_inventario_valida(x,y):
+            #no uso el método clear() porque 
+            self.matrix[x][y]=[]   
+
+    def obtener_grupo_items_matrix(self,x,y):
+        return self.matrix[x][y]
 
     def seleccionar_barra_rapida(self, indice):
         """
@@ -45,50 +204,26 @@ class Inventario:
         :param indice: Índice del elemento en la barra rápida (0-8).
         """
         if 0 <= indice < 9:  # Asegurarse de que el índice esté dentro del rango de la barra rápida
-            self.item_seleccionado = indice
+            self.item_seleccionado_barra = indice
+        else:
+            print("error. indice barra rapida no valido")
 
-  
-    def manejar_evento(self, evento):
-        """
-        Maneja eventos relacionados con el inventario.
-        """
-        if evento.type == pygame.KEYDOWN and evento.key == pygame.K_e:
-            self.visible = not self.visible
-            return None  # No se devuelve ningún elemento
-
-        if evento.type == pygame.KEYDOWN and evento.key == pygame.K_g:
-            return self.soltar_item_seleccionado()  # Devolver el elemento soltado
-
-        if not self.visible or evento.type != pygame.MOUSEBUTTONDOWN or evento.button != 1:
-            return None  # No se devuelve ningún elemento
-
-        mouse_x, mouse_y = evento.pos
-        
-        # Verificar clic en items
-        y_pos = self.posicion[1] + self.alto_categoria + 10
-        for index, item in enumerate(self.items):
-            rect = pygame.Rect(
-                self.posicion[0],
-                y_pos,
-                self.ancho,
-                self.alto_item
-            )
-            if rect.collidepoint(mouse_x, mouse_y):
-                self.item_seleccionado = index
-                return None  # No se devuelve ningún elemento
-            y_pos += self.alto_item + self.margen
-
-    def soltar_item_seleccionado(self):
+    def soltar_item_seleccionado_barra(self):
         """
         Elimina el elemento actualmente seleccionado de la barra rápida y lo devuelve.
         :return: El objeto eliminado o None si no hay un objeto seleccionado.
         """
-        if self.item_seleccionado is not None and self.item_seleccionado < len(self.items):
-            elemento_soltado = self.items.pop(self.item_seleccionado)  # Eliminar y guardar el elemento seleccionado
-            # Ajustar el índice seleccionado si es necesario
-            if self.item_seleccionado >= len(self.items):
-                self.item_seleccionado = max(0, len(self.items) - 1)
+        if self.item_seleccionado_barra>=0 and self.item_seleccionado_barra < len(self.barra_rapida):
+            elemento_soltado = (self.barra_rapida[self.item_seleccionado_barra]).pop()  # Eliminar y guardar el elemento seleccionado
             return elemento_soltado  # Devolver el elemento eliminado
         return None  # No hay elemento para soltar
+    
+    def obtener_grupo_items_barra(self,indice):
+        return self.barra_rapida[indice]
+    
+    def limpiar_pos_barra(self, indice):
+        if 0 <= indice < 9:  # Asegurarse de que el índice esté dentro del rango de la barra rápida
+            self.barra_rapida[self.item_seleccionado_barra]=[] 
+        else:
+            print("error limpiar. indice barra rapida no valido")
 
-#esta hecho a modo de pueba , pero en un futuro hay que definir como deseamos que sea nuestro inventario , hay que diseñar, y tener otra clase aparte que se relacione a esta para craftear, y agregar funciones para ordenar inventario a nuestro antojo y que la barra rapida no funcione como una pila, tambien poder generar stacks de elementos , los cuales el tamaño del stack es algo definido por el objeto en si y no por el inventario

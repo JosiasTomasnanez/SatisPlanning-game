@@ -86,34 +86,47 @@ class VistaJuego:
         # Dibuja el inventario completo si está visible
         if not getattr(inventario, "visible", False):
             return
-        altura_total = len(inventario.items) * (inventario.alto_item + inventario.margen) + inventario.alto_categoria + 20
-        fondo = pygame.Surface((inventario.ancho, altura_total))
+        fondo = pygame.Surface((inventario.ancho, inventario.altura_total))
         fondo.set_alpha(220)
         fondo.fill((60, 60, 70))
-        self.pantalla.blit(fondo, inventario.posicion)
-        self._dibujar_categorias(inventario, fuente)
-        y_pos = inventario.posicion[1] + inventario.alto_categoria + 10
-        for index, item in enumerate(inventario.items):
-            self._dibujar_item(inventario, fuente, item, y_pos, index)
-            y_pos += inventario.alto_item + inventario.margen
+        filas = inventario.tamanio_filas
+        columnas = inventario.tamanio_col
+        tamanio_icono = inventario.tamanio_icono
+        margen = 4
+        # Fondo del inventario
+        fondo = pygame.Surface((inventario.ancho, inventario.altura_total))
+        fondo.set_alpha(200)
+        fondo.fill((40, 40, 50))
+        posicion_fondo=(inventario.posicion[0]-inventario.margen,inventario.posicion[1]-inventario.margen)
+        self.pantalla.blit(fondo, posicion_fondo)
+        for i in range(filas):
+            for j in range(columnas):
+                grupo = inventario.matrix[i][j]
+                if grupo:  # si hay al menos un item en esa celda
+                    item = grupo[0]
+                    pos_x = inventario.posicion[0] + j * (tamanio_icono[0] + margen)
+                    pos_y = inventario.posicion[1] + i * (tamanio_icono[1] + margen)
+                    self._dibujar_icono_item(item, pos_x, pos_y, inventario)
+                if (i,j)==inventario.posicion_inventario_actual:
+                    ancho=inventario.tamanio_icono[0]+4
+                    alto=inventario.tamanio_icono[1]+4
+                    pygame.draw.rect(self.pantalla, (255, 255, 0), (pos_x - 2, pos_y - 2, ancho, alto), 3)
+                    
 
-    def _dibujar_categorias(self, inventario, fuente):
-        x_pos = inventario.posicion[0]
-        ancho_cat = inventario.ancho // len(ct.CATEGORIAS)
-        for i, categoria in enumerate(ct.CATEGORIAS):
-            color = (100, 100, 200) if categoria == inventario.categoria_actual else (70, 70, 80)
-            pygame.draw.rect(self.pantalla, color, (x_pos + i * ancho_cat, inventario.posicion[1], ancho_cat, inventario.alto_categoria))
-            texto = fuente.render(categoria, True, (255, 255, 255))
-            texto_rect = texto.get_rect(center=(x_pos + i * ancho_cat + ancho_cat // 2, inventario.posicion[1] + inventario.alto_categoria // 2))
-            self.pantalla.blit(texto, texto_rect)
+    def _dibujar_icono_item(self, item, x, y, inventario):
+        imagen_redimensionada = pygame.transform.scale(item.imagen, inventario.tamanio_icono)
+        self.pantalla.blit(imagen_redimensionada, (x, y))
+         
 
     def _dibujar_item(self, inventario, fuente, item, y_pos, index):
-        seleccionado = (inventario.item_seleccionado == index)
+        seleccionado = (inventario.item_seleccionado_barra == index)
         if seleccionado:
             pygame.draw.rect(self.pantalla, (100, 100, 200), (inventario.posicion[0], y_pos, inventario.ancho, inventario.alto_item))
         self.pantalla.blit(item.imagen, (inventario.posicion[0] + 5, y_pos + 5))
         texto = fuente.render(item.__class__.__name__, True, (255, 255, 255))
-        self.pantalla.blit(texto, (inventario.posicion[0] + 40, y_pos + 10))
+        self.pantalla.blit(texto, (inventario.posicion[0] + 40, y_pos + 10))        
+
+    
 
     def _dibujar_barra_rapida(self, inventario, fuente):
         num_slots = 9
@@ -124,10 +137,10 @@ class VistaJuego:
             x = barra_x + i * 55
             y = barra_y
             pygame.draw.rect(self.pantalla, (60, 60, 70), (x, y, 50, 50))
-            if inventario.item_seleccionado == i:
+            if inventario.item_seleccionado_barra == i:
                 pygame.draw.rect(self.pantalla, (255, 255, 0), (x - 2, y - 2, 54, 54), 3)
-            if i < len(inventario.items):
-                item = inventario.items[i]
+            if i>=0 and i < len(inventario.barra_rapida):
+                item = inventario.barra_rapida[i][0]
                 self.pantalla.blit(item.imagen, (x + 10, y + 10))
                 
     def dibujar_vida_jugador(self, personaje):
