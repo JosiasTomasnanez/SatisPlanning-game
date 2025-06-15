@@ -40,12 +40,12 @@ class VistaJuego:
             pj_centro_x = (self.camara.ancho_pantalla // 2)
             pj_centro_y = (self.camara.alto_pantalla // 2)
             dist = ((enemigo_x - pj_centro_x) ** 2 + (enemigo_y - pj_centro_y) ** 2) ** 0.5
-            if dist < 100:  # Si está muy cerca, lo desplazamos más lejos
-                # Desplazar enemigo a la derecha o izquierda según su posición relativa
-                if enemigo_x < pj_centro_x:
-                    enemigo_x = pj_centro_x - 120
-                else:
-                    enemigo_x = pj_centro_x + 120
+            # if dist < 100:  # Si está muy cerca, lo desplazamos más lejos
+            #     # Desplazar enemigo a la derecha o izquierda según su posición relativa
+            #     if enemigo_x < pj_centro_x:
+            #         enemigo_x = pj_centro_x - 120
+            #     else:
+            #         enemigo_x = pj_centro_x + 120
             self.pantalla.blit(enemigo.componente_animacion.imagen_actual, (enemigo_x, enemigo_y))
 
     def dibujar_inventario(self, inventario):
