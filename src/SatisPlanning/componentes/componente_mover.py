@@ -68,7 +68,4 @@ class ComponenteMover(Componente):
         """
         self.mover(teclas)
 
-# hacer que este componente pueda ser modificado por algun metodo
-#de notificacion para que pueda cambiar su comportamiento
-#por ejemplo , manejo de gravedad,salto,etc
-#tambien otro de colision por si un arma pega
+

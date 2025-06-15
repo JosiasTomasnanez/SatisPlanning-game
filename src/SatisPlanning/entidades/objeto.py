@@ -1,6 +1,5 @@
 import pygame
 
-
 class Objeto:
     def __init__(self, x, y, ancho, alto, ruta_imagen, dinamico, tangible=True):
         """
@@ -19,22 +18,22 @@ class Objeto:
         self.direccion = 1
         self.ancho = ancho
         self.alto = alto
+        # La hitbox se ajusta con un desplazamiento respecto a la posición del objeto
         self.hitbox = pygame.Rect(x + 17, y + 20, ancho - 4, alto)
         self.imagen = pygame.image.load(ruta_imagen)
         self.imagen = pygame.transform.scale(self.imagen, (ancho, alto))  # Ajustar tamaño de la imagen
         self.dinamico = dinamico
-        self.tangible = tangible  # Nuevo atributo tangible
+        self.tangible = tangible  # Indica si el objeto es tangible
         self.componentes = []  # Lista de componentes asociadas al objeto
 
-    
     def dibujar(self, pantalla):
         """
         Dibuja el objeto en la pantalla y su hitbox para depuración.
         """
         pantalla.blit(self.imagen, (self.x, self.y))
-        pygame.draw.rect(pantalla, (255, 0, 0), self.hitbox, 2)  # Dibuja el hitbox (opcional para depuración)
+        # Dibuja el hitbox en rojo (opcional para depuración)
+        pygame.draw.rect(pantalla, (255, 0, 0), self.hitbox, 2)
 
-    
     def actualizar_posicion(self, x, y):
         """
         Actualiza la posición del objeto y centra su hitbox.
@@ -56,8 +55,8 @@ class Objeto:
         :param desplazamiento_y: Desplazamiento en el eje Y.
         """
         pantalla.blit(self.imagen, (desplazamiento_x, desplazamiento_y))
-        # Opcional para depuración
-        # pygame.draw.rect(pantalla, (255, 0, 0), self.hitbox.move(desplazamiento_x - self.x, desplazamiento_y - self.y), 2)  
+        # Para depuración, se puede dibujar la hitbox desplazada
+        # pygame.draw.rect(pantalla, (255, 0, 0), self.hitbox.move(desplazamiento_x - self.x, desplazamiento_y - self.y), 2)
 
     def agregar_componente(self, componente):
         """
@@ -73,9 +72,7 @@ class Objeto:
 
         :param objeto: Objeto con el que colisiona.
         """
-       
         pass
-    
 
     def actualizar(self, dt):
         """
@@ -86,4 +83,4 @@ class Objeto:
         for componente in self.componentes:
             componente.actualizar(dt)
 
-#yo creo que esta bien no se me ocurre algo que sea bien general que pueda agregarse aca
+

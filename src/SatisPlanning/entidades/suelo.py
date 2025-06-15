@@ -1,4 +1,4 @@
-from SatisPlanning.entidades.objeto import Objeto
+from .objeto import Objeto
 
 class Suelo(Objeto):
     def __init__(self, x, y, ancho, alto, ruta_imagen):
@@ -14,5 +14,5 @@ class Suelo(Objeto):
         super().__init__(x, y, ancho, alto, ruta_imagen, dinamico=False, tangible=True)
         # Configuramos todos los fixtures como sensores
 
-# en principio esta bien esta clase, bien general, pero los que hereden de esta clase pueden implementar cosas como buff ante ciertos materiales de suelos al perosnaje, o como en terraria, que la piedra infernal queme al personaje, pero esas son extenciones hacia las subclases
+
 
