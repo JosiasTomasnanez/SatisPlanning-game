@@ -4,14 +4,15 @@ from SatisPlanning.mapa import Mapa
 from SatisPlanning.manejador_chunks import ManjeadorChunks
 
 class Mundo:
-    def __init__(self):
-        self.mapa = Mapa()  # Instancia de la clase Mapa
-        self.personaje = PersonajeJugador(100, 100, 40, 40)  # Personaje principal
+    def __init__(self, personaje, mapa, manejador_chunks):
+        self.mapa = mapa  # Instancia de la clase Mapa
+        self.personaje = personaje  # Personaje principal
         self.personaje.set_mundo(self)
-        self.manejador_chunks = ManjeadorChunks(self.mapa)  # Instancia del manejador de chunks
+        self.manejador_chunks = manejador_chunks  # Instancia del manejador de chunks
 
         # Cargar los chunks iniciales
         self.manejador_chunks.cargar_chunks_iniciales(self.personaje)
+
     def obtener_personaje(self):
         """
         Devuelve el personaje principal.

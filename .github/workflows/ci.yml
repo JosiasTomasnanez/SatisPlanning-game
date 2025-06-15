@@ -24,6 +24,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install pygame
         pip install perlin-noise
+        pip install pytest
 
     - name: 🚀 Run game module (test)
       run: |
@@ -31,6 +32,11 @@ jobs:
         sleep 20
         kill $!
       working-directory: ./src
+
+    - name: 🧪 Run pytest
+      run: |
+        PYTHONPATH=src pytest
+      working-directory: .
 
   clear-cache:
     needs: build  # se ejecuta después del build
