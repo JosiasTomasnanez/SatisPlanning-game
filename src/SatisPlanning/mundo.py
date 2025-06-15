@@ -2,7 +2,7 @@ import pygame
 from SatisPlanning.entidades.personaje_jugador import PersonajeJugador
 from SatisPlanning.mapa import Mapa
 from SatisPlanning.manejador_chunks import ManjeadorChunks
-from SatisPlanning.entidades.personaje_enemigo import PersonajeEnemigo
+from SatisPlanning.entidades.Zombie_enemy import Zombie
 
 class Mundo:
     def __init__(self):
@@ -15,7 +15,7 @@ class Mundo:
         self.manejador_chunks.cargar_chunks_iniciales(self.personaje)
         
         # Enemigos
-        self.enemigos = [PersonajeEnemigo(300, 100, 40, 40)]  # Puedes agregar más enemigos aquí
+        self.enemigos = [Zombie(300, 100, 40, 40)]  # Puedes agregar más enemigos aquí
         for enemigo in self.enemigos:
             enemigo.set_mundo(self)
 
@@ -48,13 +48,21 @@ class Mundo:
     def colisiona(self, hitbox, obj):
         """
         Verifica si la hitbox colisiona con algún objeto.
+        Permite que jugador y enemigo se superpongan, pero bloquea con el entorno.
         """
         for chunk_x in self.manejador_chunks.obtener_chunks_visibles():
             for objeto in self.manejador_chunks.obtener_objetos_por_chunk(chunk_x):
-                if objeto.hitbox.colliderect(hitbox) and objeto.tangible==True:
-                    obj.notificar_colision(objeto)
-                    objeto.notificar_colision(obj)
-                    return True
+                if objeto.hitbox.colliderect(hitbox) and objeto.tangible:
+                    # Permitir superposición entre jugador y enemigo
+                    if (getattr(obj, 'es_jugador', False) and getattr(objeto, 'es_enemigo', False)) or \
+                       (getattr(obj, 'es_enemigo', False) and getattr(objeto, 'es_jugador', False)):
+                        obj.notificar_colision(objeto)
+                        objeto.notificar_colision(obj)
+                        # No retorna True, así no bloquea el movimiento
+                    else:
+                        obj.notificar_colision(objeto)
+                        objeto.notificar_colision(obj)
+                        return True
         return False
 
     def agregar_objeto(self, objeto,tangible):
@@ -79,3 +87,13 @@ class Mundo:
         for chunk_x in self.manejador_chunks.obtener_chunks_visibles():
             objetos.extend(self.manejador_chunks.obtener_objetos_por_chunk(chunk_x))
         return objetos, self.personaje, self.enemigos
+
+    def chequear_colisiones_jugador_enemigos(self):
+        """
+        Verifica colisiones entre el personaje jugador y todos los enemigos.
+        Llama a notificar_colision en ambos si ocurre una colisión.
+        """
+        for enemigo in self.enemigos:
+            if self.personaje.hitbox.colliderect(enemigo.hitbox):
+                self.personaje.notificar_colision(enemigo)
+                enemigo.notificar_colision(self.personaje)
