@@ -1,10 +1,11 @@
-from .personaje import Personaje  
+from SatisPlanning.entidades.personaje import Personaje  
 from SatisPlanning.inventario import Inventario
 from SatisPlanning.utilidades import obtener_ruta_asset
 from SatisPlanning.componentes.componente_mover import ComponenteMover
 from SatisPlanning.componentes.componente_animacion import ComponenteAnimacion
 from SatisPlanning.componentes.componente_inventario import ComponenteInventario
-#import pygame
+import pygame
+import SatisPlanning.constantes as ct
 
 class PersonajeJugador(Personaje):
     def __init__(self, x, y, ancho, alto):
@@ -16,7 +17,7 @@ class PersonajeJugador(Personaje):
         :param ancho: Ancho del personaje.
         :param alto: Altura del personaje.
         """
-        super().__init__(x, y, ancho, alto, obtener_ruta_asset("p3.png"), dinamico=True, tangible=True)
+        super().__init__(x, y, ancho, alto, ct.SPRITE_JUGADOR, sprites=ct.SPRITES_JUGADOR, dinamico=True, tangible=True)
         
         # Posicion inicial
         self.vel_x = self.vel_y = 0
