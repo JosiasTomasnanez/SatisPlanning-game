@@ -1,0 +1,46 @@
+@startuml Secuencia_Menu_Juego
+!pragma teoz true
+
+actor Usuario as usuario #LightBlue
+participant Main
+participant GestorPresentadores
+participant PresentadorMenu
+participant VistaMenu
+participant PresentadorJuego
+participant VistaJuego
+
+== Inicio del juego ==
+usuario -> Main : main()
+activate Main
+
+Main -> GestorPresentadores : crear_todo()
+GestorPresentadores -> PresentadorMenu : crear()
+GestorPresentadores -> VistaMenu : crear()
+GestorPresentadores -> PresentadorJuego : crear()
+GestorPresentadores -> VistaJuego : crear()
+deactivate GestorPresentadores
+
+Main -> VistaMenu : mostrar()
+activate VistaMenu
+VistaMenu -> usuario : muestra opciones
+deactivate VistaMenu
+
+loop "Navegación de menú"
+    usuario -> VistaMenu : input (teclas/click)
+    VistaMenu -> PresentadorMenu : manejar_eventos()
+    PresentadorMenu -> VistaMenu : actualizar()
+    alt Selecciona "Jugar"
+        PresentadorMenu -> Main : comando="jugar"
+        Main -> GestorPresentadores : cambiar_a_juego()
+        break
+    else Selecciona "Salir"
+        PresentadorMenu -> Main : comando="salir"
+        deactivate Main
+        break
+    end
+end
+
+Main -> VistaJuego : mostrar()
+deactivate Main
+
+@enduml

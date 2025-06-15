@@ -1,0 +1,42 @@
+@startuml Secuencia_Bucle_Juego
+!pragma teoz true
+
+actor Usuario as usuario #LightBlue
+participant Main
+participant PresentadorJuego
+participant VistaJuego
+participant Mundo
+participant ManjeadorChunks
+participant PersonajeJugador
+participant Inventario
+participant Camara
+participant Mapa
+participant Pygame
+
+== Bucle principal ==
+loop "Hasta cerrar juego"
+    Main -> VistaJuego : obtener_eventos()
+    VistaJuego -> Pygame : event.get()
+    VistaJuego <-- Pygame : eventos
+    Main -> PresentadorJuego : actualizar(dt, eventos)
+    PresentadorJuego -> Mundo : actualizar(dt, eventos)
+    Mundo -> PersonajeJugador : manejar_evento(evento)
+    PersonajeJugador -> Inventario : actualizar(evento)
+    Mundo -> Pygame : key.get_pressed()
+    Mundo <-- Pygame : teclas
+    Mundo -> PersonajeJugador : actualizar(teclas)
+    PersonajeJugador -> ... : componentes (mover, animación, inventario)
+    Mundo -> ManjeadorChunks : actualizar_chunks_visibles(personaje)
+    Mundo -> ManjeadorChunks : procesar_submatriz()
+    ManjeadorChunks -> Mapa : obtener_chunk(chunk_x)
+    Mundo -> Camara : actualizar(personaje.x, personaje.y)
+    PresentadorJuego -> VistaJuego : dibujar(objetos, personaje)
+    VistaJuego -> Camara : actualizar(personaje.x, personaje.y)
+    VistaJuego -> VistaJuego : dibujar_objetos_mapa(objetos)
+    VistaJuego -> VistaJuego : dibujar_personaje_centrado(personaje)
+    VistaJuego -> VistaJuego : dibujar_inventario(inventario)
+    VistaJuego -> Pygame : display.flip()
+end
+
+note right: El ciclo termina cuando el usuario cierra la ventana o se detecta un evento de salida.
+@enduml
