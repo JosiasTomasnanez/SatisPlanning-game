@@ -39,37 +39,32 @@ class ComponenteInventario(Componente):
         if teclas.type == pygame.MOUSEBUTTONDOWN and self.inventario.visible:
 
             mouse_x, mouse_y = teclas.pos
-            rect_cat = rect = pygame.Rect(
+            rect_matrix = rect = pygame.Rect(
                 self.inventario.posicion[0],
                 self.inventario.posicion[1],
                 self.inventario.ancho,
-                self.inventario.alto_categoria
+                self.inventario.altura_total
             )
-            if rect_cat.collidepoint(mouse_x, mouse_y):
-                self.click_categoria(mouse_x)
-            else:
+            if rect_matrix.collidepoint(mouse_x, mouse_y):
+                self.click_item_matrix(mouse_x,mouse_y)
+            #else:
+                #debería revisar si hace click en la barra rapida
                 
-                rect_items = rect = pygame.Rect(
-                    self.inventario.posicion[0],
-                    self.inventario.posicion[1] + self.inventario.alto_categoria + 10,
-                    self.inventario.ancho,
-                    (self.inventario.alto_item)*len(self.inventario.items)
-                )
-                if rect_items.collidepoint(mouse_x, mouse_y):
-                    self.click_item(mouse_y)
-            
-
         
         
-         
+
+    def click_item_matrix(self, mouse_x, mouse_y):
+        ancho_celda = self.inventario.ancho / self.inventario.tamanio_col
+        alto_celda = self.inventario.altura_total / self.inventario.tamanio_filas
+
+        columna = int((mouse_x - self.inventario.posicion[0]) / ancho_celda)
+        fila = int((mouse_y - self.inventario.posicion[1]) / alto_celda)
+
+        # Validamos que esté dentro del rango del inventario
+        dentro_rango=0 <= fila < self.inventario.tamanio_filas and 0 <= columna < self.inventario.tamanio_col
         
-
-    def click_categoria(self, mouse_x):
-        if mouse_x >self.inventario.posicion[0] and mouse_x < self.inventario.ancho +self.inventario.posicion[0]:
-            x_item=math.floor(((mouse_x-self.inventario.posicion[0])*len(ct.CATEGORIAS))/self.inventario.ancho)
-            self.inventario.categoria_actual=ct.CATEGORIAS[x_item]
-
-
+        if dentro_rango and self.inventario.posicion_ocupada_cuadricula(fila,columna) :
+            self.inventario.posicion_inventario_actual = (fila, columna)
 
     def click_item(self, mouse_y):
         inicio = self.inventario.posicion[1]+ self.inventario.alto_categoria + 10 

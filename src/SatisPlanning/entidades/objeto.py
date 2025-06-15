@@ -19,11 +19,19 @@ class Objeto:
         self.ancho = ancho
         self.alto = alto
         self.hitbox = pygame.Rect(x + 17, y + 20, ancho - 4, alto)
+        self.ruta_imagen=ruta_imagen
         self.imagen = pygame.image.load(ruta_imagen)
         self.imagen = pygame.transform.scale(self.imagen, (ancho, alto))  # Ajustar tamaño de la imagen
         self.dinamico = dinamico
         self.tangible = tangible  # Nuevo atributo tangible
         self.componentes = []  # Lista de componentes asociadas al objeto
+        
+    def obtener_ruta_imagen(self):
+        return self.ruta_imagen
+    def tipo_igual(self, objeto):
+        if isinstance(objeto, Objeto):
+            return objeto.obtener_ruta_imagen() == self.ruta_imagen
+        return False
 
     def dibujar(self, pantalla):
         """
