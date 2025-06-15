@@ -1,0 +1,76 @@
+@startuml SatisPlanning_Menu
+scale 1.5
+
+package "Menú y Presentadores" {
+    class __main__ {
+        + main()
+    }
+
+    class FabricaJuego {
+        + crear_todo(pantalla)
+    }
+
+    class GestorPresentadores {
+        + cambiar_a_menu()
+        + cambiar_a_juego()
+        + obtener_presentador_actual()
+        + obtener_vista_actual()
+    }
+
+    class PresentadorMenu {
+        + manejar_eventos(eventos)
+        + actualizar(dt, eventos)
+        + mostrar_creditos()
+        + mostrar_controles()
+        + reiniciar()
+    }
+
+    class VistaMenu {
+        + dibujar()
+        + obtener_eventos()
+        + obtener_opcion_en_posicion(x, y)
+        + mostrar_creditos(texto_creditos)
+    }
+
+    class Menu {
+        + mover_arriba()
+        + mover_abajo()
+        + seleccionar()
+        + seleccionar_por_indice(indice)
+        + reiniciar()
+        + obtener_texto_creditos()
+        + obtener_texto_controles()
+    }
+
+    class PresentadorJuego {
+        + manejar_eventos(eventos)
+        + actualizar(dt, eventos)
+    }
+
+    class GestorDB {
+        + insertar_inventario(...)
+        + insertar_jugador(...)
+        + insertar_objeto_inventario(...)
+        + insertar_equipable(...)
+        + insertar_mundo(...)
+        + insertar_objeto_mundo(...)
+        + insertar_bloque(...)
+        + cerrar()
+    }
+
+    __main__ --> FabricaJuego
+    FabricaJuego --> GestorPresentadores
+    GestorPresentadores --> PresentadorMenu
+    GestorPresentadores --> VistaMenu
+    GestorPresentadores --> PresentadorJuego
+    GestorPresentadores --> VistaJuego
+    PresentadorMenu --> Menu
+    PresentadorMenu --> VistaMenu
+    PresentadorJuego --> VistaJuego
+    PresentadorJuego --> Mundo
+    GestorDB ..> sqlite3
+    GestorDB ..> os
+}
+
+hide empty members
+@enduml

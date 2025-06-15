@@ -1,0 +1,156 @@
+@startuml SatisPlanning_Nucleo
+scale 1.5
+
+package "Núcleo del Juego" {
+    class Mundo {
+        + obtener_personaje()
+        + actualizar(dt, eventos)
+        + colisiona(hitbox, obj)
+        + agregar_objeto(objeto, tangible)
+        + obtener_objetos_a_dibujar()
+    }
+
+    class ManjeadorChunks {
+        + cargar_chunks_iniciales(personaje)
+        + iniciar_carga_progresiva(chunk_index, chunk_x)
+        + procesar_submatriz()
+        + actualizar_chunks_visibles(personaje)
+        + obtener_chunks_visibles()
+        + obtener_objetos_por_chunk(chunk_x)
+        + agregar_objeto(objeto)
+    }
+
+    class Mapa {
+        + obtener_chunk(chunk_x)
+        - _generar_chunk(chunk_x)
+    }
+
+    class Personaje {
+        + set_mundo(mundo)
+        + actualizar(teclas)
+    }
+
+    class PersonajeJugador {
+        + obtener_inventario()
+        + set_mundo(mundo)
+        + actualizar(teclas)
+        + manejar_evento(evento)
+    }
+
+    class Inventario {
+        + agregar_objeto(objeto)
+        + obtener_item_actual()
+        + seleccionar_barra_rapida(indice)
+        + manejar_evento(evento)
+        + soltar_item_seleccionado()
+    }
+
+    class Objeto {
+        + dibujar(pantalla)
+        + actualizar_posicion(x, y)
+        + dibujar_con_desplazamiento(pantalla, dx, dy)
+        + agregar_componente(componente)
+        + notificar_colision(objeto)
+        + actualizar(dt)
+    }
+
+    class Suelo {
+        <<inherits>> Objeto
+    }
+
+    class Componente {
+        + actualizar(dt)
+    }
+
+    class ComponenteMover {
+        + set_mundo(mundo)
+        + mover(teclas)
+        + actualizar(teclas)
+    }
+
+    class ComponenteAnimacion {
+        + notificar_movimiento()
+        + actualizar()
+    }
+
+    class ComponenteInventario {
+        + set_mundo(mundo)
+        + actualizar(teclas)
+    }
+
+    class ComponenteDisparo {
+        + disparar(mundo)
+        + actualizar()
+    }
+
+    class Camara {
+        + actualizar(objetivo_x, objetivo_y)
+        + aplicar(x, y)
+    }
+
+    class VistaJuego {
+        + dibujar(objetos, personaje)
+        + dibujar_objetos_mapa(objetos)
+        + dibujar_personaje_centrado(personaje)
+        + dibujar_inventario(inventario)
+    }
+
+    class Constantes <<constantes>> {
+        + ANCHO : int
+        + ALTO : int
+        + TAMANIO_BLOQUE : int
+        + FPS : int
+        + FILAS : int
+        + COLUMNAS : int
+        + COLOR_FONDO : tuple
+        + FUENTE
+        + GRAVEDAD : float
+        + FUERZA_SALTO : int
+        + VELOCIDAD_PERSONAJE : int
+        + COLORES : dict
+        + TEXTURA_TIERRA : str
+        + TEXTURA_PIEDRA : str
+        + TEXTURA_PASTO : str
+        + BLOQUES_SOLIDOS : set
+        + CATEGORIAS : list
+    }
+
+    Mundo --> Mapa
+    Mundo --> ManjeadorChunks
+    Mundo --> PersonajeJugador
+    Mundo --> Objeto
+    Mundo --> Constantes
+
+    ManjeadorChunks --> Mapa
+    ManjeadorChunks --> Suelo
+    ManjeadorChunks --> Constantes
+
+    Mapa --> Constantes
+
+    Personaje <|-- PersonajeJugador
+    PersonajeJugador --> ComponenteMover
+    PersonajeJugador --> ComponenteAnimacion
+    PersonajeJugador --> ComponenteInventario
+    PersonajeJugador --> Inventario
+
+    ComponenteMover --> Componente
+    ComponenteAnimacion --> Componente
+    ComponenteInventario --> Componente
+    ComponenteDisparo --> Componente
+
+    Inventario --> Objeto
+    Inventario --> Constantes
+
+    Suelo <|-- Objeto
+
+    Objeto --> pygame
+
+    VistaJuego --> Camara
+    VistaJuego --> Constantes
+    VistaJuego --> pygame
+
+    Camara --> Constantes
+}
+
+hide empty members
+@enduml

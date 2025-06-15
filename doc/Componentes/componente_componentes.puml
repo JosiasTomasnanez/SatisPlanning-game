@@ -1,0 +1,30 @@
+@startuml DiagramaComponente_Componentes
+left to right direction
+skinparam componentStyle rectangle
+skinparam linetype ortho
+skinparam shadowing true
+
+rectangle "Componentes de Personaje" as Comp {
+    [ComponenteMover]
+    [ComponenteAnimacion]
+    [ComponenteInventario]
+    [ComponenteDisparo]
+}
+
+[PersonajeJugador]
+[Inventario]
+[Proyectil]
+
+[PersonajeJugador] --> [ComponenteMover]
+[PersonajeJugador] --> [ComponenteAnimacion]
+[PersonajeJugador] --> [ComponenteInventario]
+[PersonajeJugador] --> [ComponenteDisparo]
+[PersonajeJugador] --> [Inventario]
+
+[ComponenteMover] ..> [PersonajeJugador]
+[ComponenteAnimacion] ..> [PersonajeJugador]
+[ComponenteInventario] ..> [Inventario]
+[ComponenteDisparo] ..> [PersonajeJugador]
+[ComponenteDisparo] --> [Proyectil]
+
+@enduml

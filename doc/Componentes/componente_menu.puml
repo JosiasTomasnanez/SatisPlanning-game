@@ -1,0 +1,40 @@
+@startuml DiagramaComponente_Menu
+skinparam componentStyle rectangle
+skinparam linetype ortho
+skinparam shadowing true
+skinparam arrowColor DarkSlateGray
+skinparam ArrowFontSize 14
+skinparam ArrowFontColor #222266
+
+package "Menú y Presentadores" {
+    [Main]
+    [FabricaJuego]
+    [GestorPresentadores]
+    [PresentadorMenu]
+    [VistaMenu]
+    [Menu]
+    [PresentadorJuego]
+    [VistaJuego]
+}
+
+package "Persistencia" {
+    [GestorDB]
+}
+
+[Pygame]
+
+[Main] --> [FabricaJuego]
+[FabricaJuego] --> [GestorPresentadores]
+[GestorPresentadores] --> [PresentadorMenu]
+[GestorPresentadores] --> [VistaMenu]
+[GestorPresentadores] --> [PresentadorJuego]
+[GestorPresentadores] --> [VistaJuego]
+[PresentadorMenu] --> [Menu]
+[PresentadorMenu] --> [VistaMenu]
+[PresentadorJuego] --> [VistaJuego]
+[PresentadorJuego] --> [Mundo]
+[VistaJuego] ..> [Pygame]
+[GestorDB] ..> [sqlite3]
+[GestorDB] ..> [os]
+
+@enduml

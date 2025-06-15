@@ -1,4 +1,6 @@
-class Componente:
+from abc import ABC, abstractmethod
+
+class Componente(ABC):
     """
     Clase base para todos los componentes.
     """
@@ -10,6 +12,7 @@ class Componente:
         """
         self.propietario = propietario
 
+    @abstractmethod
     def actualizar(self, dt):
         """
         Método que debe ser implementado por las subclases para actualizar la lógica del componente.

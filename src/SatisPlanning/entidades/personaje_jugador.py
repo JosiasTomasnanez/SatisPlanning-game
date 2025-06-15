@@ -1,4 +1,4 @@
-from SatisPlanning.entidades.personaje import Personaje  
+from .personaje import Personaje  
 from SatisPlanning.inventario import Inventario
 from SatisPlanning.utilidades import obtener_ruta_asset
 from SatisPlanning.componentes.componente_mover import ComponenteMover
