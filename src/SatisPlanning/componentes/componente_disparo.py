@@ -1,14 +1,15 @@
 import pygame
 from SatisPlanning.utilidades import obtener_posicion_mouse
+from .componente import Componente
 
-class ComponenteDisparo:
+class ComponenteDisparo(Componente):
     def __init__(self, personaje):
         """
         Inicializa el componente de disparo.
 
         :param personaje: Referencia al personaje que utiliza este componente.
         """
-        self.personaje = personaje
+        super().__init__(personaje)
 
     def disparar(self, mundo):
         """
@@ -25,3 +26,9 @@ class ComponenteDisparo:
         
         
         #esto es un ejemplo mapeo de mause
+
+    def actualizar(self, *args, **kwargs):
+        """
+            Método requerido por la clase abstracta Componente.
+        """
+        pass
