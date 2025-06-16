@@ -9,15 +9,15 @@ class VistaJuego:
         self.camara = camara
         self.pantalla = pygame.display.set_mode((ct.ANCHO, ct.ALTO))
 
-    def dibujar(self, objetos, personaje, enemigos):
+    def dibujar(self, objetos, personaje,enemigos):
         self.camara.actualizar(personaje.x, personaje.y)
         self.pantalla.fill(ct.COLOR_FONDO)
         self.pantalla.fill(ct.COLORES[0])
 
         self.dibujar_objetos_mapa(objetos)
         self.dibujar_personaje_centrado(personaje)
-        self.dibujar_enemigos(enemigos, personaje)
         self.dibujar_inventario(personaje.obtener_inventario())
+        self.dibujar_enemigos(enemigos, personaje)
 
         pygame.display.flip()
 
@@ -30,12 +30,15 @@ class VistaJuego:
         personaje_centrado_x = (self.camara.ancho_pantalla // 2) - (personaje.ancho // 2)
         personaje_centrado_y = (self.camara.alto_pantalla // 2) - (personaje.alto // 2)
         self.pantalla.blit(personaje.componente_animacion.imagen_actual, (personaje_centrado_x, personaje_centrado_y))
-
+    
     def dibujar_enemigos(self, enemigos, personaje):
         # Dibuja cada enemigo en pantalla, evitando que aparezcan demasiado cerca del personaje jugador
         for enemigo in enemigos:
             # Calcular posición en pantalla del enemigo según la cámara
             enemigo_x, enemigo_y = self.camara.aplicar(enemigo.x, enemigo.y)
+            # Desplazar la imagen algunos píxeles hacia arriba para alinear con la hitbox
+            enemigo_y -= 20  # Ajusta este valor según lo que necesites
+            enemigo_x -= 20
             # Calcular distancia al personaje jugador (centrado en pantalla)
             pj_centro_x = (self.camara.ancho_pantalla // 2)
             pj_centro_y = (self.camara.alto_pantalla // 2)

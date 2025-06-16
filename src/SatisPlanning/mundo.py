@@ -1,23 +1,19 @@
 import pygame
-from SatisPlanning.entidades.personaje_jugador import PersonajeJugador
-from SatisPlanning.mapa import Mapa
-from SatisPlanning.manejador_chunks import ManjeadorChunks
-from SatisPlanning.entidades.Zombie_enemy import Zombie
+from .entidades.personaje_jugador import PersonajeJugador
+from .mapa import Mapa
+from .manejador_chunks import ManjeadorChunks
+from .generador_monstruos import GeneradorMonstruos
 
 class Mundo:
-    def __init__(self):
-        self.mapa = Mapa()  # Instancia de la clase Mapa
-        self.personaje = PersonajeJugador(100, 100, 40, 40)  # Personaje principal
+    def __init__(self, personaje, mapa, manejador_chunks, generador_monstruos):
+        self.mapa = mapa  # Instancia de la clase Mapa
+        self.personaje = personaje  # Personaje principal
         self.personaje.set_mundo(self)
-        self.manejador_chunks = ManjeadorChunks(self.mapa)  # Instancia del manejador de chunks
+        self.manejador_chunks = manejador_chunks  # Instancia del manejador de chunks
 
         # Cargar los chunks iniciales
         self.manejador_chunks.cargar_chunks_iniciales(self.personaje)
-        
-        # Enemigos
-        self.enemigos = [Zombie(300, 100, 40, 40)]  # Puedes agregar más enemigos aquí
-        for enemigo in self.enemigos:
-            enemigo.set_mundo(self)
+        self.generador_monstruos = generador_monstruos
 
     def obtener_personaje(self):
         """
@@ -36,9 +32,7 @@ class Mundo:
         teclas = pygame.key.get_pressed()
         self.personaje.actualizar(teclas)
 
-        # Actualizar enemigos
-        for enemigo in self.enemigos:
-            enemigo.actualizar()
+        self.generador_monstruos.actualizar(self.personaje, self)
 
         # Actualizar chunks visibles y procesar submatrices
         self.manejador_chunks.actualizar_chunks_visibles(self.personaje)
@@ -77,7 +71,7 @@ class Mundo:
         """
         Devuelve la lista de enemigos.
         """
-        return self.enemigos
+        return self.generador_monstruos.obtener_enemigos()
 
     def obtener_objetos_a_dibujar(self):
         """
@@ -86,14 +80,14 @@ class Mundo:
         objetos = []
         for chunk_x in self.manejador_chunks.obtener_chunks_visibles():
             objetos.extend(self.manejador_chunks.obtener_objetos_por_chunk(chunk_x))
-        return objetos, self.personaje, self.enemigos
+        return objetos, self.personaje, self.obtener_enemigos()
 
     def chequear_colisiones_jugador_enemigos(self):
         """
         Verifica colisiones entre el personaje jugador y todos los enemigos.
         Llama a notificar_colision en ambos si ocurre una colisión.
         """
-        for enemigo in self.enemigos:
+        for enemigo in self.obtener_enemigos():
             if self.personaje.hitbox.colliderect(enemigo.hitbox):
                 self.personaje.notificar_colision(enemigo)
                 enemigo.notificar_colision(self.personaje)

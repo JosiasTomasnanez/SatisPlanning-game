@@ -1,36 +1,52 @@
 import pygame
-from SatisPlanning.presentador_juego import PresentadorJuego
+from .fabrica_juego import FabricaJuego
+from .persistencia.gestor_db import GestorDB
 import SatisPlanning.constantes as ct
-from SatisPlanning.persistencia.gestor_db import GestorDB
-from SatisPlanning.mundo import Mundo  # Cambiado de World a Mundo
-from SatisPlanning.vista_juego import VistaJuego
-from SatisPlanning.camara import Camara
 
 def main():
-    coneDB= GestorDB()
+    coneDB = GestorDB()
     pygame.init()
     pantalla = pygame.display.set_mode((ct.ANCHO, ct.ALTO))
-    presentador_juego = PresentadorJuego(Mundo(),VistaJuego(Camara(),pantalla))
-
     pygame.display.set_caption("SatisPlanning")
     reloj = pygame.time.Clock()
+    fullscreen = False
+
+    # Usar la fábrica para crear todos los objetos
+    objetos = FabricaJuego.crear_todo(pantalla)
+    vista_menu = objetos["vista_menu"]
+    vista_juego = objetos["vista_juego"]
+    gestor = objetos["gestor"]
+
     corriendo = True
-    
+    gestor.cambiar_a_menu()
+
     while corriendo:
-        dt = reloj.tick(ct.FPS) / 1000  # Delta time en segundos
+        dt = reloj.tick(ct.FPS) / 1000
 
-        eventos = presentador_juego.vista_juego.obtener_eventos()  # La vista obtiene los eventos de pygame
-        eventos_filtrados = presentador_juego.manejar_eventos(eventos)  # Se los pasa al presentador
-        if eventos_filtrados is None:  # Si se detecta un evento de salida
+        presentador_actual = gestor.obtener_presentador_actual()
+        vista_actual = gestor.obtener_vista_actual()
+
+        eventos = vista_actual.obtener_eventos()
+        # --- Pantalla completa: F11 ---
+        for evento in eventos:
+            if evento.type == pygame.KEYDOWN and evento.key == pygame.K_F11:
+                fullscreen = not fullscreen
+                if fullscreen:
+                    pantalla = pygame.display.set_mode((ct.ANCHO, ct.ALTO), pygame.FULLSCREEN)
+                else:
+                    pantalla = pygame.display.set_mode((ct.ANCHO, ct.ALTO))
+                vista_menu.pantalla = pantalla
+                vista_juego.pantalla = pantalla
+
+        comando = presentador_actual.actualizar(dt, eventos)
+        if comando == "jugar":
+            gestor.cambiar_a_juego()
+        elif comando == "menu":
+            gestor.cambiar_a_menu()
+        elif comando == "salir":
             corriendo = False
-            continue
-
-        presentador_juego.actualizar(dt, eventos_filtrados) 
 
     pygame.quit()
 
 if __name__ == "__main__":
     main()
-
-
-# a esta clase la veo ok, se encarga de iniciar pygame y de generar el bucle que corre el juego, definiendo los fps, y controlando los eventos de salida, ordenando en cada iteraccion al juego ctualizarse y dibujarse

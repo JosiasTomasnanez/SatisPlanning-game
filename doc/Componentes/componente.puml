@@ -1,0 +1,65 @@
+@startuml DiagramaComponente_Nucleo
+left to right direction
+skinparam componentStyle rectangle
+skinparam linetype ortho
+skinparam shadowing true
+skinparam arrowColor DarkSlateGray
+skinparam ArrowFontSize 14
+skinparam ArrowFontColor #222266
+
+package "Infraestructura" {
+    [Mundo]
+    [ManjeadorChunks]
+    [Mapa]
+    [Constantes]
+    [Camara]
+}
+
+package "Entidades" {
+    [PersonajeJugador]
+    [Objeto]
+    [Suelo]
+    [Proyectil]
+    [Inventario]
+}
+
+package "Componentes de Personaje" {
+    [ComponenteMover]
+    [ComponenteAnimacion]
+    [ComponenteInventario]
+    [ComponenteDisparo]
+}
+
+[Pygame]
+
+
+[PersonajeJugador] --> [Inventario]
+[PersonajeJugador] --> [ComponenteMover]
+[PersonajeJugador] --> [ComponenteAnimacion]
+[PersonajeJugador] --> [ComponenteInventario]
+[PersonajeJugador] --> [ComponenteDisparo]
+
+[ComponenteMover] ..> [PersonajeJugador]
+[ComponenteAnimacion] ..> [PersonajeJugador]
+[ComponenteInventario] ..> [Inventario]
+[ComponenteDisparo] ..> [PersonajeJugador]
+[ComponenteDisparo] --> [Proyectil]
+[Proyectil] ..> [Objeto]
+
+[Inventario] --> [Objeto]
+
+[Mundo] --> [ManjeadorChunks]
+[Mundo] --> [Mapa]
+[Mundo] --> [PersonajeJugador]
+[Mundo] --> [Constantes]
+
+[ManjeadorChunks] --> [Mapa]
+[ManjeadorChunks] --> [Suelo]
+[ManjeadorChunks] --> [Objeto]
+
+[Mapa] --> [Constantes]
+
+[Objeto] ..> [Pygame]
+[Suelo] ..> [Objeto]
+
+@enduml

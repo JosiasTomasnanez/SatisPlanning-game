@@ -1,15 +1,25 @@
-from SatisPlanning.entidades.personaje import Personaje  
+from .personaje import Personaje  
 from SatisPlanning.inventario import Inventario
 from SatisPlanning.utilidades import obtener_ruta_asset
 from SatisPlanning.componentes.componente_mover import ComponenteMover
 from SatisPlanning.componentes.componente_animacion import ComponenteAnimacion
 from SatisPlanning.componentes.componente_inventario import ComponenteInventario
 import pygame
+import SatisPlanning.constantes as ct
 
 class PersonajeJugador(Personaje):
     def __init__(self, x, y, ancho, alto):
+        """
+        Inicializa el personaje jugador con posición, sprites y un inventario.
 
-        super().__init__(x, y, ancho, alto, obtener_ruta_asset("p3.png"), dinamico=True, tangible=True)
+        :param x: Posición X inicial.
+        :param y: Posición Y inicial.
+        :param ancho: Ancho del personaje.
+        :param alto: Altura del personaje.
+        """
+        velocidad = 4         # Velocidad específica para el jugador
+        fuerza_salto = 11     # Fuerza de salto específica para el jugador
+        super().__init__(x, y, ancho, alto, ct.SPRITE_JUGADOR, sprites=ct.SPRITES_JUGADOR, velocidad=velocidad, fuerza_salto=fuerza_salto, dinamico=True, tangible=True)
         
         # Posicion inicial
         self.vel_x = self.vel_y = 0
@@ -24,12 +34,6 @@ class PersonajeJugador(Personaje):
 
         # Componente para manejar el movimiento
         self.componente_mover = ComponenteMover(self, self.componente_animacion)
-
-        # Atributo para identificar si es un jugador
-        self.es_jugador = True
-
-        # Puntos de vida del jugador
-        self.vida = 100  
 
     def obtener_inventario(self):
         return self.componente_inventario.inventario
@@ -46,22 +50,3 @@ class PersonajeJugador(Personaje):
         # Actualiza el inventario según eventos individuales
         self.componente_inventario.actualizar(evento)
         # Puedes agregar aquí otros componentes que reaccionen a eventos
-
-    def notificar_colision(self, otro):
-        """
-        Lógica de reacción cuando el jugador colisiona con otro objeto o enemigo.
-        """
-        if hasattr(otro, 'es_enemigo') and otro.es_enemigo:
-            # Ejemplo: reducir vida, empujar, etc.
-            print('¡El jugador colisionó con un enemigo!')
-        # Aquí puedes agregar más lógica según el tipo de colisión
-
-    def recibir_danio(self, cantidad):
-        """
-        Resta puntos de vida al jugador. Si la vida llega a 0, puedes manejar la muerte aquí.
-        """
-        self.vida -= cantidad
-        if self.vida <= 0:
-            self.vida = 0
-            # Aquí podrías poner lógica de muerte, reinicio, etc.
-            print('¡Jugador derrotado!')

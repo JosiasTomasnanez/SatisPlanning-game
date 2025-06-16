@@ -16,11 +16,20 @@ class PresentadorJuego:
         """
         for evento in eventos:
             if getattr(evento, "type", None) == getattr(self.vista_juego, "QUIT", None):
-                return None
+                return "salir"
+            elif evento.type == pygame.KEYDOWN and evento.key == pygame.K_ESCAPE:
+                return "menu"
         return eventos  # Devuelve la lista de eventos
 
     """Actualiza el juego."""
     def actualizar(self, dt, eventos):
-        self.mundo.actualizar(dt, eventos)
-        objetos, personaje, enemigos = self.mundo.obtener_objetos_a_dibujar()
-        self.vista_juego.dibujar(objetos, personaje, enemigos)  # Actualiza la pantalla con los objetos y enemigos a dibujar
+        resultado = self.manejar_eventos(eventos)
+        if resultado == "salir":
+            return "salir"
+        elif resultado == "menu":
+            return "menu"
+        else:
+            self.mundo.actualizar(dt, resultado)
+            objetos, personaje, enemigos = self.mundo.obtener_objetos_a_dibujar()
+            self.vista_juego.dibujar(objetos, personaje, enemigos)  # Actualiza la pantalla con los objetos y enemigos a dibujar
+            return None
