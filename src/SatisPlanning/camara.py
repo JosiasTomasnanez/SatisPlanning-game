@@ -21,5 +21,3 @@ class Camara:
         Aplica el desplazamiento de la cámara a una posición dada.
         """
         return x - self.desplazamiento_x, y - self.desplazamiento_y
-
-#Esta clase va a ser mas compleja , para poder realizar zoom usando teclas, hay que ver como se puede implementar eso en un futuro, quizas cambiando el valor del tamaño de los bloques y a la vez el valor del tamaño de los chunks a voluntad
