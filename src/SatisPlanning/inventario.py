@@ -1,7 +1,6 @@
 import pygame
 import SatisPlanning.constantes as ct
-from SatisPlanning.entidades.objeto import Objeto
-from SatisPlanning.entidades.suelo import Suelo
+from .entidades.objeto import Objeto
 
 class Inventario:
     def __init__(self):

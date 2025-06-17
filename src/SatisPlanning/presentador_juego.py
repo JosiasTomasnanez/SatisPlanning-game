@@ -30,6 +30,6 @@ class PresentadorJuego:
             return "menu"
         else:
             self.mundo.actualizar(dt, resultado)
-            objetos, personaje = self.mundo.obtener_objetos_a_dibujar()
-            self.vista_juego.dibujar(objetos, personaje)  # Actualiza la pantalla con los objetos a dibujar
+            objetos, personaje, enemigos = self.mundo.obtener_objetos_a_dibujar()
+            self.vista_juego.dibujar(objetos, personaje, enemigos)  # Actualiza la pantalla con los objetos y enemigos a dibujar
             return None

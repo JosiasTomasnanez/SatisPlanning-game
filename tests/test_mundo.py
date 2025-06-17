@@ -7,7 +7,8 @@ class TestMundo(unittest.TestCase):
     @patch('SatisPlanning.mundo.PersonajeJugador')
     @patch('SatisPlanning.mundo.ManjeadorChunks')
     def test_init(self, mock_chunks, mock_personaje, mock_mapa):
-        mundo = Mundo(mock_personaje, mock_mapa, mock_chunks)
+        generador_monstruos = MagicMock()
+        mundo = Mundo(mock_personaje, mock_mapa, mock_chunks, generador_monstruos)
         # Verifica que se llamó a set_mundo en el personaje
         mock_personaje.set_mundo.assert_called_once_with(mundo)
         # Verifica que se llamó a cargar_chunks_iniciales en el manejador de chunks

@@ -1,5 +1,5 @@
 import pygame
-from SatisPlanning.utilidades import obtener_posicion_mouse
+from .utilidades import obtener_posicion_mouse
 from .componente import Componente
 
 class ComponenteDisparo(Componente):
@@ -24,11 +24,10 @@ class ComponenteDisparo(Componente):
         proyectil = Proyectil(posicion_inicial, posicion_mouse)
         mundo.agregar_objeto(proyectil)
         
-        
-        #esto es un ejemplo mapeo de mause
-
     def actualizar(self, *args, **kwargs):
         """
             Método requerido por la clase abstracta Componente.
         """
         pass
+        
+        #esto es un ejemplo mapeo de mause

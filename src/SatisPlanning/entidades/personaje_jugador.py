@@ -17,7 +17,9 @@ class PersonajeJugador(Personaje):
         :param ancho: Ancho del personaje.
         :param alto: Altura del personaje.
         """
-        super().__init__(x, y, ancho, alto, ct.SPRITE_JUGADOR, sprites=ct.SPRITES_JUGADOR, dinamico=True, tangible=True)
+        velocidad = 4         # Velocidad específica para el jugador
+        fuerza_salto = 11     # Fuerza de salto específica para el jugador
+        super().__init__(x, y, ancho, alto, ct.SPRITE_JUGADOR, sprites=ct.SPRITES_JUGADOR, velocidad=velocidad, fuerza_salto=fuerza_salto, dinamico=True, tangible=True)
         
         # Posicion inicial
         self.vel_x = self.vel_y = 0

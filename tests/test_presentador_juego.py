@@ -30,7 +30,7 @@ class TestPresentadorJuego(unittest.TestCase):
     def test_actualizar_llama_metodos(self):
         mock_mundo = MagicMock()
         mock_vista = MagicMock()
-        mock_mundo.obtener_objetos_a_dibujar.return_value = (['obj1'], 'personaje')
+        mock_mundo.obtener_objetos_a_dibujar.return_value = (['obj1'], 'personaje', ['enemigo1'])
         # Simula un evento válido con .type y .key
         mock_event = MagicMock()
         mock_event.type = 0

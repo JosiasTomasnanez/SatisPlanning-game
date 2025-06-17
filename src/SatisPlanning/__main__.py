@@ -1,6 +1,6 @@
 import pygame
-from SatisPlanning.fabrica_juego import FabricaJuego
-from SatisPlanning.persistencia.gestor_db import GestorDB
+from .fabrica_juego import FabricaJuego
+from .persistencia.gestor_db import GestorDB
 import SatisPlanning.constantes as ct
 
 def main():

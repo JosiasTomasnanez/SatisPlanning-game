@@ -1,6 +1,6 @@
 import pygame
-from SatisPlanning.utilidades import es_click_mouse, obtener_posicion_mouse
-from SatisPlanning.menu import Menu
+from .utilidades import es_click_mouse, obtener_posicion_mouse
+from .menu import Menu
 
 class PresentadorMenu:
     def __init__(self, vista_menu):

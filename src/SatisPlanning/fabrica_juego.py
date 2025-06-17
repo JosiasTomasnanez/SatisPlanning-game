@@ -1,14 +1,16 @@
-from SatisPlanning.vista_menu import VistaMenu
-from SatisPlanning.presentador_menu import PresentadorMenu
-from SatisPlanning.vista_juego import VistaJuego
-from SatisPlanning.presentador_juego import PresentadorJuego
-from SatisPlanning.gestor_presentadores import GestorPresentadores
-from SatisPlanning.camara import Camara
-from SatisPlanning.entidades.personaje_jugador import PersonajeJugador
-from SatisPlanning.mapa import Mapa
-from SatisPlanning.manejador_chunks import ManjeadorChunks
-from SatisPlanning.mundo import Mundo
+from .vista_menu import VistaMenu
+from .presentador_menu import PresentadorMenu
+from .vista_juego import VistaJuego
+from .presentador_juego import PresentadorJuego
+from .gestor_presentadores import GestorPresentadores
+from .camara import Camara
+from .entidades.personaje_jugador import PersonajeJugador
+from .mapa import Mapa
+from .manejador_chunks import ManjeadorChunks
+from .mundo import Mundo
+from .generador_monstruos import GeneradorMonstruos
 import SatisPlanning.constantes as ct
+import random
 
 class FabricaJuego:
     @staticmethod
@@ -18,10 +20,28 @@ class FabricaJuego:
         presentador_menu = PresentadorMenu(vista_menu)
 
         # Objetos del mundo
-        mapa = Mapa()
+        mapa = Mapa(random.randint(0, 1000))
         personaje = PersonajeJugador(100, 100, 40, 40)
         manejador_chunks = ManjeadorChunks(mapa)
-        mundo = Mundo(personaje, mapa, manejador_chunks)
+
+        # Configuración de monstruos centralizada aquí
+        spawn_frame_interval = 350
+        max_enemigos = 5
+        spawn_dist_min = 600
+        spawn_dist_max = 630
+        despawn_dist = 1000
+        distancia_persecucion = 280
+
+        generador_monstruos = GeneradorMonstruos(
+            spawn_frame_interval=spawn_frame_interval,
+            max_enemigos=max_enemigos,
+            spawn_dist_min=spawn_dist_min,
+            spawn_dist_max=spawn_dist_max,
+            despawn_dist=despawn_dist,
+            distancia_persecucion=distancia_persecucion
+        )
+
+        mundo = Mundo(personaje, mapa, manejador_chunks, generador_monstruos)
         personaje.set_mundo(mundo)
 
         # Vistas y presentadores del juego
@@ -43,5 +63,6 @@ class FabricaJuego:
             "mundo": mundo,
             "personaje": personaje,
             "mapa": mapa,
-            "manejador_chunks": manejador_chunks
+            "manejador_chunks": manejador_chunks,
+            "generador_monstruos": generador_monstruos
         }

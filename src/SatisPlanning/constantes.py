@@ -1,5 +1,5 @@
 import pygame
-from SatisPlanning.utilidades import obtener_ruta_asset, scale_keep_aspect
+from .utilidades import obtener_ruta_asset, scale_keep_aspect
 
 ANCHO = 1280  # Ancho de la pantalla
 ALTO = 720  # Alto de la pantalla
@@ -15,8 +15,6 @@ FUENTE = pygame.font.Font(None, 24)  # Fuente predeterminada con tamaño 24
 
 # Sistema de física
 GRAVEDAD = 0.5
-FUERZA_SALTO = 12
-VELOCIDAD_PERSONAJE = 4
 
 # Colores de bloques (ampliados para futuros minerales)
 COLORES = {
@@ -38,9 +36,18 @@ SPRITE_JUGADOR = obtener_ruta_asset("pf.png")
 SPRITES_JUGADOR = [
     scale_keep_aspect(
         pygame.image.load(obtener_ruta_asset(f"p{i}.png")),
-        (40, 40)
+        (40, 40), 
+        True
     )
     for i in range(1, 6)
+]
+SPRITES_ENEMIGO = [
+    scale_keep_aspect(
+        pygame.image.load(obtener_ruta_asset(f"enemigo{i}.png")),
+        (40, 40),
+        False
+    )
+    for i in range(1, 9)
 ]
 # Categorías
 CATEGORIAS = ["Bloques", "Herramientas"]

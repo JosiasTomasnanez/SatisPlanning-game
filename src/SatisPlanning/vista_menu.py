@@ -1,6 +1,6 @@
 import pygame
 import SatisPlanning.constantes as ct
-from SatisPlanning.utilidades import obtener_ruta_asset
+from .utilidades import obtener_ruta_asset
 
 class VistaMenu:
     QUIT = pygame.QUIT

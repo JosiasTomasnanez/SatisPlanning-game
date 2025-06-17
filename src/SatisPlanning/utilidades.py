@@ -43,7 +43,7 @@ def scale_keep_aspect(image, target_size):
         
         return pygame.transform.flip(final_image, True, False)
 
-def scale_keep_aspect(image, target_size):
+def scale_keep_aspect(image, target_size, invertir):
         original_width, original_height = image.get_size()
         target_width, target_height = target_size
 
@@ -58,5 +58,7 @@ def scale_keep_aspect(image, target_size):
         x = (target_width - new_width) // 2
         y = (target_height - new_height) // 2
         final_image.blit(scaled, (x, y))
-        
-        return pygame.transform.flip(final_image, True, False)
+
+        if invertir:
+            return pygame.transform.flip(final_image, True, False)
+        return final_image

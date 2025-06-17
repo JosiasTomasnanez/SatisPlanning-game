@@ -1,10 +1,11 @@
 import pygame
-from SatisPlanning.entidades.personaje_jugador import PersonajeJugador
-from SatisPlanning.mapa import Mapa
-from SatisPlanning.manejador_chunks import ManjeadorChunks
+from .entidades.personaje_jugador import PersonajeJugador
+from .mapa import Mapa
+from .manejador_chunks import ManjeadorChunks
+from .generador_monstruos import GeneradorMonstruos
 
 class Mundo:
-    def __init__(self, personaje, mapa, manejador_chunks):
+    def __init__(self, personaje, mapa, manejador_chunks, generador_monstruos):
         self.mapa = mapa  # Instancia de la clase Mapa
         self.personaje = personaje  # Personaje principal
         self.personaje.set_mundo(self)
@@ -12,6 +13,7 @@ class Mundo:
 
         # Cargar los chunks iniciales
         self.manejador_chunks.cargar_chunks_iniciales(self.personaje)
+        self.generador_monstruos = generador_monstruos
 
     def obtener_personaje(self):
         """
@@ -30,6 +32,8 @@ class Mundo:
         teclas = pygame.key.get_pressed()
         self.personaje.actualizar(teclas)
 
+        self.generador_monstruos.actualizar(self.personaje, self)
+
         # Actualizar chunks visibles y procesar submatrices
         self.manejador_chunks.actualizar_chunks_visibles(self.personaje)
         self.manejador_chunks.procesar_submatriz()
@@ -38,13 +42,21 @@ class Mundo:
     def colisiona(self, hitbox, obj):
         """
         Verifica si la hitbox colisiona con algún objeto.
+        Permite que jugador y enemigo se superpongan, pero bloquea con el entorno.
         """
         for chunk_x in self.manejador_chunks.obtener_chunks_visibles():
             for objeto in self.manejador_chunks.obtener_objetos_por_chunk(chunk_x):
-                if objeto.hitbox.colliderect(hitbox) and objeto.tangible==True:
-                    obj.notificar_colision(objeto)
-                    objeto.notificar_colision(obj)
-                    return True
+                if objeto.hitbox.colliderect(hitbox) and objeto.tangible:
+                    # Permitir superposición entre jugador y enemigo
+                    if (getattr(obj, 'es_jugador', False) and getattr(objeto, 'es_enemigo', False)) or \
+                       (getattr(obj, 'es_enemigo', False) and getattr(objeto, 'es_jugador', False)):
+                        obj.notificar_colision(objeto)
+                        objeto.notificar_colision(obj)
+                        # No retorna True, así no bloquea el movimiento
+                    else:
+                        obj.notificar_colision(objeto)
+                        objeto.notificar_colision(obj)
+                        return True
         return False
 
     def agregar_objeto(self, objeto,tangible):
@@ -55,11 +67,27 @@ class Mundo:
         objeto.tangible = tangible
         self.manejador_chunks.agregar_objeto(objeto)
 
+    def obtener_enemigos(self):
+        """
+        Devuelve la lista de enemigos.
+        """
+        return self.generador_monstruos.obtener_enemigos()
+
     def obtener_objetos_a_dibujar(self):
         """
-        Devuelve los objetos y el personaje para ser dibujados.
+        Devuelve los objetos, el personaje y los enemigos para ser dibujados.
         """
         objetos = []
         for chunk_x in self.manejador_chunks.obtener_chunks_visibles():
             objetos.extend(self.manejador_chunks.obtener_objetos_por_chunk(chunk_x))
-        return objetos, self.personaje
+        return objetos, self.personaje, self.obtener_enemigos()
+
+    def chequear_colisiones_jugador_enemigos(self):
+        """
+        Verifica colisiones entre el personaje jugador y todos los enemigos.
+        Llama a notificar_colision en ambos si ocurre una colisión.
+        """
+        for enemigo in self.obtener_enemigos():
+            if self.personaje.hitbox.colliderect(enemigo.hitbox):
+                self.personaje.notificar_colision(enemigo)
+                enemigo.notificar_colision(self.personaje)

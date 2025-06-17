@@ -11,7 +11,7 @@ class TestPersonaje(unittest.TestCase):
         mock_pygame.image.load.return_value = MagicMock()
         mock_pygame.transform.scale.return_value = MagicMock()
         # Pasa una lista de mocks como sprites
-        personaje = Personaje(10, 20, 30, 40, 'fake_path', sprites=[MagicMock(), MagicMock()])
+        personaje = Personaje(10, 20, 30, 40, 'fake_path', [MagicMock(), MagicMock()], 5, 10)
         self.assertEqual(personaje.x, 10)
         self.assertEqual(personaje.y, 20)
         self.assertEqual(personaje.ancho, 30)

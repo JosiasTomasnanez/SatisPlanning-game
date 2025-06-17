@@ -1,13 +1,12 @@
-import random
 from perlin_noise import PerlinNoise
 import SatisPlanning.constantes as ct
 
 class Mapa:
-    def __init__(self):
+    def __init__(self, semilla):
         """
         Inicializa el mapa con un diccionario para almacenar los chunks generados.
         """
-        self.semilla = random.randint(0, 1000)
+        self.semilla = semilla
         self.chunks = {}  # Diccionario para almacenar los chunks generados
 
     def _generar_chunk(self, chunk_x):
