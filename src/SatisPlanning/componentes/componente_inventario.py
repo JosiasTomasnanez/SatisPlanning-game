@@ -24,7 +24,7 @@ class ComponenteInventario(Componente):
                 self.inventario.seleccionar_barra_rapida(indice_barra)
 
             if teclas.key == pygame.K_g:
-                item_soltado = self.inventario.soltar_item_seleccionado()
+                item_soltado = self.inventario.soltar_item_seleccionado_barra()
                 if item_soltado:
                     # Usar atributos del propietario
                     if self.propietario.direccion == 1:
