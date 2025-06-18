@@ -30,43 +30,65 @@ class VistaJuego:
 
     def dibujar_inventario(self, inventario):
         fuente = pygame.font.SysFont("Arial", 20)
+        fuente_cantidad = pygame.font.SysFont("Arial", 14, bold=True)
+        
         # Dibuja la barra rápida
         self._dibujar_barra_rapida(inventario, fuente)
+        
         # Dibuja el inventario completo si está visible
         if not getattr(inventario, "visible", False):
             return
+        
         fondo = pygame.Surface((inventario.ancho, inventario.altura_total))
-        fondo.set_alpha(220)
-        fondo.fill((60, 60, 70))
+        fondo.set_alpha(200)
+        fondo.fill((40, 40, 50))
+        
+        posicion_fondo = (
+            inventario.posicion[0] - inventario.margen,
+            inventario.posicion[1] - inventario.margen
+        )
+        self.pantalla.blit(fondo, posicion_fondo)
+        
         filas = inventario.tamanio_filas
         columnas = inventario.tamanio_col
         tamanio_icono = inventario.tamanio_icono
         margen = 4
-        # Fondo del inventario
-        fondo = pygame.Surface((inventario.ancho, inventario.altura_total))
-        fondo.set_alpha(200)
-        fondo.fill((40, 40, 50))
-        posicion_fondo=(inventario.posicion[0]-inventario.margen,inventario.posicion[1]-inventario.margen)
-        self.pantalla.blit(fondo, posicion_fondo)
+
         for i in range(filas):
             for j in range(columnas):
                 grupo = inventario.matrix[i][j]
+                pos_x = inventario.posicion[0] + j * (tamanio_icono[0] + margen)
+                pos_y = inventario.posicion[1] + i * (tamanio_icono[1] + margen)
+                
                 if grupo:  # si hay al menos un item en esa celda
                     item = grupo[0]
-                    pos_x = inventario.posicion[0] + j * (tamanio_icono[0] + margen)
-                    pos_y = inventario.posicion[1] + i * (tamanio_icono[1] + margen)
                     self._dibujar_icono_item(item, pos_x, pos_y, inventario)
-                if (i,j)==inventario.posicion_inventario_actual:
-                    ancho=inventario.tamanio_icono[0]+4
-                    alto=inventario.tamanio_icono[1]+4
-                    pygame.draw.rect(self.pantalla, (255, 255, 0), (pos_x - 2, pos_y - 2, ancho, alto), 3)
                     
+                    # Dibujar la cantidad de objetos con efecto 3D
+                    cantidad = len(grupo)
+                    texto_str = str(cantidad)
+                    
+                    # Sombra (negra, desplazada)
+                    sombra = fuente_cantidad.render(texto_str, True, (0, 0, 0))
+                    rect_sombra = sombra.get_rect(topright=(pos_x + tamanio_icono[0] - 1, pos_y + 3))
+                    self.pantalla.blit(sombra, rect_sombra)
 
+                    # Texto principal (amarillo)
+                    texto = fuente_cantidad.render(texto_str, True, (255, 255, 0))
+                    rect_texto = texto.get_rect(topright=(pos_x + tamanio_icono[0] - 2, pos_y + 2))
+                    self.pantalla.blit(texto, rect_texto)
+
+                # Dibujar selección actual
+                if (i, j) == inventario.posicion_inventario_actual:
+                    ancho = inventario.tamanio_icono[0] + 4
+                    alto = inventario.tamanio_icono[1] + 4
+                    pygame.draw.rect(self.pantalla, (255, 255, 0), (pos_x - 2, pos_y - 2, ancho, alto), 3)
+    
     def _dibujar_icono_item(self, item, x, y, inventario):
         imagen_redimensionada = pygame.transform.scale(item.imagen, inventario.tamanio_icono)
         self.pantalla.blit(imagen_redimensionada, (x, y))
          
-
+    #eliminar _dibujar_item si ya no hace falta
     def _dibujar_item(self, inventario, fuente, item, y_pos, index):
         seleccionado = (inventario.item_seleccionado_barra == index)
         if seleccionado:
@@ -78,16 +100,34 @@ class VistaJuego:
     
 
     def _dibujar_barra_rapida(self, inventario, fuente):
-        num_slots = 9
-        ancho_barra = num_slots * 50 + (num_slots - 1) * 5
-        barra_x = (ct.ANCHO - ancho_barra) // 2
-        barra_y = ct.ALTO - 60
-        for i in range(num_slots):
+        fuente_cantidad = pygame.font.SysFont("Arial", 14, bold=True)
+        barra_x = inventario.posicion_barra[0]
+        barra_y = inventario.posicion_barra[1]
+        
+        for i in range(inventario.num_slots_barra):
             x = barra_x + i * 55
             y = barra_y
             pygame.draw.rect(self.pantalla, (60, 60, 70), (x, y, 50, 50))
+            
             if inventario.item_seleccionado_barra == i:
                 pygame.draw.rect(self.pantalla, (255, 255, 0), (x - 2, y - 2, 54, 54), 3)
-            if i>=0 and i < len(inventario.barra_rapida):
-                item = inventario.barra_rapida[i][0]
+            
+            if i >= 0 and i < len(inventario.barra_rapida) and inventario.barra_rapida[i]:
+                grupo = inventario.barra_rapida[i]
+                item = grupo[0]
                 self.pantalla.blit(item.imagen, (x + 10, y + 10))
+                
+                # Mostrar cantidad si hay más de uno
+                cantidad = len(grupo)
+                if cantidad > 1:
+                    texto_str = str(cantidad)
+
+                    # Sombra
+                    sombra = fuente_cantidad.render(texto_str, True, (0, 0, 0))
+                    rect_sombra = sombra.get_rect(topright=(x + 48, y + 3))
+                    self.pantalla.blit(sombra, rect_sombra)
+
+                    # Texto principal
+                    texto = fuente_cantidad.render(texto_str, True, (255, 255, 0))
+                    rect_texto = texto.get_rect(topright=(x + 47, y + 2))
+                    self.pantalla.blit(texto, rect_texto)

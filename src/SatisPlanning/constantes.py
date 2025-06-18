@@ -48,3 +48,11 @@ HERRAMIENTAS = {
 CATEGORIAS = ["Bloques", "Herramientas"]
 
 #hay que modificar por que va a quedar un poco obsoleto muchas de estas variables, ya que tenemos que pensar que de verdad queremos que sea constante y que deseamos que sea modificable, la gravedad, salto, velocidad del personaje, son cosas que no deberian ir por que son modificables desde otros lados, por lo tanto solo usar esta clase cuando realmente lo amerite y para cosas inmovibles
+
+
+# Items
+ITEM_POCIONES =[f"assets/pociones/sprite_{i}.png" for i in range(5)]
+#ITEM_HACHA=[obtener_ruta_asset(f"/hacha/sprite_{i}.png") for i in range(3)]
+#ITEM_ESPADA=[obtener_ruta_asset(f"/espada/sprite_{i}.png") for i in range(5)]
+ITEM_ARMADURA=[f"assets/armadura/sprite_{i}.png" for i in range(3)]
+ITEM_MINERALES=[f"assets/minerales/sprite_{i}.png" for i in range(13,20)]

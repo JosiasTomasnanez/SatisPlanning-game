@@ -20,3 +20,4 @@ def obtener_posicion_mouse():
     """
     return pygame.mouse.get_pos()
 #esta clase funciona bien y nos puede servir para muchas cosas que exedan las responsabilidades del juego, por ejemplo aca podemos tener la funcion para cargar  y leer el archivo json de guardado de progreso de nuestro juego, o por otra parte podemos tener archivos txt de dialogos de personajes y que sean leidos por metodos de esta clase y puestos en string para enviarlos a otras clases que nesesiten ciertos dialogos de algun archivo
+

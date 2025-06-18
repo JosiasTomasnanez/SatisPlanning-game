@@ -6,68 +6,48 @@ class Inventario:
     def __init__(self):
         # Tamaño deseado para las imágenes en el inventario y la barra rápida
         self.posicion_inventario_actual= (1,1) 
-        self.item_seleccionado_barra=0
         self.tamanio_filas=10
         self.tamanio_col=6
         self.tamanio_icono = (30, 30)  # Cambiado de icon_size a tamanio_icono
         self.textura_vacia=""
-        
+        self.num_slots_barra=9
         
         # Inventario inicializado con bloques de tierra, piedra y pasto en la barra rápida
         
         self.matrix = [[[] for _ in range(self.tamanio_col)] for _ in range(self.tamanio_filas)] 
+        #inicializar inventario
+        for i in range(5):
+            self.agregar_item(Objeto(0, 0, 30, 30, ct.ITEM_POCIONES[0], dinamico=False,tangible=True))
+        for i in range(3):
+            self.agregar_item(Objeto(0, 0, 30, 30, ct.ITEM_POCIONES[1], dinamico=False, tangible=True))
+        for i in range(4):
+            self.agregar_item(Objeto(0, 0, 30, 30, ct.ITEM_POCIONES[2], dinamico=False,tangible=True))
+        for i in range(7):
+            self.agregar_item(Objeto(0, 0, 30, 30, ct.ITEM_POCIONES[3], dinamico=False,tangible=True))
+        for i in range(8):
+            self.agregar_item(Objeto(0, 0, 30, 30, ct.ITEM_POCIONES[4], dinamico=False,tangible=True))
+        for i in range(11):
+            self.agregar_item(Objeto(0, 0, 30, 30, ct.ITEM_MINERALES[0], dinamico=False,tangible=True))
+        for i in range(2):
+            self.agregar_item(Objeto(0, 0, 30, 30, ct.ITEM_MINERALES[1], dinamico=False,tangible=True))
+        for i in range(6):
+            self.agregar_item(Objeto(0, 0, 30, 30, ct.ITEM_MINERALES[2], dinamico=False, tangible=True))
+        for i in range(12):
+            self.agregar_item(Objeto(0, 0, 30, 30, ct.ITEM_MINERALES[3], dinamico=False,tangible=True))
+        for i in range(2):
+            self.agregar_item(Objeto(0, 0, 30, 30, ct.ITEM_MINERALES[4], dinamico=False,tangible=True))
+        for i in range(3):
+            self.agregar_item(Objeto(0, 0, 30, 30, ct.ITEM_MINERALES[5], dinamico=False,tangible=True))
+        for i in range(7):
+            self.agregar_item(Objeto(0, 0, 30, 30, ct.ITEM_MINERALES[6], dinamico=False,tangible=True))
         
+        self.barra_rapida = [[] for _ in range(self.num_slots_barra)]  
 
-        self.matrix[0][0].append(Objeto(0, 0, 30, 30, ct.TEXTURA_TIERRA, dinamico=False,tangible=True))
-        self.matrix[0][0].append(Objeto(0, 0, 30, 30, ct.TEXTURA_TIERRA, dinamico=False,tangible=True))
-        self.matrix[0][0].append(Objeto(0, 0, 30, 30, ct.TEXTURA_TIERRA, dinamico=False,tangible=True))
-
-        self.matrix[0][1].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PIEDRA, dinamico=False, tangible=True))
-        self.matrix[0][1].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PIEDRA, dinamico=False, tangible=True))
-        self.matrix[0][1].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PIEDRA, dinamico=False, tangible=True))
-        
-        self.matrix[0][2].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PASTO, dinamico=False,tangible=True))
-        self.matrix[0][2].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PASTO, dinamico=False,tangible=True))
-        self.matrix[0][2].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PASTO, dinamico=False,tangible=True))
-
-        self.matrix[0][3].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PASTO, dinamico=False,tangible=True))
-
-        self.matrix[0][4].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PASTO, dinamico=False,tangible=True))
-
-        self.matrix[0][5].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PIEDRA, dinamico=False,tangible=True))
-
-        
-        #columnas
-        self.matrix[1][0].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PIEDRA, dinamico=False, tangible=True))
-        self.matrix[1][0].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PIEDRA, dinamico=False, tangible=True))
-        self.matrix[1][0].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PIEDRA, dinamico=False, tangible=True))
-        
-        self.matrix[2][0].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PASTO, dinamico=False,tangible=True))
-        self.matrix[2][0].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PASTO, dinamico=False,tangible=True))
-        self.matrix[2][0].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PASTO, dinamico=False,tangible=True))
-
-        self.matrix[3][0].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PASTO, dinamico=False,tangible=True))
-
-        self.matrix[4][0].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PASTO, dinamico=False,tangible=True))
-
-        self.matrix[5][0].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PASTO, dinamico=False,tangible=True))
-
-        self.matrix[6][0].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PASTO, dinamico=False,tangible=True))
-        
-        self.matrix[7][0].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PASTO, dinamico=False,tangible=True))
-
-        self.matrix[8][0].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PASTO, dinamico=False,tangible=True))
-
-        self.matrix[9][0].append(Objeto(0, 0, 30, 30, ct.TEXTURA_PASTO, dinamico=False,tangible=True))
-
-        self.matrix[8][3].append(Objeto(0, 0, 30, 30, ct.TEXTURA_TIERRA, dinamico=False,tangible=True))
-        
-        
-        
-        self.barra_rapida =[] 
-        self.barra_rapida.append(self.matrix[0][0]) 
-        self.barra_rapida.append(self.matrix[0][1])
-        #self.categoria_actual = "Bloques"        
+        self.asignar_item_a_barra_rapida(0, 0, 0)  # Asignar el primer item a la barra rápida
+        self.asignar_item_a_barra_rapida(1, 1, 2)
+        self.asignar_item_a_barra_rapida(2, 0, 2) 
+        self.asignar_item_a_barra_rapida(3, 1, 3)  
+        self.asignar_item_a_barra_rapida(4, 0, 1)      
         self.visible = False
         self.posicion = (ct.ANCHO - 220, 50)
         
@@ -75,11 +55,19 @@ class Inventario:
         self.margen = 5
         self.ancho = (self.tamanio_icono[0] + self.margen)*self.tamanio_col
         self.altura_total =  (self.tamanio_icono[0] + self.margen)*self.tamanio_filas-4
+        
+        #caracteristicas de la barra rapida
+        self.item_seleccionado_barra=0
+        self.num_slots_barra = 9
+        ancho_barra = self.num_slots_barra * 50 + (self.num_slots_barra - 1) * 5 
+        barra_x = (ct.ANCHO - ancho_barra) // 2
+        barra_y = ct.ALTO - 60
+        self.posicion_barra=(barra_x,barra_y)
+
 
     def  cantidad_items_posicion(self, x, y):
         if self._posicion_ocupada_cuadricula(x,y):
             return len(self.matrix[x][y])
-        
         return   0
     
     def existeItemEnPosicion(self,x,y, objeto):
@@ -112,27 +100,36 @@ class Inventario:
         return encontrado 
     
     def agregar_item(self,objeto):
-        encontrado=False
+        coincide_tipo=False
         pos_i = pos_j = -1
         i=0
-        while not encontrado and i < self.tamanio_filas:
+        while not coincide_tipo and i < self.tamanio_filas:
             j = 0
-            while not encontrado and j < self.tamanio_col:
+            while not coincide_tipo and j < self.tamanio_col:
                 for obj in self.matrix[i][j]:
                     if obj.tipo_igual(objeto):
-                        encontrado = True
+                        coincide_tipo = True
                         pos_i, pos_j = i, j
                         break
                 j += 1
             i += 1
 
-        if encontrado:
+        if coincide_tipo:
             if objeto in self.matrix[pos_i][pos_j]:
-                print(" item ya existe en el inventario")
+                #print(" item ya existe en el inventario")
                 return False
             else:
+                #print("agregar item en posicion:(",pos_i,",",pos_j,")")
                 self.matrix[pos_i][pos_j].append(objeto)
                 return True
+        else:
+            # Si no hay coincidencia de tipo, buscar una posición vacía
+            for i in range(self.tamanio_filas):
+                for j in range(self.tamanio_col):
+                    if len(self.matrix[i][j]) == 0:
+                        #print("agregar item en posicion:(",i,",",j,")")
+                        self.matrix[i][j].append(objeto)
+                        return True
     
     def posicion_ocupada_cuadricula(self,x,y):
         if not self.pos_inventario_valida(x,y):
@@ -222,8 +219,19 @@ class Inventario:
         return self.barra_rapida[indice]
     
     def limpiar_pos_barra(self, indice):
-        if 0 <= indice < 9:  # Asegurarse de que el índice esté dentro del rango de la barra rápida
-            self.barra_rapida[self.item_seleccionado_barra]=[] 
+        if 0 <= indice < len(self.barra_rapida):  # Asegurarse de que el índice esté dentro del rango de la barra rápida
+            self.barra_rapida[indice]=[] 
         else:
             print("error limpiar. indice barra rapida no valido")
 
+    def asignar_item_a_barra_rapida(self, indice_barra, x, y):
+        if not (0 <= indice_barra < len(self.barra_rapida)):
+            print("Error: índice de barra rápida fuera de rango")
+            return False
+
+        if not self.pos_inventario_valida(x, y):
+            print("Error: posición de inventario no válida")
+            return False
+  
+        self.barra_rapida[indice_barra] = self.obtener_grupo_items_matrix(x, y)
+        return True

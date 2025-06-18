@@ -36,7 +36,7 @@ class ComponenteInventario(Componente):
                         item_soltado.actualizar_posicion(item_soltado.x, item_soltado.y - 1)
                     self.mundo.agregar_objeto(item_soltado, True)
             
-        if teclas.type == pygame.MOUSEBUTTONDOWN and self.inventario.visible:
+        if teclas.type == pygame.MOUSEBUTTONDOWN and teclas.button == 1 and self.inventario.visible:
 
             mouse_x, mouse_y = teclas.pos
             rect_matrix = rect = pygame.Rect(
@@ -49,6 +49,7 @@ class ComponenteInventario(Componente):
                 self.click_item_matrix(mouse_x,mouse_y)
             #else:
                 #debería revisar si hace click en la barra rapida
+                
                 
         
         
