@@ -2,7 +2,7 @@ from SatisPlanning.entidades.personaje import Personaje
 from SatisPlanning.utilidades import obtener_ruta_asset
 from SatisPlanning.componentes.componente_mover import ComponenteMover
 from SatisPlanning.componentes.componente_animacion import ComponenteAnimacion
-from SatisPlanning.componentes.comportamiento_movimiento import MovimientoAleatorio, MovimientoPersecucion
+from SatisPlanning.componentes.comportamiento_movimiento import EstrategiaMovimientoAleatorio, EstrategiaMovimientoPersecucion
 import random
 import pygame
 import SatisPlanning.constantes as ct
@@ -28,11 +28,12 @@ class Zombie(Personaje):
         self.es_enemigo = True
         
         # Estrategias de movimiento (Strategy)
-        self.movimiento_aleatorio = MovimientoAleatorio()
-        self.movimiento_persecucion = MovimientoPersecucion(distancia_persecucion)
+        self.movimiento_aleatorio = EstrategiaMovimientoAleatorio()
+        self.movimiento_persecucion = EstrategiaMovimientoPersecucion(distancia_persecucion)
         self.comportamiento_movimiento = self.movimiento_aleatorio
 
         self.vida = 100  # Puntos de vida del zombie
+        self.cambiar_tamano(ancho, alto)
 
     def set_mundo(self, mundo):
         self.componente_mover.set_mundo(mundo)
