@@ -60,3 +60,7 @@ class Zombie(Personaje):
     def dibujar(self, pantalla):
         # Dibuja el sprite alineado con la hitbox
         pantalla.blit(self.sprites[0], self.hitbox.topleft)
+
+    def notificar_colision(self, objeto):
+        # No hacer nada, solo el jugador recibe daño en la colisión
+        pass

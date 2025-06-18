@@ -6,6 +6,7 @@ from SatisPlanning.componentes.componente_animacion import ComponenteAnimacion
 from SatisPlanning.componentes.componente_inventario import ComponenteInventario
 import pygame
 import SatisPlanning.constantes as ct
+import time
 
 class PersonajeJugador(Personaje):
     def __init__(self, x, y, ancho, alto):
@@ -35,6 +36,12 @@ class PersonajeJugador(Personaje):
         # Componente para manejar el movimiento
         self.componente_mover = ComponenteMover(self, self.componente_animacion)
 
+        # Vida y cooldown de daño
+        self.vida = 100
+        self._ultimo_danio = 0  # timestamp del último daño recibido
+        self.cooldown_danio = 2.0  # segundos
+        self.es_jugador = True
+
     def obtener_inventario(self):
         return self.componente_inventario.inventario
     
@@ -50,3 +57,17 @@ class PersonajeJugador(Personaje):
         # Actualiza el inventario según eventos individuales
         self.componente_inventario.actualizar(evento)
         # Puedes agregar aquí otros componentes que reaccionen a eventos
+
+    def recibir_danio(self, cantidad):
+        ahora = time.time()
+        if ahora - self._ultimo_danio >= self.cooldown_danio:
+            self.vida -= cantidad
+            self._ultimo_danio = ahora
+            if self.vida < 0:
+                self.vida = 0
+            print(f"¡Jugador recibió {cantidad} de daño! Vida restante: {self.vida}")
+
+    def notificar_colision(self, objeto):
+        # Si colisiona con un enemigo, recibe daño
+        if hasattr(objeto, 'es_enemigo') and getattr(objeto, 'es_enemigo', False):
+            self.recibir_danio(10)

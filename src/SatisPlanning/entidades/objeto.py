@@ -67,12 +67,12 @@ class Objeto:
         self.componentes.append(componente)
 
     def notificar_colision(self, objeto):
+        #print("choque")
         """
         Notifica al personaje sobre una colisión con otro objeto.
 
         :param objeto: Objeto con el que colisiona.
         """
-        pass
 
     def actualizar(self, dt):
         """

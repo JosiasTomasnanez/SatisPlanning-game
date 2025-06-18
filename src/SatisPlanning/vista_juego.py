@@ -18,6 +18,7 @@ class VistaJuego:
         self.dibujar_personaje_centrado(personaje)
         self.dibujar_inventario(personaje.obtener_inventario())
         self.dibujar_enemigos(enemigos, personaje)
+        self.dibujar_vida_jugador(personaje)
 
         pygame.display.flip()
 
@@ -101,6 +102,15 @@ class VistaJuego:
             if i < len(inventario.items):
                 item = inventario.items[i]
                 self.pantalla.blit(item.imagen, (x + 10, y + 10))
+
+    def dibujar_vida_jugador(self, personaje):
+        fuente = pygame.font.SysFont("Arial", 28, bold=True)
+        texto = f"Vida: {personaje.vida}"
+        color = (255, 0, 0) if personaje.vida <= 3 else (255, 255, 255)
+        superficie_texto = fuente.render(texto, True, color)
+        x = self.pantalla.get_width() - superficie_texto.get_width() - 20
+        y = 10
+        self.pantalla.blit(superficie_texto, (x, y))
 
     def obtener_eventos(self):
         """
