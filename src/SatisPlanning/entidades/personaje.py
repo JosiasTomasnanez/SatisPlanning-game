@@ -59,3 +59,11 @@ class Personaje(Objeto):
         """
         self.componente_mover.actualizar(teclas)
         self.componente_animacion.actualizar()
+
+    def set_sprites(self, sprites):
+        """
+        Cambia el paquete de sprites del personaje y actualiza el componente de animación.
+        :param sprites: Lista de imágenes (superficies pygame) para animación.
+        """
+        self.sprites = sprites
+        self.componente_animacion.set_sprites(sprites)

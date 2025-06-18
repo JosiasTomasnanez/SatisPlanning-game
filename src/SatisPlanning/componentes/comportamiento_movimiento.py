@@ -53,7 +53,7 @@ class EstrategiaMovimientoPersecucion(EstrategiaMovimiento):
         dx = jugador.x - enemigo.x
         
         # Decidir dirección basada en la distancia
-        if abs(dx) < self.distancia_activacion:
+        if abs(dx) < self.distancia_activacion and abs(dx) > 1:
             direccion = 1 if dx > 0 else -1
         else:
             direccion = 0

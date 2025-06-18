@@ -49,5 +49,54 @@ SPRITES_ENEMIGO = [
     )
     for i in range(1, 9)
 ]
+# Enemigo nivel 2: ea1.png a ea8.png
+SPRITES_ENEMIGO_2 = [
+    scale_keep_aspect(
+        pygame.image.load(obtener_ruta_asset(f"ea{i}.png")),
+        (40, 40),
+        False
+    )
+    for i in range(1, 9)
+]
+
+# Enemigo nivel 3: ev1.png a ev8.png
+SPRITES_ENEMIGO_3 = [
+    scale_keep_aspect(
+        pygame.image.load(obtener_ruta_asset(f"ev{i}.png")),
+        (40, 40),
+        False
+    )
+    for i in range(1, 9)
+]
+
+# Boss 1: bma1.png a bma8.png
+SPRITES_BOSS_1 = [
+    scale_keep_aspect(
+        pygame.image.load(obtener_ruta_asset(f"bma{i}.png")),
+        (70, 70),
+        False
+    )
+    for i in range(1, 9)
+]
+
+# Boss 2: bv1.png a bv8.png
+SPRITES_BOSS_2 = [
+    scale_keep_aspect(
+        pygame.image.load(obtener_ruta_asset(f"bv{i}.png")),
+        (70, 70),
+        False
+    )
+    for i in range(1, 9)
+]
+
+# Boss 3: bm1.png a bm8.png
+SPRITES_BOSS_3 = [
+    scale_keep_aspect(
+        pygame.image.load(obtener_ruta_asset(f"bm{i}.png")),
+        (70, 70),
+        False
+    )
+    for i in range(1, 9)
+]
 # Categorías
 CATEGORIAS = ["Bloques", "Herramientas"]

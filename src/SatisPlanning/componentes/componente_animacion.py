@@ -24,7 +24,7 @@ class ComponenteAnimacion(Componente):
 
     def set_sprites(self, sprites):
         """
-        Permite actualizar la lista de sprites y el sprite idle cuando cambian de tamaño.
+        Permite actualizar la lista de sprites y el sprite idle cuando cambian de tamaño o paquete.
         """
         self.sprites = sprites
         self.sprite_idle = sprites[0]
