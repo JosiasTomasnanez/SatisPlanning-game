@@ -11,10 +11,26 @@ class Inventario:
         self.tamanio_icono = (30, 30)  # Cambiado de icon_size a tamanio_icono
         self.textura_vacia=""
         self.num_slots_barra=9
+        self.item_seleccionado_barra=0
         
         # Inventario inicializado con bloques de tierra, piedra y pasto en la barra rápida
         
         self.matrix = [[[] for _ in range(self.tamanio_col)] for _ in range(self.tamanio_filas)] 
+        self.barra_rapida = [[] for _ in range(self.num_slots_barra)]  
+        self.visible = False
+        self.posicion = (ct.ANCHO - 220, 50)
+        self.alto_item = 40
+        self.margen = 5
+        self.ancho = (self.tamanio_icono[0] + self.margen)*self.tamanio_col
+        self.altura_total =  (self.tamanio_icono[0] + self.margen)*self.tamanio_filas-4
+        
+        #caracteristicas de la barra rapida
+        
+        ancho_barra = self.num_slots_barra * 50 + (self.num_slots_barra - 1) * 5 
+        barra_x = (ct.ANCHO - ancho_barra) // 2
+        barra_y = ct.ALTO - 60
+        self.posicion_barra=(barra_x,barra_y)
+
         #inicializar inventario
         for i in range(5):
             self.agregar_item(Objeto(0, 0, 30, 30, ct.ITEM_POCIONES[0], dinamico=False,tangible=True))
@@ -41,29 +57,12 @@ class Inventario:
         for i in range(7):
             self.agregar_item(Objeto(0, 0, 30, 30, ct.ITEM_MINERALES[6], dinamico=False,tangible=True))
         
-        self.barra_rapida = [[] for _ in range(self.num_slots_barra)]  
-
         self.asignar_item_a_barra_rapida(0, 0, 0)  # Asignar el primer item a la barra rápida
         self.asignar_item_a_barra_rapida(1, 1, 2)
         self.asignar_item_a_barra_rapida(2, 0, 2) 
         self.asignar_item_a_barra_rapida(3, 1, 3)  
-        self.asignar_item_a_barra_rapida(4, 0, 1)      
-        self.visible = False
-        self.posicion = (ct.ANCHO - 220, 50)
-        
-        self.alto_item = 40
-        self.margen = 5
-        self.ancho = (self.tamanio_icono[0] + self.margen)*self.tamanio_col
-        self.altura_total =  (self.tamanio_icono[0] + self.margen)*self.tamanio_filas-4
-        
-        #caracteristicas de la barra rapida
-        self.item_seleccionado_barra=0
-        self.num_slots_barra = 9
-        ancho_barra = self.num_slots_barra * 50 + (self.num_slots_barra - 1) * 5 
-        barra_x = (ct.ANCHO - ancho_barra) // 2
-        barra_y = ct.ALTO - 60
-        self.posicion_barra=(barra_x,barra_y)
-
+        self.asignar_item_a_barra_rapida(4, 0, 1) 
+          
 
     def  cantidad_items_posicion(self, x, y):
         if self._posicion_ocupada_cuadricula(x,y):
@@ -205,15 +204,7 @@ class Inventario:
         else:
             print("error. indice barra rapida no valido")
 
-    def soltar_item_seleccionado_barra(self):
-        """
-        Elimina el elemento actualmente seleccionado de la barra rápida y lo devuelve.
-        :return: El objeto eliminado o None si no hay un objeto seleccionado.
-        """
-        if self.item_seleccionado_barra>=0 and self.item_seleccionado_barra < len(self.barra_rapida):
-            elemento_soltado = (self.barra_rapida[self.item_seleccionado_barra]).pop()  # Eliminar y guardar el elemento seleccionado
-            return elemento_soltado  # Devolver el elemento eliminado
-        return None  # No hay elemento para soltar
+   
     
     def obtener_grupo_items_barra(self,indice):
         return self.barra_rapida[indice]
@@ -223,15 +214,23 @@ class Inventario:
             self.barra_rapida[indice]=[] 
         else:
             print("error limpiar. indice barra rapida no valido")
-
+            
     def asignar_item_a_barra_rapida(self, indice_barra, x, y):
         if not (0 <= indice_barra < len(self.barra_rapida)):
             print("Error: índice de barra rápida fuera de rango")
             return False
-
         if not self.pos_inventario_valida(x, y):
             print("Error: posición de inventario no válida")
-            return False
-  
+            return False  
         self.barra_rapida[indice_barra] = self.obtener_grupo_items_matrix(x, y)
         return True
+    
+    def soltar_item_seleccionado_barra(self):
+        """
+        Elimina el elemento actualmente seleccionado de la barra rápida y lo devuelve.
+        :return: El objeto eliminado o None si no hay un objeto seleccionado.
+        """
+        if  0<=self.item_seleccionado_barra < len(self.barra_rapida):
+            elemento_soltado = (self.barra_rapida[self.item_seleccionado_barra]).pop()  # Eliminar y guardar el elemento seleccionado
+            return elemento_soltado  # Devolver el elemento eliminado
+        return None  # No hay elemento para soltar

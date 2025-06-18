@@ -27,7 +27,7 @@ class ComponenteInventario(Componente):
 
             # Suelta el item seleccionado con la tecla 'g'
             if teclas.key == pygame.K_g:
-                item_soltado = self.inventario.soltar_item_seleccionado()
+                item_soltado = self.inventario.soltar_item_seleccionado_barra()
                 if item_soltado:
                     # Usar atributos del propietario para determinar la posición de soltado
                     if self.propietario.direccion == 1:
