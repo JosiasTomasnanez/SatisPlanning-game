@@ -241,7 +241,11 @@ class Inventario:
         if not self.pos_inventario_valida(x, y):
             print("Error: posición de inventario no válida")
             return False  
-        self.barra_rapida[indice_barra] = self.obtener_grupo_items_matrix(x, y)
+        grupo = self.obtener_grupo_items_matrix(x,y)
+        for i in range(len(self.barra_rapida)):
+            if grupo is self.barra_rapida[i]:
+                self.limpiar_pos_barra(i)
+        self.barra_rapida[indice_barra] = grupo
         return True
     
     def soltar_item_seleccionado_barra(self):

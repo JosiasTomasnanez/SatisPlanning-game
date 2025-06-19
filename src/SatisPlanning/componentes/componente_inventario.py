@@ -22,7 +22,10 @@ class ComponenteInventario(Componente):
             if pygame.K_1 <= teclas.key <= pygame.K_9:
                 indice_barra = teclas.key - pygame.K_1
                 self.inventario.seleccionar_barra_rapida(indice_barra)
-
+            if self.inventario.visible and teclas.key == pygame.K_c:
+                pos_inv=self.inventario.posicion_inventario_actual
+                idx_barra= self.inventario.item_seleccionado_barra
+                self.inventario.asignar_item_a_barra_rapida( idx_barra, pos_inv[0], pos_inv[1])
             if teclas.key == pygame.K_g:
                 from SatisPlanning.entidades.suelo import Suelo
                 if(self.inventario.visible):

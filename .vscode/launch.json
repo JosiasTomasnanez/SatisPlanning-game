@@ -5,13 +5,15 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Current File",
+            "name": "Python: Ejecutar __main__.py como módulo",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
+            "module": "SatisPlanning",
             "console": "integratedTerminal",
-            "cwd": "${fileDirname}",
-            "env": {"PYTHONPATH": "${workspaceFolder}/src${pathSeparator}${env:PYTHONPATH}"}
+            "cwd": "${workspaceFolder}/src",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src${pathSeparator}${env:PYTHONPATH}"
+            }
         },
         {
             "name": "Python Debugger: Current File",
