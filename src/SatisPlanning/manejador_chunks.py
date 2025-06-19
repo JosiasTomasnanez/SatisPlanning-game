@@ -1,6 +1,6 @@
-from SatisPlanning.entidades.mapa import Mapa
+from .mapa import Mapa
 import SatisPlanning.constantes as ct
-from SatisPlanning.entidades.suelo import Suelo
+from .entidades.suelo import Suelo
 
 class ManjeadorChunks:
     def __init__(self, mapa):
@@ -144,4 +144,10 @@ class ManjeadorChunks:
         chunk_x = chunk_index * ct.COLUMNAS * ct.TAMANIO_BLOQUE
         self.objetos_por_chunk.setdefault(chunk_x, []).append(objeto)
 
-# mejora: persistencia en los bloques
+    def eliminar_objeto(self, objeto):
+        """
+        Elimina el objeto de todos los chunks donde esté presente.
+        """
+        for chunk in self.objetos_por_chunk.values():
+            if objeto in chunk:
+                chunk.remove(objeto)

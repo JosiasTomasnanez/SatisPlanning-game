@@ -1,6 +1,6 @@
 import pygame
 import SatisPlanning.constantes as ct
-from SatisPlanning.componentes.componente import Componente
+from .componente import Componente
 
 class ComponenteMover(Componente):
     def __init__(self, personaje, componente_animacion):
@@ -26,7 +26,7 @@ class ComponenteMover(Componente):
         mundo = self.mundo
 
         # Movimiento horizontal
-        personaje.vel_x = (teclas[pygame.K_d] - teclas[pygame.K_a]) * ct.VELOCIDAD_PERSONAJE
+        personaje.vel_x = (teclas[pygame.K_d] - teclas[pygame.K_a]) * personaje.velocidad
         nueva_hitbox = personaje.hitbox.move(personaje.vel_x, 0)
         if not mundo.colisiona(nueva_hitbox, personaje):
             personaje.hitbox = nueva_hitbox
@@ -41,7 +41,7 @@ class ComponenteMover(Componente):
         if not personaje.en_el_suelo:
             personaje.vel_y += ct.GRAVEDAD
         if (teclas[pygame.K_w] or teclas[pygame.K_SPACE]) and personaje.en_el_suelo:
-            personaje.vel_y = -ct.FUERZA_SALTO
+            personaje.vel_y = -personaje.fuerza_salto
             personaje.en_el_suelo = False
 
         # Movimiento vertical
@@ -68,7 +68,4 @@ class ComponenteMover(Componente):
         """
         self.mover(teclas)
 
-# hacer que este componente pueda ser modificado por algun metodo
-#de notificacion para que pueda cambiar su comportamiento
-#por ejemplo , manejo de gravedad,salto,etc
-#tambien otro de colision por si un arma pega
+

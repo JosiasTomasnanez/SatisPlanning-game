@@ -1,7 +1,8 @@
 import pygame
+import os
 
 class Objeto:
-    def __init__(self, x, y, ancho, alto, ruta_imagen, dinamico, tangible=True):
+    def __init__(self, x, y, ancho, alto, ruta_imagen, dinamico, tangible=True, ajustar_hitbox=True):
         """
         Inicializa un objeto con posición, hitbox, una imagen y un cuerpo físico en el mundo.
 
@@ -12,18 +13,26 @@ class Objeto:
         :param ruta_imagen: Ruta de la imagen en la carpeta assets.
         :param dinamico: Define si el objeto es dinámico (True) o estático (False).
         :param tangible: Define si el objeto es tangible (True) o no (False).
+        :param ajustar_hitbox: Define si se ajusta la hitbox con desplazamiento (True) o sin desplazamiento (False).
         """
         self.x, self.y = x, y
         self.vel_x = self.vel_y = 0
         self.direccion = 1
         self.ancho = ancho
         self.alto = alto
+<<<<<<< HEAD
         self.hitbox = pygame.Rect(x + 17, y + 20, ancho - 4, alto)
         self.ruta_imagen=ruta_imagen
         self.imagen = pygame.image.load(ruta_imagen)
+=======
+        ruta_final = ruta_imagen
+        if not os.path.isabs(ruta_imagen):
+            ruta_final = os.path.join(os.path.dirname(__file__), "assets", ruta_imagen)
+        self.imagen = pygame.image.load(ruta_final)
+>>>>>>> 16c3422063338c885103fdfd189fad8b95f5bad3
         self.imagen = pygame.transform.scale(self.imagen, (ancho, alto))  # Ajustar tamaño de la imagen
         self.dinamico = dinamico
-        self.tangible = tangible  # Nuevo atributo tangible
+        self.tangible = tangible  # Indica si el objeto es tangible
         self.componentes = []  # Lista de componentes asociadas al objeto
         
     def obtener_ruta_imagen(self):
@@ -33,12 +42,28 @@ class Objeto:
             return objeto.obtener_ruta_imagen() == self.ruta_imagen
         return False
 
+        if ajustar_hitbox:
+            # Reducción horizontal de la hitbox para personajes y enemigos
+            from SatisPlanning.entidades.personaje_jugador import PersonajeJugador
+            from SatisPlanning.entidades.enemigo import Enemigo
+            if isinstance(self, PersonajeJugador) or isinstance(self, Enemigo):
+                hitbox_ancho = int(ancho * 0.6)
+                hitbox_x = x + (ancho - hitbox_ancho) // 2
+                self.hitbox = pygame.Rect(hitbox_x, y + 20, hitbox_ancho, alto)
+            else:
+                # La hitbox se ajusta con un desplazamiento respecto a la posición del objeto
+                self.hitbox = pygame.Rect(x + 17, y + 20, ancho - 4, alto)
+        else:
+            # Hitbox exacta al tamaño y posición del objeto (para armas)
+            self.hitbox = pygame.Rect(x, y, ancho, alto)
+
     def dibujar(self, pantalla):
         """
         Dibuja el objeto en la pantalla y su hitbox para depuración.
         """
         pantalla.blit(self.imagen, (self.x, self.y))
-        pygame.draw.rect(pantalla, (255, 0, 0), self.hitbox, 2)  # Dibuja el hitbox (opcional para depuración)
+        # Dibuja el hitbox en rojo (opcional para depuración)
+        pygame.draw.rect(pantalla, (255, 0, 0), self.hitbox, 2)
 
     def actualizar_posicion(self, x, y):
         """
@@ -61,7 +86,8 @@ class Objeto:
         :param desplazamiento_y: Desplazamiento en el eje Y.
         """
         pantalla.blit(self.imagen, (desplazamiento_x, desplazamiento_y))
-        # pygame.draw.rect(pantalla, (255, 0, 0), self.hitbox.move(desplazamiento_x - self.x, desplazamiento_y - self.y), 2)  # Opcional para depuración
+        # Para depuración, se puede dibujar la hitbox desplazada
+        # pygame.draw.rect(pantalla, (255, 0, 0), self.hitbox.move(desplazamiento_x - self.x, desplazamiento_y - self.y), 2)
 
     def agregar_componente(self, componente):
         """
@@ -77,7 +103,6 @@ class Objeto:
 
         :param objeto: Objeto con el que colisiona.
         """
-       
         pass
 
     def actualizar(self, dt):
@@ -89,4 +114,4 @@ class Objeto:
         for componente in self.componentes:
             componente.actualizar(dt)
 
-#yo creo que esta bien no se me ocurre algo que sea bien general que pueda agregarse aca
+
