@@ -1,15 +1,15 @@
-from .vista_menu import VistaMenu
-from .presentador_menu import PresentadorMenu
-from .vista_juego import VistaJuego
-from .presentador_juego import PresentadorJuego
-from .gestor_presentadores import GestorPresentadores
-from .camara import Camara
-from .entidades.personaje_jugador import PersonajeJugador
-from .mapa import Mapa
-from .manejador_chunks import ManjeadorChunks
-from .mundo import Mundo
-from .generador_monstruos import GeneradorMonstruos
-from .manejador_niveles import ManejadorNiveles
+from SatisPlanning.vista_menu import VistaMenu
+from SatisPlanning.presentador_menu import PresentadorMenu
+from SatisPlanning.vista_juego import VistaJuego
+from SatisPlanning.presentador_juego import PresentadorJuego
+from SatisPlanning.gestor_presentadores import GestorPresentadores
+from SatisPlanning.camara import Camara
+from SatisPlanning.entidades.personaje_jugador import PersonajeJugador
+from SatisPlanning.mapa import Mapa
+from SatisPlanning.manejador_chunks import ManjeadorChunks
+from SatisPlanning.mundo import Mundo
+from SatisPlanning.generador_monstruos import GeneradorMonstruos
+from SatisPlanning.manejador_niveles import ManejadorNiveles
 import SatisPlanning.constantes as ct
 import random
 

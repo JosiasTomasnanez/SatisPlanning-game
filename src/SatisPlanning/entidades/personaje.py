@@ -1,5 +1,5 @@
 import pygame
-from .objeto import Objeto
+from SatisPlanning.entidades.objeto import Objeto
 from SatisPlanning.componentes.componente_mover import ComponenteMover
 from SatisPlanning.componentes.componente_animacion import ComponenteAnimacion
 from abc import abstractmethod

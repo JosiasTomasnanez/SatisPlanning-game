@@ -1,19 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "SatisPlanningGame"
 version = "1.0.0"
 description = "Un juego de aventura en 2d"
 authors = [
-  {name = "GloriousDevs", email = ""}
+  {name = "GloriousDevs", email = "gloriousdevs@example.com"}
 ]
 dependencies = [
   "pygame",
   "perlin-noise"
-
 ]
 requires-python = ">=3.10"
 
-[tool.setuptools]
-packages = ["SatisPlanning"]
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.briefcase]
 project-name = "SatisPlanning"
@@ -29,5 +32,4 @@ license = "GNU General Public License v3.0"
 formal-name = "Satiss Planning Game"
 sources = ["src/SatisPlanning"]
 entry-point = "SatisPlanning.__main__"
-#icon = "icono.ico"  # opcional
 

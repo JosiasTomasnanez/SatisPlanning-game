@@ -1,6 +1,6 @@
 import pygame
-from .utilidades import obtener_posicion_mouse
-from .componente import Componente
+from SatisPlanning.utilidades import obtener_posicion_mouse
+from SatisPlanning.componentes.componente import Componente
 
 class ComponenteDisparo(Componente):
     def __init__(self, personaje):

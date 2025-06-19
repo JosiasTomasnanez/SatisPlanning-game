@@ -1,9 +1,9 @@
 import pygame
-from .entidades.personaje_jugador import PersonajeJugador
-from .mapa import Mapa
-from .manejador_chunks import ManjeadorChunks
-from .generador_monstruos import GeneradorMonstruos
-from .manejador_niveles import ManejadorNiveles
+from SatisPlanning.entidades.personaje_jugador import PersonajeJugador
+from SatisPlanning.mapa import Mapa
+from SatisPlanning.manejador_chunks import ManjeadorChunks
+from SatisPlanning.generador_monstruos import GeneradorMonstruos
+from SatisPlanning.manejador_niveles import ManejadorNiveles
 
 class Mundo:
     def __init__(self, personaje, mapa, manejador_chunks, manejador_niveles):

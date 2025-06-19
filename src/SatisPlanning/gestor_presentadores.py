@@ -1,5 +1,5 @@
-from .entidades.personaje_jugador import PersonajeJugador
-from .mapa import Mapa
+from SatisPlanning.entidades.personaje_jugador import PersonajeJugador
+from SatisPlanning.mapa import Mapa
 
 class GestorPresentadores:
     def __init__(self, presentador_menu, vista_menu, presentador_juego, vista_juego):

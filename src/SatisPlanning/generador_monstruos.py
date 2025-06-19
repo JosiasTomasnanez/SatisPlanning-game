@@ -1,4 +1,4 @@
-from .entidades.enemigo import Enemigo
+from SatisPlanning.entidades.enemigo import Enemigo
 import SatisPlanning.constantes as ct
 
 SPRITES_POR_NIVEL = {

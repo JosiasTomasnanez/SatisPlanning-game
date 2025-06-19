@@ -1,4 +1,4 @@
-from .generador_monstruos import GeneradorMonstruos
+from SatisPlanning.generador_monstruos import GeneradorMonstruos
 
 class EstadoNivel:
     def actualizar(self, manejador, personaje):

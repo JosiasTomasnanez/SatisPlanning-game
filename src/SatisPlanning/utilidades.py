@@ -1,16 +1,24 @@
 # src/SatisPlanning/utils.py
 import os
 import pygame
+import sys
 
 def obtener_ruta_asset(ruta_relativa: str) -> str:
     """
-    Devuelve la ruta absoluta del asset desde el archivo actual.
+    Devuelve la ruta absoluta del asset, compatible con PyInstaller y ejecución local.
 
     :param ruta_relativa: Ruta relativa del asset dentro de la carpeta assets.
     :return: Ruta absoluta del asset.
     """
-    base_path = os.path.dirname(__file__)
+    try:
+        # Si está en PyInstaller
+        base_path = sys._MEIPASS
+    except AttributeError:
+        # Si está en desarrollo
+        base_path = os.path.abspath(os.path.dirname(__file__))
+
     return os.path.join(base_path, "assets", ruta_relativa)
+
 
 def obtener_posicion_mouse():
     """

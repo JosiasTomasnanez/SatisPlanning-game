@@ -1,5 +1,5 @@
 import pygame
-from .utilidades import obtener_ruta_asset, scale_keep_aspect
+from SatisPlanning.utilidades import obtener_ruta_asset, scale_keep_aspect
 
 ANCHO = 1280  # Ancho de la pantalla
 ALTO = 720  # Alto de la pantalla
