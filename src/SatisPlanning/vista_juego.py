@@ -74,7 +74,23 @@ class VistaJuego:
             #         enemigo_x = pj_centro_x - 120
             #     else:
             #         enemigo_x = pj_centro_x + 120
-            self.pantalla.blit(enemigo.componente_animacion.imagen_actual, (enemigo_x, enemigo_y))
+            sprite = enemigo.componente_animacion.imagen_actual
+            sprite_width = sprite.get_width()
+            sprite_height = sprite.get_height()
+            self.pantalla.blit(sprite, (enemigo_x, enemigo_y))
+
+            # --- DIBUJAR NÚMERO DE VIDA ENCIMA DE LA CABEZA ---
+            if hasattr(enemigo, "vida"):
+                fuente_vida = pygame.font.SysFont("Arial", 16, bold=True)
+                texto_vida = f"{int(enemigo.vida)}"
+                superficie_texto = fuente_vida.render(texto_vida, True, (255, 255, 255))
+                texto_rect = superficie_texto.get_rect(center=(enemigo_x + sprite_width // 2, enemigo_y - 12))
+                # Fondo negro translúcido para mejor visibilidad
+                fondo_texto = pygame.Surface((texto_rect.width + 4, texto_rect.height))
+                fondo_texto.set_alpha(180)
+                fondo_texto.fill((0, 0, 0))
+                self.pantalla.blit(fondo_texto, (texto_rect.x - 2, texto_rect.y))
+                self.pantalla.blit(superficie_texto, texto_rect)
 
     def dibujar_inventario(self, inventario):
         fuente = pygame.font.SysFont("Arial", 20)
