@@ -6,12 +6,16 @@ class EstadoNivel:
 
 class EstadoJugando(EstadoNivel):
     def actualizar(self, manejador, personaje):
-        # Elimina enemigos muertos
-        manejador.enemigos = [e for e in manejador.enemigos if not getattr(e, "muerto", False)]
-        derrotados = sum(1 for e in manejador.enemigos if getattr(e, "muerto", False))
-        manejador.enemigos_derrotados += derrotados
+        # Elimina enemigos muertos y aumenta el contador
+        enemigos_vivos = []
+        for e in manejador.enemigos:
+            if getattr(e, "muerto", False):
+                manejador.enemigos_derrotados += 1
+            else:
+                enemigos_vivos.append(e)
+        manejador.enemigos = enemigos_vivos
 
-        if manejador.enemigos_derrotados >= 20:
+        if manejador.enemigos_derrotados >= 5:
             manejador.cambiar_estado(EstadoBoss())
             manejador.spawn_boss(personaje)
         else:
@@ -20,14 +24,22 @@ class EstadoJugando(EstadoNivel):
 
 class EstadoBoss(EstadoNivel):
     def actualizar(self, manejador, personaje):
-        # Elimina enemigos muertos
-        manejador.enemigos = [e for e in manejador.enemigos if not getattr(e, "muerto", False)]
+        # Buscar el boss antes de filtrar enemigos
         boss = next((e for e in manejador.enemigos if getattr(e, "es_boss", False)), None)
+
+        # Elimina enemigos muertos
+        enemigos_vivos = []
+        for e in manejador.enemigos:
+            if not getattr(e, "muerto", False):
+                enemigos_vivos.append(e)
+        manejador.enemigos = enemigos_vivos
         if boss and getattr(boss, "muerto", False):
             manejador.nivel_actual += 1
             manejador.enemigos_derrotados = 0
             manejador.enemigos = [e for e in manejador.enemigos if not getattr(e, "es_boss", False)]
+            manejador.spawn_frame_counter = 0  # Reinicia el contador de spawn
             manejador.cambiar_estado(EstadoJugando())
+            return
         manejador._actualizar_enemigos(personaje)
 
 class ManejadorNiveles:
@@ -115,6 +127,11 @@ class ManejadorNiveles:
         y = py
         boss = self.generador_monstruos.crear_boss(x, y, nivel=self.nivel_actual)
         boss.set_mundo(self.mundo)
+        # Ajustar posición si colisiona con el suelo u otro objeto
+        while self.mundo.colisiona(boss.hitbox, boss):
+            y -= 1
+            boss.hitbox.y = y
+            boss.y = y
         self.enemigos.append(boss)
 
     def obtener_enemigos(self):

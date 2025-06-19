@@ -27,7 +27,7 @@ class FabricaJuego:
 
         # Configuración de monstruos y niveles centralizada aquí
         distancia_persecucion = 300
-        spawn_frame_interval = 250
+        spawn_frame_interval = 350
         max_enemigos = 5
         spawn_dist_min = 600
         spawn_dist_max = 700

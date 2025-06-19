@@ -40,6 +40,7 @@ class TestPersonajeJugador(unittest.TestCase):
         jugador = MagicMock(spec=PersonajeJugador)
         jugador.componente_mover = MagicMock()
         jugador.componente_animacion = MagicMock()
+        jugador.atacando = False  # Añadido para evitar AttributeError
         PersonajeJugador.actualizar(jugador, 'teclas')
         jugador.componente_mover.actualizar.assert_called_once_with('teclas')
         jugador.componente_animacion.actualizar.assert_called_once()

@@ -24,9 +24,13 @@ class GeneradorMonstruos:
         Crea un monstruo acorde al nivel.
         """
         sprites = SPRITES_POR_NIVEL.get(nivel, ct.SPRITES_ENEMIGO)
-        velocidad = int(3 * (1 + nivel * 0.3))
+        velocidad = 1 * (1 + nivel * 0.5)
+        vida = 5 + nivel * 30
+        danio = 5 + nivel * 5
         enemigo = Enemigo(x, y, 40, 40, distancia_persecucion=self.distancia_persecucion, sprites=sprites)
         enemigo.velocidad = velocidad
+        enemigo.vida = vida
+        enemigo.danio = danio
         return enemigo
 
     def crear_boss(self, x, y, nivel=1):
@@ -34,9 +38,13 @@ class GeneradorMonstruos:
         Crea un boss acorde al nivel.   
         """
         sprites = SPRITES_BOSS_POR_NIVEL.get(nivel, ct.SPRITES_BOSS_1)
-        velocidad = int(5 * (1 + nivel * 0.7))
+        velocidad = 2 * (1 + nivel*0.3)
+        vida = 50 + nivel * 100
+        danio = 20 + nivel * 10
         boss = Enemigo(x, y, 70, 70, distancia_persecucion=self.distancia_persecucion, sprites=sprites)
         boss.velocidad = velocidad
+        boss.vida = vida
+        boss.danio = danio
         boss.es_boss = True
         return boss
 

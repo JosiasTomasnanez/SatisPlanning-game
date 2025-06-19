@@ -9,7 +9,7 @@ import SatisPlanning.constantes as ct
 
 class Enemigo(Personaje):
     def __init__(self, x, y, ancho, alto, comportamiento_movimiento=None, distancia_persecucion=120, sprites=None):
-        velocidad = 3         # Velocidad específica para enemigo
+        velocidad = 2         # Velocidad específica para enemigo
         fuerza_salto = 10     # Fuerza de salto específica para enemigo
         if sprites is None:
             sprites = ct.SPRITES_ENEMIGO
@@ -34,6 +34,8 @@ class Enemigo(Personaje):
         self.comportamiento_movimiento = self.movimiento_aleatorio
 
         self.vida = 100  # Puntos de vida del enemigo
+        self.danio = 10  # Daño que inflige el enemigo al jugador
+
 
         # Si se pasan sprites personalizados, setéalos y luego escala
         if sprites is not None:
@@ -58,11 +60,12 @@ class Enemigo(Personaje):
         Resta puntos de vida al enemigo. Si la vida llega a 0, puedes manejar la muerte aquí.
         """
         self.vida -= cantidad
+        print(f"[DEBUG] Vida del enemigo: {self.vida}")  # Mostrar vida actual
         if self.vida <= 0:
             self.vida = 0
-            # Aquí podrías poner lógica de muerte, eliminar el enemigo, etc.
-            print('¡Enemigo derrotado!')
+            self.muerto = True  # Marca al enemigo como muerto
 
-    def dibujar(self, pantalla):
-        # Dibuja el sprite alineado con la hitbox
-        pantalla.blit(self.sprites[0], self.hitbox.topleft)
+    def notificar_colision(self, objeto):
+        # Recibe daño si colisiona con un arma
+        if hasattr(objeto, 'es_arma') and getattr(objeto, 'es_arma', False):
+            self.recibir_danio(objeto.danio)

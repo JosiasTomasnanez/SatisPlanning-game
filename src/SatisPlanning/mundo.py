@@ -38,7 +38,7 @@ class Mundo:
         # Actualizar chunks visibles y procesar submatrices
         self.manejador_chunks.actualizar_chunks_visibles(self.personaje)
         self.manejador_chunks.procesar_submatriz()
-
+        self.chequear_colisiones_jugador_enemigos()
   
     def colisiona(self, hitbox, obj):
         """
