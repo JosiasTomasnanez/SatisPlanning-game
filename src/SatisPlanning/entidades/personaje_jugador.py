@@ -57,6 +57,14 @@ class PersonajeJugador(Personaje):
         if cls._instancia is not None:
             cls._instancia = None
 
+        self._inicializado = True
+
+    @classmethod
+    def reset(cls):
+        """Resetea la instancia singleton del jugador."""
+        if cls._instancia is not None:
+            cls._instancia = None
+
     def obtener_inventario(self):
         return self.componente_inventario.inventario
     

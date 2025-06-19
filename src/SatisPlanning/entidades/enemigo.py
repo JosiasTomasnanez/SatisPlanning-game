@@ -14,6 +14,7 @@ class Enemigo(Personaje):
         if sprites is None:
             sprites = ct.SPRITES_ENEMIGO
         super().__init__(x, y, ancho, alto, ct.SPRITE_JUGADOR, sprites=sprites, velocidad=velocidad, fuerza_salto=fuerza_salto, dinamico=True, tangible=True)
+        # No reasignes self.sprites aquí
 
         # Posición y estado inicial del enemigo
         self.vel_x = self.vel_y = 0
@@ -34,6 +35,7 @@ class Enemigo(Personaje):
 
         self.vida = 100  # Puntos de vida del enemigo
         self.danio = 10  # Daño que inflige el enemigo al jugador
+
 
         # Si se pasan sprites personalizados, setéalos y luego escala
         if sprites is not None:

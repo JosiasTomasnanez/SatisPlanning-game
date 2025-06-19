@@ -33,7 +33,6 @@ class EstadoBoss(EstadoNivel):
             if not getattr(e, "muerto", False):
                 enemigos_vivos.append(e)
         manejador.enemigos = enemigos_vivos
-
         if boss and getattr(boss, "muerto", False):
             manejador.nivel_actual += 1
             manejador.enemigos_derrotados = 0

@@ -100,5 +100,6 @@ SPRITES_BOSS_3 = [
 ]
 # Ruta de la imagen de la mano
 RUTA_MANO = obtener_ruta_asset("mano.png")
+
 # Categorías
 CATEGORIAS = ["Bloques", "Herramientas"]
