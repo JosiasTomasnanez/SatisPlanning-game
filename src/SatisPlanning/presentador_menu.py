@@ -3,9 +3,10 @@ from .utilidades import es_click_mouse, obtener_posicion_mouse
 from .menu import Menu
 
 class PresentadorMenu:
-    def __init__(self, vista_menu):
+    def __init__(self, vista_menu, gestor_presentadores=None):
         self.vista_menu = vista_menu
         self.menu = Menu(self.vista_menu.opciones)
+        self.gestor_presentadores = gestor_presentadores  # Nuevo: referencia al gestor
 
     def manejar_eventos(self, eventos):
         for evento in eventos:
@@ -26,6 +27,26 @@ class PresentadorMenu:
                     self.menu.seleccionar_por_indice(opcion)
 
     def actualizar(self, dt, eventos):
+        if getattr(self, "estado", None) == "game_over":
+            self.vista_menu.mostrar_game_over()
+            for evento in eventos:
+                if evento.type == pygame.KEYDOWN or evento.type == pygame.MOUSEBUTTONDOWN:
+                    if evento.type == pygame.MOUSEBUTTONDOWN:
+                        x, y = evento.pos
+                        if self.vista_menu.obtener_opcion_en_posicion(x, y) == "nueva_partida":
+                            self.estado = None
+                            self.menu.reiniciar()
+                            if self.gestor_presentadores:
+                                self.gestor_presentadores.nueva_partida(self.vista_menu.pantalla)
+                            return "jugar"
+                    elif evento.type == pygame.KEYDOWN:
+                        self.estado = None
+                        self.menu.reiniciar()
+                        if self.gestor_presentadores:
+                            self.gestor_presentadores.nueva_partida(self.vista_menu.pantalla)
+                        return "jugar"
+            return None
+
         self.manejar_eventos(eventos)
         self.vista_menu.opcion_seleccionada = self.menu.opcion_seleccionada
         self.vista_menu.dibujar()
@@ -96,3 +117,9 @@ class PresentadorMenu:
             pygame.time.delay(10)
         self.menu.reiniciar()
         return "menu"
+
+    def mostrar_game_over(self):
+        # Lógica para mostrar la pantalla de game over y un botón de nueva partida
+        # Por ejemplo, puedes cambiar el estado interno y dibujar la pantalla de game over en el método dibujar
+        self.estado = "game_over"
+        # Aquí puedes mostrar un mensaje y un botón para reiniciar

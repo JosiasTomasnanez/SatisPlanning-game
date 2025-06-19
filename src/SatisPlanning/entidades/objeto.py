@@ -23,6 +23,7 @@ class Objeto:
         ruta_final = ruta_imagen
         if not os.path.isabs(ruta_imagen):
             ruta_final = os.path.join(os.path.dirname(__file__), "assets", ruta_imagen)
+        self.ruta_final = ruta_final  # Guarda la ruta absoluta/final para comparación de tipo
         self.imagen = pygame.image.load(ruta_final)
         self.imagen = pygame.transform.scale(self.imagen, (ancho, alto))  # Ajustar tamaño de la imagen
         self.dinamico = dinamico
@@ -100,5 +101,12 @@ class Objeto:
         """
         for componente in self.componentes:
             componente.actualizar(dt)
+
+    def tipo_igual(self, otro):
+        """
+        Determina si este objeto es del mismo tipo que otro.
+        Compara la clase y la ruta final de la imagen.
+        """
+        return type(self) == type(otro) and getattr(self, "ruta_final", None) == getattr(otro, "ruta_final", None)
 
 

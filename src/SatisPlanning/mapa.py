@@ -20,10 +20,7 @@ class Mapa:
     @classmethod
     def reset(cls):
         """Resetea la instancia singleton y los datos del mapa."""
-        if cls._instancia is not None:
-            cls._instancia.chunks = {}
-            cls._instancia._inicializado = False
-            cls._instancia = None
+        cls._instancia = None
 
     def _generar_chunk(self, chunk_x):
         """

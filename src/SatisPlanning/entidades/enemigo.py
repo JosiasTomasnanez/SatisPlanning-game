@@ -6,6 +6,8 @@ from SatisPlanning.componentes.comportamiento_movimiento import EstrategiaMovimi
 import random
 import pygame
 import SatisPlanning.constantes as ct
+from SatisPlanning.entidades.consumible import PocionCura
+from SatisPlanning.entidades.espada import Espada
 
 class Enemigo(Personaje):
     def __init__(self, x, y, ancho, alto, comportamiento_movimiento=None, distancia_persecucion=120, sprites=None):
@@ -14,7 +16,6 @@ class Enemigo(Personaje):
         if sprites is None:
             sprites = ct.SPRITES_ENEMIGO
         super().__init__(x, y, ancho, alto, ct.SPRITE_JUGADOR, sprites=sprites, velocidad=velocidad, fuerza_salto=fuerza_salto, dinamico=True, tangible=True)
-        # No reasignes self.sprites aquí
 
         # Posición y estado inicial del enemigo
         self.vel_x = self.vel_y = 0
@@ -36,7 +37,6 @@ class Enemigo(Personaje):
         self.vida = 100  # Puntos de vida del enemigo
         self.danio = 10  # Daño que inflige el enemigo al jugador
 
-
         # Si se pasan sprites personalizados, setéalos y luego escala
         if sprites is not None:
             self.set_sprites(sprites)
@@ -55,15 +55,36 @@ class Enemigo(Personaje):
         self.comportamiento_movimiento.mover(self)
         self.componente_animacion.actualizar()
 
-    def recibir_danio(self, cantidad):
-        """
-        Resta puntos de vida al enemigo. Si la vida llega a 0, puedes manejar la muerte aquí.
-        """
+    def recibir_danio(self, cantidad, atacante=None):
         self.vida -= cantidad
-        print(f"[DEBUG] Vida del enemigo: {self.vida}")  # Mostrar vida actual
         if self.vida <= 0:
             self.vida = 0
             self.muerto = True  # Marca al enemigo como muerto
+            self.soltar_objeto_al_morir()
+            # Si es boss, soltar espada
+            if getattr(self, "es_boss", False):
+                self.soltar_espada_al_morir()
+
+    def soltar_objeto_al_morir(self):
+        """
+        Probabilidad de soltar una poción de cura al morir.
+        """
+        probabilidad = 0.4  # 40% de probabilidad
+        if hasattr(self, "mundo") and random.random() < probabilidad:
+            pocion = PocionCura(self.x, self.y, 30, 30)
+            # Soltar como no tangible
+            self.mundo.agregar_objeto(pocion, False)
+
+    def soltar_espada_al_morir(self):
+        """
+        Suelta una espada de forma intangible al morir (solo para bosses).
+        El daño de la espada depende del nivel del boss.
+        """
+        if hasattr(self, "mundo"):
+            nivel_boss = getattr(self, "nivel", 1)
+            danio_espada = 35 + 15 * (nivel_boss) 
+            espada = Espada(self.x, self.y, 60, 65, danio=danio_espada)
+            self.mundo.agregar_objeto(espada, False)
 
     def notificar_colision(self, objeto):
         # Recibe daño si colisiona con un arma

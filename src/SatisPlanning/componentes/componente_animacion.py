@@ -60,3 +60,12 @@ class ComponenteAnimacion(Componente):
             self.imagen_actual = self.sprite_idle
             if hasattr(self.propietario, "direccion") and getattr(self.propietario, "direccion") == -1:
                 self.imagen_actual = pygame.transform.flip(self.sprite_idle, True, False)
+
+    def avanzar_sprite(self):
+        """
+        Avanza inmediatamente al siguiente sprite de la animación.
+        """
+        self.sprite_actual = (self.sprite_actual + 1) % len(self.sprites)
+        self.imagen_actual = self.sprites[self.sprite_actual]
+        if hasattr(self.propietario, "direccion") and getattr(self.propietario, "direccion") == -1:
+            self.imagen_actual = pygame.transform.flip(self.imagen_actual, True, False)

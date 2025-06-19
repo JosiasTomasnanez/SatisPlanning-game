@@ -100,6 +100,38 @@ SPRITES_BOSS_3 = [
 ]
 # Ruta de la imagen de la mano
 RUTA_MANO = obtener_ruta_asset("mano.png")
+RUTA_CORAZON = obtener_ruta_asset("mana_vida/sprite_0.png")
 
 # Categorías
 CATEGORIAS = ["Bloques", "Herramientas"]
+
+# Sprites de la espada (ejemplo: espada1.png a espada4.png)
+SPRITES_ESPADA = [
+    scale_keep_aspect(
+        pygame.image.load(obtener_ruta_asset(f"espada/e{i}.png")),
+        (40, 40),
+        True
+    )
+    for i in range(1, 6)
+]
+SPRITES_MANO = [
+    scale_keep_aspect(
+        pygame.image.load(obtener_ruta_asset(f"mano/mano{i}.png")),
+        (40, 40),
+        True
+    )
+    for i in range(1, 5)
+]
+
+# Items (ahora usando obtener_ruta_asset como el resto)
+ITEM_POCIONES = [
+    obtener_ruta_asset(f"pociones/sprite_{i}.png") for i in range(5)
+]
+# ITEM_HACHA = [obtener_ruta_asset(f"hacha/sprite_{i}.png") for i in range(3)]
+# ITEM_ESPADA = [obtener_ruta_asset(f"espada/sprite_{i}.png") for i in range(5)]
+ITEM_ARMADURA = [
+    obtener_ruta_asset(f"armadura/sprite_{i}.png") for i in range(3)
+]
+ITEM_MINERALES = [
+    obtener_ruta_asset(f"minerales/sprite_{i}.png") for i in range(13, 20)
+]

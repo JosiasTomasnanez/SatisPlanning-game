@@ -49,14 +49,17 @@ class Menu:
 
     def obtener_texto_controles(self):
         """
-        Devuelve un texto de ejemplo para los controles del juego.
+        Devuelve el texto actualizado para los controles del juego.
         """
         return (
             "Controles\n"
-            "Mover: Flechas o WASD\n"
+            "Mover: W A S D\n"
             "Inventario: I\n"
-            "Seleccionar: Enter o Click\n"
-            "Pantalla completa: F11\n"
-            "Salir al menú: ESC\n"
-            "Salir del juego: Cerrar ventana o desde el menú\n"
+            "Seleccionar en hotbar: 1-9\n"
+            "Soltar objeto al mapa: Q\n"
+            "Colocar bloque: G\n"
+            "Consumir ítem: E\n"
+            "Equipar/desequipar/cambiar arma: R\n"
+            "Atacar: J o Click izquierdo\n"
+            "Seleccionar en inventario: Click\n"
         )
