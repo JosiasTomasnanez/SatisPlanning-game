@@ -12,8 +12,13 @@ if not exist env (
 REM Activar entorno virtual
 call env\Scripts\activate.bat
 
-REM Instalar dependencias
+REM Actualizar pip
 pip install --upgrade pip
+
+REM Instalar pyinstaller
+pip install pyinstaller
+
+REM Instalar dependencias del paquete
 pip install .
 
 echo.
