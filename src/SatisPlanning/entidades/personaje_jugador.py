@@ -8,15 +8,17 @@ import pygame
 import SatisPlanning.constantes as ct
 
 class PersonajeJugador(Personaje):
-    def __init__(self, x, y, ancho, alto):
-        """
-        Inicializa el personaje jugador con posición, sprites y un inventario.
+    _instancia = None
 
-        :param x: Posición X inicial.
-        :param y: Posición Y inicial.
-        :param ancho: Ancho del personaje.
-        :param alto: Altura del personaje.
-        """
+    def __new__(cls, x, y, ancho, alto):
+        if cls._instancia is None:
+            cls._instancia = super(PersonajeJugador, cls).__new__(cls)
+            cls._instancia._inicializado = False
+        return cls._instancia
+
+    def __init__(self, x, y, ancho, alto):
+        if getattr(self, "_inicializado", False):
+            return
         velocidad = 4         # Velocidad específica para el jugador
         fuerza_salto = 11     # Fuerza de salto específica para el jugador
         super().__init__(x, y, ancho, alto, ct.SPRITE_JUGADOR, sprites=ct.SPRITES_JUGADOR, velocidad=velocidad, fuerza_salto=fuerza_salto, dinamico=True, tangible=True)
@@ -34,6 +36,14 @@ class PersonajeJugador(Personaje):
 
         # Componente para manejar el movimiento
         self.componente_mover = ComponenteMover(self, self.componente_animacion)
+
+        self._inicializado = True
+
+    @classmethod
+    def reset(cls):
+        """Resetea la instancia singleton del jugador."""
+        if cls._instancia is not None:
+            cls._instancia = None
 
     def obtener_inventario(self):
         return self.componente_inventario.inventario

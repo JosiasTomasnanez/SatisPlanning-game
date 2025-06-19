@@ -2,18 +2,19 @@ from SatisPlanning.entidades.personaje import Personaje
 from SatisPlanning.utilidades import obtener_ruta_asset
 from SatisPlanning.componentes.componente_mover import ComponenteMover
 from SatisPlanning.componentes.componente_animacion import ComponenteAnimacion
-from SatisPlanning.componentes.comportamiento_movimiento import MovimientoAleatorio, MovimientoPersecucion
+from SatisPlanning.componentes.comportamiento_movimiento import EstrategiaMovimientoAleatorio, EstrategiaMovimientoPersecucion
 import random
 import pygame
 import SatisPlanning.constantes as ct
 
-class Zombie(Personaje):
-    def __init__(self, x, y, ancho, alto, comportamiento_movimiento=None, distancia_persecucion=120):
-        velocidad = 3         # Velocidad específica para zombie
-        fuerza_salto = 10     # Fuerza de salto específica para zombie
-        super().__init__(x, y, ancho, alto, ct.SPRITE_JUGADOR, sprites=ct.SPRITES_JUGADOR, velocidad=velocidad, fuerza_salto=fuerza_salto, dinamico=True, tangible=True)
-        # Sobrescribir los sprites para que solo use el sprite de enemigo
-        self.sprites = ct.SPRITES_ENEMIGO
+class Enemigo(Personaje):
+    def __init__(self, x, y, ancho, alto, comportamiento_movimiento=None, distancia_persecucion=120, sprites=None):
+        velocidad = 3         # Velocidad específica para enemigo
+        fuerza_salto = 10     # Fuerza de salto específica para enemigo
+        if sprites is None:
+            sprites = ct.SPRITES_ENEMIGO
+        super().__init__(x, y, ancho, alto, ct.SPRITE_JUGADOR, sprites=sprites, velocidad=velocidad, fuerza_salto=fuerza_salto, dinamico=True, tangible=True)
+        # No reasignes self.sprites aquí
 
         # Posición y estado inicial del enemigo
         self.vel_x = self.vel_y = 0
@@ -28,11 +29,16 @@ class Zombie(Personaje):
         self.es_enemigo = True
         
         # Estrategias de movimiento (Strategy)
-        self.movimiento_aleatorio = MovimientoAleatorio()
-        self.movimiento_persecucion = MovimientoPersecucion(distancia_persecucion)
+        self.movimiento_aleatorio = EstrategiaMovimientoAleatorio()
+        self.movimiento_persecucion = EstrategiaMovimientoPersecucion(distancia_persecucion)
         self.comportamiento_movimiento = self.movimiento_aleatorio
 
-        self.vida = 100  # Puntos de vida del zombie
+        self.vida = 100  # Puntos de vida del enemigo
+
+        # Si se pasan sprites personalizados, setéalos y luego escala
+        if sprites is not None:
+            self.set_sprites(sprites)
+        self.cambiar_tamano(ancho, alto)
 
     def set_mundo(self, mundo):
         self.componente_mover.set_mundo(mundo)
@@ -49,13 +55,13 @@ class Zombie(Personaje):
 
     def recibir_danio(self, cantidad):
         """
-        Resta puntos de vida al zombie. Si la vida llega a 0, puedes manejar la muerte aquí.
+        Resta puntos de vida al enemigo. Si la vida llega a 0, puedes manejar la muerte aquí.
         """
         self.vida -= cantidad
         if self.vida <= 0:
             self.vida = 0
-            # Aquí podrías poner lógica de muerte, eliminar el zombie, etc.
-            print('¡Zombie derrotado!')
+            # Aquí podrías poner lógica de muerte, eliminar el enemigo, etc.
+            print('¡Enemigo derrotado!')
 
     def dibujar(self, pantalla):
         # Dibuja el sprite alineado con la hitbox

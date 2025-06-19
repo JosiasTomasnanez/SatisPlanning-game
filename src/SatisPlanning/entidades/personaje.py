@@ -26,6 +26,27 @@ class Personaje(Objeto):
 
         # Componente para manejar el movimiento
         self.componente_mover = ComponenteMover(self, self.componente_animacion)
+
+    def cambiar_tamano(self, ancho, alto):
+        """
+        Cambia el tamaño de los sprites y la hitbox del personaje.
+        """
+        # Redimensionar sprites
+        self.sprites = [
+            pygame.transform.scale(sprite, (ancho, alto))
+            for sprite in self.sprites
+        ]
+        self.componente_animacion.set_sprites(self.sprites)
+        # Cambiar tamaño de la imagen principal si existe
+        if hasattr(self, 'imagen') and self.imagen:
+            self.imagen = pygame.transform.scale(self.imagen, (ancho, alto))
+        # Actualizar hitbox
+        self.ancho = ancho
+        self.alto = alto
+        self.hitbox.width = ancho - 4
+        self.hitbox.height = alto
+        # Opcional: ajustar la posición de la hitbox si es necesario
+        self.hitbox.topleft = (self.x + 17, self.y + 20)
     @abstractmethod
     def set_mundo(self, mundo):
         self.mundo = mundo
@@ -38,3 +59,11 @@ class Personaje(Objeto):
         """
         self.componente_mover.actualizar(teclas)
         self.componente_animacion.actualizar()
+
+    def set_sprites(self, sprites):
+        """
+        Cambia el paquete de sprites del personaje y actualiza el componente de animación.
+        :param sprites: Lista de imágenes (superficies pygame) para animación.
+        """
+        self.sprites = sprites
+        self.componente_animacion.set_sprites(sprites)

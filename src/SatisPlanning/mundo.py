@@ -3,9 +3,10 @@ from .entidades.personaje_jugador import PersonajeJugador
 from .mapa import Mapa
 from .manejador_chunks import ManjeadorChunks
 from .generador_monstruos import GeneradorMonstruos
+from .manejador_niveles import ManejadorNiveles
 
 class Mundo:
-    def __init__(self, personaje, mapa, manejador_chunks, generador_monstruos):
+    def __init__(self, personaje, mapa, manejador_chunks, manejador_niveles):
         self.mapa = mapa  # Instancia de la clase Mapa
         self.personaje = personaje  # Personaje principal
         self.personaje.set_mundo(self)
@@ -13,7 +14,7 @@ class Mundo:
 
         # Cargar los chunks iniciales
         self.manejador_chunks.cargar_chunks_iniciales(self.personaje)
-        self.generador_monstruos = generador_monstruos
+        self.manejador_niveles = manejador_niveles
 
     def obtener_personaje(self):
         """
@@ -32,7 +33,7 @@ class Mundo:
         teclas = pygame.key.get_pressed()
         self.personaje.actualizar(teclas)
 
-        self.generador_monstruos.actualizar(self.personaje, self)
+        self.manejador_niveles.actualizar(self.personaje)
 
         # Actualizar chunks visibles y procesar submatrices
         self.manejador_chunks.actualizar_chunks_visibles(self.personaje)
@@ -71,7 +72,7 @@ class Mundo:
         """
         Devuelve la lista de enemigos.
         """
-        return self.generador_monstruos.obtener_enemigos()
+        return self.manejador_niveles.obtener_enemigos()
 
     def obtener_objetos_a_dibujar(self):
         """
