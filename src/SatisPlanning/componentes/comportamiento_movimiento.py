@@ -1,111 +1,79 @@
 import random
+import abc
 
-class ComportamientoMovimiento:
+class EstrategiaMovimiento(abc.ABC):
     """Interfaz de estrategia de movimiento."""
+    @abc.abstractmethod
     def mover(self, enemigo):
-        raise NotImplementedError
+        pass
 
-class MovimientoAleatorio(ComportamientoMovimiento):
+class EstrategiaMovimientoAleatorio(EstrategiaMovimiento):
     """Movimiento aleatorio para un enemigo."""
     def __init__(self):
         self.tiempo_cambio_direccion = 0
         self.duracion_direccion = random.randint(30, 90)
         self.direccion_aleatoria = random.choice([-1, 0, 1])
-        self.frames_bloqueado = 0
 
     def mover(self, enemigo):
+        # Cambio de dirección aleatorio
         self.tiempo_cambio_direccion += 1
         if self.tiempo_cambio_direccion > self.duracion_direccion:
             self.direccion_aleatoria = random.choice([-1, 0, 1])
             self.duracion_direccion = random.randint(30, 90)
             self.tiempo_cambio_direccion = 0
 
-        salto_aleatorio = random.random() < 0.02  # 2% de probabilidad de salto aleatorio por frame
-
+        # Detectar si hay pared adelante
         if self.direccion_aleatoria != 0:
-            dx = self.direccion_aleatoria * 1  # velocidad reducida
+            dx = self.direccion_aleatoria * enemigo.velocidad
             nueva_hitbox = enemigo.hitbox.move(dx, 0)
-            if enemigo.mundo.colisiona(nueva_hitbox, enemigo):
-                self.frames_bloqueado += 1
-                if (enemigo.en_el_suelo or abs(enemigo.vel_y) < 1.5 or self.frames_bloqueado > 8 or salto_aleatorio):
-                    enemigo.vel_y = -enemigo.mundo.ct.FUERZA_SALTO if hasattr(enemigo.mundo, "ct") else -12  # valor por defecto
-                    enemigo.en_el_suelo = False
-                    self.frames_bloqueado = 0
-            else:
-                self.frames_bloqueado = 0
-                # Salto aleatorio aunque no esté bloqueado
-                if (enemigo.en_el_suelo or abs(enemigo.vel_y) < 1.5) and salto_aleatorio:
-                    enemigo.vel_y = -enemigo.mundo.ct.FUERZA_SALTO if hasattr(enemigo.mundo, "ct") else -12  # valor por defecto
-                    enemigo.en_el_suelo = False
+            hay_pared = enemigo.mundo.colisiona(nueva_hitbox, enemigo)
         else:
-            self.frames_bloqueado = 0
-            # Salto aleatorio aunque esté quieto
-            if (enemigo.en_el_suelo or abs(enemigo.vel_y) < 1.5) and salto_aleatorio:
-                enemigo.vel_y = -enemigo.mundo.ct.FUERZA_SALTO if hasattr(enemigo.mundo, "ct") else -12  # valor por defecto
-                enemigo.en_el_suelo = False
+            hay_pared = False
 
-        enemigo.vel_x = self.direccion_aleatoria * 1  # velocidad reducida
+        # Decidir si salta (por pared o aleatoriamente)
+        salto = hay_pared or random.random() < 0.02  # Salta si hay pared o 2% de probabilidad
+
+        # Simular teclas para ComponenteMover
         teclas_falsas = {
-            100: self.direccion_aleatoria == 1,
-            97: self.direccion_aleatoria == -1,
-            119: False,
-            32: False
+            100: self.direccion_aleatoria == 1,   # d
+            97: self.direccion_aleatoria == -1,   # a
+            119: salto,                           # w
+            32: False                             # space
         }
         enemigo.componente_mover.actualizar(teclas_falsas)
 
-class MovimientoPersecucion(ComportamientoMovimiento):
+class EstrategiaMovimientoPersecucion(EstrategiaMovimiento):
     """Movimiento de persecución hacia el jugador si está cerca."""
     def __init__(self, distancia_activacion):
         self.distancia_activacion = distancia_activacion
-        self.frames_bloqueado = 0
 
     def mover(self, enemigo):
+        # Calcular dirección hacia el jugador
         jugador = enemigo.mundo.personaje
         dx = jugador.x - enemigo.x
-        salto_aleatorio = random.random() < 0.02  # 2% de probabilidad de salto aleatorio por frame
-
-        if abs(dx) < self.distancia_activacion:
-            if dx > 0:
-                direccion = 1
-            else:
-                direccion = -1
-
-            # Detectar si está bloqueado por una pared
-            if direccion != 0:
-                dx_mov = direccion * 1  # velocidad corregida
-                nueva_hitbox = enemigo.hitbox.move(dx_mov, 0)
-                if enemigo.mundo.colisiona(nueva_hitbox, enemigo):
-                    self.frames_bloqueado += 1
-                    if (enemigo.en_el_suelo or abs(enemigo.vel_y) < 1.5 or self.frames_bloqueado > 8 or salto_aleatorio):
-                        enemigo.vel_y = -enemigo.mundo.ct.FUERZA_SALTO if hasattr(enemigo.mundo, "ct") else -12
-                        enemigo.en_el_suelo = False
-                        self.frames_bloqueado = 0
-                else:
-                    self.frames_bloqueado = 0
-                    # Salto aleatorio aunque no esté bloqueado
-                    if (enemigo.en_el_suelo or abs(enemigo.vel_y) < 1.5) and salto_aleatorio:
-                        enemigo.vel_y = -enemigo.mundo.ct.FUERZA_SALTO if hasattr(enemigo.mundo, "ct") else -12
-                        enemigo.en_el_suelo = False
-            else:
-                self.frames_bloqueado = 0
-                # Salto aleatorio aunque esté quieto
-                if (enemigo.en_el_suelo or abs(enemigo.vel_y) < 1.5) and salto_aleatorio:
-                    enemigo.vel_y = -enemigo.mundo.ct.FUERZA_SALTO if hasattr(enemigo.mundo, "ct") else -12
-                    enemigo.en_el_suelo = False
-
-            enemigo.vel_x = direccion * 1  # velocidad corregida
-            teclas_falsas = {
-                100: direccion == 1,
-                97: direccion == -1,
-                119: False,
-                32: False
-            }
-            enemigo.componente_mover.actualizar(teclas_falsas)
+        
+        # Decidir dirección basada en la distancia
+        if abs(dx) < self.distancia_activacion and abs(dx) > 1:
+            direccion = 1 if dx > 0 else -1
         else:
-            self.frames_bloqueado = 0
-            # Salto aleatorio aunque esté fuera de rango de persecución
-            if (enemigo.en_el_suelo or abs(enemigo.vel_y) < 1.5) and salto_aleatorio:
-                enemigo.vel_y = -enemigo.mundo.ct.FUERZA_SALTO if hasattr(enemigo.mundo, "ct") else -12
-                enemigo.en_el_suelo = False
-            teclas_falsas = {100: False, 97: False, 119: False, 32: False}
-            enemigo.componente_mover.actualizar(teclas_falsas)
+            direccion = 0
+
+        # Detectar si hay pared adelante
+        if direccion != 0:
+            dx = direccion * enemigo.velocidad
+            nueva_hitbox = enemigo.hitbox.move(dx, 0)
+            hay_pared = enemigo.mundo.colisiona(nueva_hitbox, enemigo)
+        else:
+            hay_pared = False
+
+        # Decidir si salta (por pared o aleatoriamente)
+        salto = hay_pared or random.random() < 0.02  # Salta si hay pared o 2% de probabilidad
+
+        # Simular teclas para ComponenteMover
+        teclas_falsas = {
+            100: direccion == 1,    # d
+            97: direccion == -1,    # a
+            119: salto,            # w
+            32: False              # space
+        }
+        enemigo.componente_mover.actualizar(teclas_falsas)

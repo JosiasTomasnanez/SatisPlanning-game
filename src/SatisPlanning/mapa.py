@@ -2,12 +2,28 @@ from perlin_noise import PerlinNoise
 import SatisPlanning.constantes as ct
 
 class Mapa:
+    _instancia = None
+
+    def __new__(cls, semilla):
+        if cls._instancia is None:
+            cls._instancia = super(Mapa, cls).__new__(cls)
+            cls._instancia._inicializado = False
+        return cls._instancia
+
     def __init__(self, semilla):
-        """
-        Inicializa el mapa con un diccionario para almacenar los chunks generados.
-        """
+        if self._inicializado:
+            return
         self.semilla = semilla
         self.chunks = {}  # Diccionario para almacenar los chunks generados
+        self._inicializado = True
+
+    @classmethod
+    def reset(cls):
+        """Resetea la instancia singleton y los datos del mapa."""
+        if cls._instancia is not None:
+            cls._instancia.chunks = {}
+            cls._instancia._inicializado = False
+            cls._instancia = None
 
     def _generar_chunk(self, chunk_x):
         """

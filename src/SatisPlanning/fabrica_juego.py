@@ -9,6 +9,7 @@ from .mapa import Mapa
 from .manejador_chunks import ManjeadorChunks
 from .mundo import Mundo
 from .generador_monstruos import GeneradorMonstruos
+from .manejador_niveles import ManejadorNiveles
 import SatisPlanning.constantes as ct
 import random
 
@@ -24,24 +25,29 @@ class FabricaJuego:
         personaje = PersonajeJugador(100, 100, 40, 40)
         manejador_chunks = ManjeadorChunks(mapa)
 
-        # Configuración de monstruos centralizada aquí
+        # Configuración de monstruos y niveles centralizada aquí
+        distancia_persecucion = 300
         spawn_frame_interval = 350
         max_enemigos = 5
         spawn_dist_min = 600
-        spawn_dist_max = 630
+        spawn_dist_max = 700
         despawn_dist = 1000
-        distancia_persecucion = 280
 
         generador_monstruos = GeneradorMonstruos(
+            distancia_persecucion=distancia_persecucion
+        )
+
+        manejador_niveles = ManejadorNiveles(
+            generador_monstruos,
             spawn_frame_interval=spawn_frame_interval,
             max_enemigos=max_enemigos,
             spawn_dist_min=spawn_dist_min,
             spawn_dist_max=spawn_dist_max,
-            despawn_dist=despawn_dist,
-            distancia_persecucion=distancia_persecucion
+            despawn_dist=despawn_dist
         )
 
-        mundo = Mundo(personaje, mapa, manejador_chunks, generador_monstruos)
+        mundo = Mundo(personaje, mapa, manejador_chunks, manejador_niveles)
+        manejador_niveles.set_mundo(mundo)  # Setea el mundo después de crearlo
         personaje.set_mundo(mundo)
 
         # Vistas y presentadores del juego
@@ -64,5 +70,6 @@ class FabricaJuego:
             "personaje": personaje,
             "mapa": mapa,
             "manejador_chunks": manejador_chunks,
-            "generador_monstruos": generador_monstruos
+            "generador_monstruos": generador_monstruos,
+            "manejador_niveles": manejador_niveles
         }

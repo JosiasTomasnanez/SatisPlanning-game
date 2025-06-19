@@ -22,6 +22,16 @@ class ComponenteAnimacion(Componente):
         self.contador_idle = 0
         self.esta_idle = False
 
+    def set_sprites(self, sprites):
+        """
+        Permite actualizar la lista de sprites y el sprite idle cuando cambian de tamaño o paquete.
+        """
+        self.sprites = sprites
+        self.sprite_idle = sprites[0]
+        # Si está en idle, actualizar la imagen actual también
+        if self.esta_idle:
+            self.imagen_actual = self.sprite_idle
+
     def notificar_movimiento(self):
         """
         Notifica al componente de animación que el objeto se está moviendo.

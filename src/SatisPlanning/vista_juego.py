@@ -19,6 +19,7 @@ class VistaJuego:
         self.dibujar_inventario(personaje.obtener_inventario())
         self.dibujar_enemigos(enemigos, personaje)
         self.dibujar_vida_jugador(personaje)
+        self.dibujar_arma_personaje(personaje)  # NUEVO
 
         pygame.display.flip()
 
@@ -31,7 +32,33 @@ class VistaJuego:
         personaje_centrado_x = (self.camara.ancho_pantalla // 2) - (personaje.ancho // 2)
         personaje_centrado_y = (self.camara.alto_pantalla // 2) - (personaje.alto // 2)
         self.pantalla.blit(personaje.componente_animacion.imagen_actual, (personaje_centrado_x, personaje_centrado_y))
-    
+        # Efecto visual de ataque
+        if getattr(personaje, "atacando", False):
+            color = (255, 200, 0)
+            arma = getattr(personaje, "arma", None)
+            if arma:
+                ataque_ancho = arma.ancho
+                ataque_alto = arma.alto
+            else:
+                ataque_ancho = 20
+                ataque_alto = personaje.alto // 2
+            mitad_pj_x = personaje_centrado_x + personaje.ancho // 2
+            if personaje.direccion == 1:
+                # Ataque a la derecha, desde la mitad del personaje
+                ataque_rect = pygame.Rect(
+                    mitad_pj_x,
+                    personaje_centrado_y + (personaje.alto - ataque_alto) // 2,
+                    ataque_ancho, ataque_alto
+                )
+            else:
+                # Ataque a la izquierda, desde la mitad del personaje hacia la izquierda
+                ataque_rect = pygame.Rect(
+                    mitad_pj_x - ataque_ancho,
+                    personaje_centrado_y + (personaje.alto - ataque_alto) // 2,
+                    ataque_ancho, ataque_alto
+                )
+            pygame.draw.rect(self.pantalla, color, ataque_rect)
+
     def dibujar_enemigos(self, enemigos, personaje):
         # Dibuja cada enemigo en pantalla, evitando que aparezcan demasiado cerca del personaje jugador
         for enemigo in enemigos:
@@ -102,15 +129,25 @@ class VistaJuego:
             if i < len(inventario.items):
                 item = inventario.items[i]
                 self.pantalla.blit(item.imagen, (x + 10, y + 10))
-
+                
     def dibujar_vida_jugador(self, personaje):
         fuente = pygame.font.SysFont("Arial", 28, bold=True)
         texto = f"Vida: {personaje.vida}"
-        color = (255, 0, 0) if personaje.vida <= 3 else (255, 255, 255)
+        color = (255, 0, 0) if personaje.vida <= 30 else (255, 255, 255)
         superficie_texto = fuente.render(texto, True, color)
         x = self.pantalla.get_width() - superficie_texto.get_width() - 20
         y = 10
         self.pantalla.blit(superficie_texto, (x, y))
+
+    def dibujar_arma_personaje(self, personaje):
+        """
+        Dibuja el arma equipada del personaje en la pantalla.
+        """
+        if personaje.arma and hasattr(personaje.arma, "imagen"):
+            self.pantalla.blit(personaje.arma.imagen, (20, 20))
+            fuente = pygame.font.SysFont("Arial", 18, bold=True)
+            texto = fuente.render(personaje.arma.__class__.__name__, True, (255, 255, 255))
+            self.pantalla.blit(texto, (25 + personaje.arma.ancho, 25))
 
     def obtener_eventos(self):
         """
