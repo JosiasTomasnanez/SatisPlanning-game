@@ -20,27 +20,15 @@ class Objeto:
         self.direccion = 1
         self.ancho = ancho
         self.alto = alto
-<<<<<<< HEAD
-        self.hitbox = pygame.Rect(x + 17, y + 20, ancho - 4, alto)
-        self.ruta_imagen=ruta_imagen
-        self.imagen = pygame.image.load(ruta_imagen)
-=======
         ruta_final = ruta_imagen
         if not os.path.isabs(ruta_imagen):
             ruta_final = os.path.join(os.path.dirname(__file__), "assets", ruta_imagen)
+        self.ruta_final = ruta_final  # Guarda la ruta absoluta/final para comparación de tipo
         self.imagen = pygame.image.load(ruta_final)
->>>>>>> 16c3422063338c885103fdfd189fad8b95f5bad3
         self.imagen = pygame.transform.scale(self.imagen, (ancho, alto))  # Ajustar tamaño de la imagen
         self.dinamico = dinamico
         self.tangible = tangible  # Indica si el objeto es tangible
         self.componentes = []  # Lista de componentes asociadas al objeto
-        
-    def obtener_ruta_imagen(self):
-        return self.ruta_imagen
-    def tipo_igual(self, objeto):
-        if isinstance(objeto, Objeto):
-            return objeto.obtener_ruta_imagen() == self.ruta_imagen
-        return False
 
         if ajustar_hitbox:
             # Reducción horizontal de la hitbox para personajes y enemigos
@@ -113,5 +101,12 @@ class Objeto:
         """
         for componente in self.componentes:
             componente.actualizar(dt)
+
+    def tipo_igual(self, otro):
+        """
+        Determina si este objeto es del mismo tipo que otro.
+        Compara la clase y la ruta final de la imagen.
+        """
+        return type(self) == type(otro) and getattr(self, "ruta_final", None) == getattr(otro, "ruta_final", None)
 
 

@@ -18,7 +18,7 @@ class FabricaJuego:
     def crear_todo(pantalla):
         # Vistas y presentadores del menú
         vista_menu = VistaMenu(pantalla)
-        presentador_menu = PresentadorMenu(vista_menu)
+        presentador_menu = PresentadorMenu(vista_menu)  # gestor_presentadores se setea después
 
         # Objetos del mundo
         mapa = Mapa(random.randint(0, 1000))
@@ -59,6 +59,8 @@ class FabricaJuego:
             presentador_menu, vista_menu,
             presentador_juego, vista_juego
         )
+        # Setea la referencia circular
+        presentador_menu.gestor_presentadores = gestor
 
         return {
             "vista_menu": vista_menu,

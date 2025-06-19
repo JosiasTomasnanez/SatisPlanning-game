@@ -24,8 +24,7 @@ COLORES = {
 # Texturas
 TEXTURA_TIERRA = obtener_ruta_asset("tierra.png")
 TEXTURA_PIEDRA = obtener_ruta_asset("piedra.png")
-TEXTURA_PASTO = obtener_ruta_asset("pasto.png")
-
+TEXTURA_PASTO = obtener_ruta_asset("pasto.png")   
 
 # Tipos de bloques sólidos
 BLOQUES_SOLIDOS = {1, 2, 3}  # Tierra, Piedra, Pasto
@@ -101,20 +100,38 @@ SPRITES_BOSS_3 = [
 ]
 # Ruta de la imagen de la mano
 RUTA_MANO = obtener_ruta_asset("mano.png")
+RUTA_CORAZON = obtener_ruta_asset("mana_vida/sprite_0.png")
 
 # Categorías
-<<<<<<< HEAD
 CATEGORIAS = ["Bloques", "Herramientas"]
 
-#hay que modificar por que va a quedar un poco obsoleto muchas de estas variables, ya que tenemos que pensar que de verdad queremos que sea constante y que deseamos que sea modificable, la gravedad, salto, velocidad del personaje, son cosas que no deberian ir por que son modificables desde otros lados, por lo tanto solo usar esta clase cuando realmente lo amerite y para cosas inmovibles
+# Sprites de la espada (ejemplo: espada1.png a espada4.png)
+SPRITES_ESPADA = [
+    scale_keep_aspect(
+        pygame.image.load(obtener_ruta_asset(f"espada/e{i}.png")),
+        (40, 40),
+        True
+    )
+    for i in range(1, 6)
+]
+SPRITES_MANO = [
+    scale_keep_aspect(
+        pygame.image.load(obtener_ruta_asset(f"mano/mano{i}.png")),
+        (40, 40),
+        True
+    )
+    for i in range(1, 5)
+]
 
-
-# Items
-ITEM_POCIONES =[f"assets/pociones/sprite_{i}.png" for i in range(5)]
-#ITEM_HACHA=[obtener_ruta_asset(f"/hacha/sprite_{i}.png") for i in range(3)]
-#ITEM_ESPADA=[obtener_ruta_asset(f"/espada/sprite_{i}.png") for i in range(5)]
-ITEM_ARMADURA=[f"assets/armadura/sprite_{i}.png" for i in range(3)]
-ITEM_MINERALES=[f"assets/minerales/sprite_{i}.png" for i in range(13,20)]
-=======
-CATEGORIAS = ["Bloques", "Herramientas"]
->>>>>>> 16c3422063338c885103fdfd189fad8b95f5bad3
+# Items (ahora usando obtener_ruta_asset como el resto)
+ITEM_POCIONES = [
+    obtener_ruta_asset(f"pociones/sprite_{i}.png") for i in range(5)
+]
+# ITEM_HACHA = [obtener_ruta_asset(f"hacha/sprite_{i}.png") for i in range(3)]
+# ITEM_ESPADA = [obtener_ruta_asset(f"espada/sprite_{i}.png") for i in range(5)]
+ITEM_ARMADURA = [
+    obtener_ruta_asset(f"armadura/sprite_{i}.png") for i in range(3)
+]
+ITEM_MINERALES = [
+    obtener_ruta_asset(f"minerales/sprite_{i}.png") for i in range(13, 20)
+]

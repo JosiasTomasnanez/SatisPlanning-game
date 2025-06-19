@@ -46,6 +46,7 @@ class GeneradorMonstruos:
         boss.vida = vida
         boss.danio = danio
         boss.es_boss = True
+        boss.nivel = nivel  # <--- Añade el nivel al boss
         return boss
 
     # Puedes agregar más métodos para crear otros tipos de monstruos/bosses

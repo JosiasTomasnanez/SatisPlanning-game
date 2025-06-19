@@ -47,17 +47,26 @@ class Mundo:
         """
         for chunk_x in self.manejador_chunks.obtener_chunks_visibles():
             for objeto in self.manejador_chunks.obtener_objetos_por_chunk(chunk_x):
-                if objeto.hitbox.colliderect(hitbox) and objeto.tangible:
+                if objeto.hitbox.colliderect(hitbox):
                     # Permitir superposición entre jugador y enemigo
                     if (getattr(obj, 'es_jugador', False) and getattr(objeto, 'es_enemigo', False)) or \
                        (getattr(obj, 'es_enemigo', False) and getattr(objeto, 'es_jugador', False)):
                         obj.notificar_colision(objeto)
                         objeto.notificar_colision(obj)
                         # No retorna True, así no bloquea el movimiento
-                    else:
+                    elif objeto.tangible:
                         obj.notificar_colision(objeto)
                         objeto.notificar_colision(obj)
                         return True
+                    else:
+                        # Si el objeto NO es tangible y el que colisiona es el jugador, lo recoge
+                        if getattr(obj, 'es_jugador', False):
+                            # Quitar el objeto del mundo
+                            self.manejador_chunks.eliminar_objeto(objeto)
+                            # Agregar al inventario del personaje
+                            if hasattr(obj, "componente_inventario"):
+                                obj.componente_inventario.inventario.agregar_item(objeto)
+                        # No retorna True, así no bloquea el movimiento
         return False
 
     def agregar_objeto(self, objeto,tangible):

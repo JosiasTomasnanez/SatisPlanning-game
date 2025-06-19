@@ -19,10 +19,6 @@ def obtener_posicion_mouse():
     :return: Una tupla (x, y) con la posición del ratón.
     """
     return pygame.mouse.get_pos()
-<<<<<<< HEAD
-#esta clase funciona bien y nos puede servir para muchas cosas que exedan las responsabilidades del juego, por ejemplo aca podemos tener la funcion para cargar  y leer el archivo json de guardado de progreso de nuestro juego, o por otra parte podemos tener archivos txt de dialogos de personajes y que sean leidos por metodos de esta clase y puestos en string para enviarlos a otras clases que nesesiten ciertos dialogos de algun archivo
-
-=======
 
 def es_click_mouse(evento):
     """
@@ -66,4 +62,3 @@ def scale_keep_aspect(image, target_size, invertir):
         if invertir:
             return pygame.transform.flip(final_image, True, False)
         return final_image
->>>>>>> 16c3422063338c885103fdfd189fad8b95f5bad3

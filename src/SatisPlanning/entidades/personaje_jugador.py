@@ -6,11 +6,14 @@ from SatisPlanning.componentes.componente_animacion import ComponenteAnimacion
 from SatisPlanning.componentes.componente_inventario import ComponenteInventario
 from SatisPlanning.componentes.componente_atacar import ComponenteAtacar
 from SatisPlanning.entidades.mano import Mano
+from SatisPlanning.entidades.espada import Espada
+from SatisPlanning.patron_observer import Observable
+from SatisPlanning.display_vidas import DisplayVidas
 import pygame
 import time
 import SatisPlanning.constantes as ct
 
-class PersonajeJugador(Personaje):
+class PersonajeJugador(Personaje, Observable):
     _instancia = None
 
     def __new__(cls, x, y, ancho, alto):
@@ -40,7 +43,7 @@ class PersonajeJugador(Personaje):
         # Componente para manejar el movimiento
         self.componente_mover = ComponenteMover(self, self.componente_animacion)
         # Componente para manejar el ataque
-        self.componente_atacar = ComponenteAtacar(self)  # NUEVO COMPONENTE
+        # self.componente_atacar = ComponenteAtacar(self)  # ELIMINADO, ahora lo tiene el arma
         # Vida y cooldown de daño
         self.vida = 100
         self._ultimo_danio = 0  # timestamp del último daño recibido
@@ -49,14 +52,9 @@ class PersonajeJugador(Personaje):
         self.arma = Mano()  # Siempre tiene Mano por defecto
         self.atacando = False  # Nuevo: indica si está atacando
         self.tiempo_ataque = 0  # Nuevo: duración de la animación de ataque
-        self._inicializado = True
-
-    @classmethod
-    def reset(cls):
-        """Resetea la instancia singleton del jugador."""
-        if cls._instancia is not None:
-            cls._instancia = None
-
+        Observable.__init__(self)  # Inicializa Observable
+        self.display_vidas = DisplayVidas(self.vida)
+        self.agregar_observer(self.display_vidas)
         self._inicializado = True
 
     @classmethod
@@ -76,6 +74,7 @@ class PersonajeJugador(Personaje):
         # Actualiza el movimiento según teclas presionadas
         super().actualizar(teclas)
         if self.atacando:
+            self.arma.actualizar_animacion_ataque()
             self.tiempo_ataque -= 1
             if self.tiempo_ataque <= 0:
                 self.atacando = False
@@ -86,7 +85,7 @@ class PersonajeJugador(Personaje):
         # Atacar con la tecla J o con el click izquierdo del mouse
         if (evento.type == pygame.KEYDOWN and evento.key == pygame.K_j) or \
            (evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1):
-           self.componente_atacar.atacar(self.arma)
+           self.arma.atacar(self)
         # Puedes agregar aquí otros componentes que reaccionen a eventos
     
     def recibir_danio(self, cantidad):
@@ -96,6 +95,13 @@ class PersonajeJugador(Personaje):
             self._ultimo_danio = ahora
             if self.vida < 0:
                 self.vida = 0
+            self.notificar_observers(self.vida)  # Notifica a los observers del cambio de vida
+
+    def curar(self, cantidad):
+        self.vida += cantidad
+        if self.vida > 100:
+            self.vida = 100
+        self.notificar_observers(self.vida)
 
     def notificar_colision(self, objeto):
         # Si colisiona con un enemigo, recibe daño

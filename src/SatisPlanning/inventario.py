@@ -1,6 +1,9 @@
 import pygame
 import SatisPlanning.constantes as ct
-from .entidades.objeto import Objeto
+from SatisPlanning.entidades.objeto import Objeto
+from SatisPlanning.entidades.suelo import Suelo  # Asegúrate de importar la clase Suelo
+from SatisPlanning.entidades.consumible import PocionCura
+from SatisPlanning.entidades.arma import Arma
 
 class Inventario:
     def __init__(self):
@@ -33,7 +36,7 @@ class Inventario:
 
         #inicializar inventario
         for i in range(5):
-            self.agregar_item(Objeto(0, 0, 30, 30, ct.ITEM_POCIONES[0], dinamico=False,tangible=True))
+            self.agregar_item(PocionCura(0, 0, 30, 30, ct.ITEM_POCIONES[0]))
         for i in range(3):
             self.agregar_item(Objeto(0, 0, 30, 30, ct.ITEM_POCIONES[1], dinamico=False, tangible=True))
         for i in range(4):
@@ -62,7 +65,14 @@ class Inventario:
         self.asignar_item_a_barra_rapida(2, 0, 2) 
         self.asignar_item_a_barra_rapida(3, 1, 3)  
         self.asignar_item_a_barra_rapida(4, 0, 1) 
-          
+        
+        # Agregar bloques de piedra de la clase Suelo al inventario
+        for i in range(5):
+            bloque_piedra = Suelo(0, 0, 30, 30, ct.TEXTURA_PIEDRA)
+            self.agregar_item(bloque_piedra)
+        
+        # Ejemplo: agrega una poción de cura consumible al inventario
+        self.agregar_item(PocionCura())
 
     def  cantidad_items_posicion(self, x, y):
         if self._posicion_ocupada_cuadricula(x,y):
@@ -99,7 +109,16 @@ class Inventario:
         return encontrado 
     
     def agregar_item(self,objeto):
-        coincide_tipo=False
+        # No apilar armas: cada arma ocupa su propio slot
+        if isinstance(objeto, Arma):
+            for i in range(self.tamanio_filas):
+                for j in range(self.tamanio_col):
+                    if len(self.matrix[i][j]) == 0:
+                        self.matrix[i][j].append(objeto)
+                        return True
+            return False  # No hay espacio
+
+        coincide_tipo = False
         pos_i = pos_j = -1
         i=0
         while not coincide_tipo and i < self.tamanio_filas:
@@ -234,3 +253,45 @@ class Inventario:
             elemento_soltado = (self.barra_rapida[self.item_seleccionado_barra]).pop()  # Eliminar y guardar el elemento seleccionado
             return elemento_soltado  # Devolver el elemento eliminado
         return None  # No hay elemento para soltar
+    
+    def consumir_item_seleccionado_matrix(self, personaje=None):
+        x = self.posicion_inventario_actual[0]
+        y = self.posicion_inventario_actual[1]
+        if len(self.matrix[x][y]) > 0:
+            item = self.matrix[x][y][0]
+            if (hasattr(item, "consumir") and callable(item.consumir)) or getattr(item, "es_consumible", False):
+                # Ejecutar el método consumir si existe
+                if hasattr(item, "consumir") and callable(item.consumir):
+                    item.consumir(personaje)
+                self.matrix[x][y].pop(0)
+                return True
+        return False
+
+    def consumir_item_seleccionado_barra(self, personaje=None):
+        idx = self.item_seleccionado_barra
+        if 0 <= idx < len(self.barra_rapida) and len(self.barra_rapida[idx]) > 0:
+            item = self.barra_rapida[idx][0]
+            if (hasattr(item, "consumir") and callable(item.consumir)) or getattr(item, "es_consumible", False):
+                if hasattr(item, "consumir") and callable(item.consumir):
+                    item.consumir(personaje)
+                self.barra_rapida[idx].pop(0)
+                return True
+        return False
+    
+    def remover_item(self, objeto):
+        """
+        Remueve la instancia de objeto del inventario (de cualquier slot/barra).
+        """
+        # Buscar y remover de la matriz principal
+        for i in range(self.tamanio_filas):
+            for j in range(self.tamanio_col):
+                grupo = self.matrix[i][j]
+                if objeto in grupo:
+                    grupo.remove(objeto)
+                    return True
+        # Buscar y remover de la barra rápida
+        for grupo in self.barra_rapida:
+            if objeto in grupo:
+                grupo.remove(objeto)
+                return True
+        return False

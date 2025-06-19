@@ -2,6 +2,7 @@ import pygame
 from .fabrica_juego import FabricaJuego
 from .persistencia.gestor_db import GestorDB
 import SatisPlanning.constantes as ct
+from SatisPlanning.patron_observer import GestorPresentadoresObserver
 
 def main():
     coneDB = GestorDB()
@@ -16,6 +17,9 @@ def main():
     vista_menu = objetos["vista_menu"]
     vista_juego = objetos["vista_juego"]
     gestor = objetos["gestor"]
+    personaje_jugador = objetos["personaje"]  # <-- Cambia "personaje_jugador" por "personaje"
+
+    personaje_jugador.agregar_observer(GestorPresentadoresObserver(gestor))
 
     corriendo = True
     gestor.cambiar_a_menu()
