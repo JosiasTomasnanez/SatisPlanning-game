@@ -23,6 +23,13 @@ class ComponenteInventario(Componente):
                 indice_barra = teclas.key - pygame.K_1
                 self.inventario.seleccionar_barra_rapida(indice_barra)
 
+            if teclas.key == pygame.K_c:
+                if self.inventario.visible:
+                    #establecer nuevo item rapido
+                    pos_inventario = self.inventario.obtener_posicion_inventario_actual()
+                    indx = self.inventario.item_seleccionado_barra
+                    self.inventario.asignar_item_a_barra_rapida(indx, pos_inventario[0],pos_inventario[1])
+
             if teclas.key == pygame.K_g:
                 if(self.inventario.visible):
                     item_soltado =self.inventario.soltar_item_seleccionado_matrix()

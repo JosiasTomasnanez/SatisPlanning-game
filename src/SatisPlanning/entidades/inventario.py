@@ -5,7 +5,7 @@ from SatisPlanning.entidades.objeto import Objeto
 class Inventario:
     def __init__(self):
         # Tamaño deseado para las imágenes en el inventario y la barra rápida
-        self.posicion_inventario_actual= (1,1) 
+        self.posicion_inventario_actual= (0,0) 
         self.tamanio_filas=10
         self.tamanio_col=6
         self.tamanio_icono = (30, 30)  # Cambiado de icon_size a tamanio_icono
@@ -214,7 +214,7 @@ class Inventario:
             self.barra_rapida[indice]=[] 
         else:
             print("error limpiar. indice barra rapida no valido")
-            
+
     def asignar_item_a_barra_rapida(self, indice_barra, x, y):
         if not (0 <= indice_barra < len(self.barra_rapida)):
             print("Error: índice de barra rápida fuera de rango")
@@ -222,7 +222,12 @@ class Inventario:
         if not self.pos_inventario_valida(x, y):
             print("Error: posición de inventario no válida")
             return False  
-        self.barra_rapida[indice_barra] = self.obtener_grupo_items_matrix(x, y)
+        grupo = self.obtener_grupo_items_matrix(x, y)
+        for  i in range(len(self.barra_rapida)):
+            if self.barra_rapida[i] is grupo:
+                self.limpiar_pos_barra(i)  # Limpiar la barra rápida si ya contiene el item
+
+        self.barra_rapida[indice_barra] = grupo
         return True
     
     def soltar_item_seleccionado_barra(self):
