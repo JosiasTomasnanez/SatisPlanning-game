@@ -12,8 +12,13 @@ fi
 # Activar entorno virtual
 source env/bin/activate
 
-# Instalar dependencias
+# Actualizar pip
 pip install --upgrade pip
+
+# Instalar pyinstaller
+pip install pyinstaller
+
+# Instalar dependencias del paquete
 pip install .
 
 echo
