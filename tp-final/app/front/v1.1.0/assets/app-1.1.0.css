@@ -1,0 +1,44 @@
+/* Cambio visual EXAGERADO a propósito: en la demo tiene que ser imposible
+   confundir la canary con la stable, aunque se mire de lejos o en un video. */
+body {
+  margin: 0;
+  background: #39ff14;           /* verde chillón */
+  color: #000;
+  font-family: "Courier New", Courier, monospace;
+}
+
+/* Banner fijo arriba: queda visible aunque se haga scroll. */
+#banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  padding: 1.2rem;
+  background: #000;
+  color: #39ff14;
+  font-size: 2.2rem;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: .05em;
+}
+
+/* Margen superior para que el banner fijo no tape el contenido. */
+main { max-width: 960px; margin: 7rem auto 2rem; padding: 0 1rem; }
+h1 { font-size: 2.4rem; }
+
+#estado { padding: .6rem 1rem; border: 3px solid #000; margin-bottom: 1rem; font-weight: 700; }
+.ok { background: #fff; }
+.error { background: #ff3b3b; color: #fff; }
+.carga { background: #ffe600; }
+
+/* Tarjetas en lugar de tabla (cambio de layout, no solo de colores). */
+#tarjetas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+.tarjeta { background: #fff; border: 3px solid #000; padding: .8rem; box-shadow: 6px 6px 0 #000; }
+.tarjeta h2 { margin: 0 0 .5rem; font-size: 1.1rem; }
+.tarjeta p { margin: .2rem 0; }
+.tarjeta small { color: #333; }

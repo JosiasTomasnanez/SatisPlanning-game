@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TerraSense - Monitoreo</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem auto; max-width: 820px; padding: 0 1rem; color: #1b2a1b; }
+    h1 { color: #2e6b2e; }
+    #estado { padding: .6rem 1rem; border-radius: 6px; margin-bottom: 1rem; font-weight: 600; }
+    .ok { background: #dff3df; color: #1d5a1d; }
+    .error { background: #fbe0e0; color: #8a1c1c; }
+    .carga { background: #fff3cd; color: #7a5b00; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border-bottom: 1px solid #ddd; padding: .4rem .6rem; text-align: left; font-size: .9rem; }
+    th { background: #f3f7f3; }
+  </style>
+</head>
+<body>
+  <h1>TerraSense S.A.</h1>
+  <p>Ultimas lecturas de la flota de sensores ESP32.</p>
+  <div id="estado" class="carga">Cargando...</div>
+  <p>Total de lecturas: <strong id="total">-</strong> | Atendido por pod: <code id="pod">-</code></p>
+  <table>
+    <thead><tr><th>Sensor</th><th>Temp (C)</th><th>H. suelo (%)</th><th>H. aire (%)</th><th>Fecha</th></tr></thead>
+    <tbody id="filas"></tbody>
+  </table>
+
+  <script>
+    // SPA estatica: corre en el navegador, apunta al Ingress del backend.
+    const API = 'http://api.terrasense.local';
+    const estado = document.getElementById('estado');
+
+    async function refrescar() {
+      try {
+        const ctrl = new AbortController();
+        const t = setTimeout(() => ctrl.abort(), 5000);
+        const [lect, stats] = await Promise.all([
+          fetch(API + '/api/sensores', { signal: ctrl.signal }).then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }),
+          fetch(API + '/api/stats', { signal: ctrl.signal }).then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }),
+        ]);
+        clearTimeout(t);
+        document.getElementById('total').textContent = stats.total;
+        document.getElementById('pod').textContent = stats.pod;
+        document.getElementById('filas').innerHTML = lect.map(l =>
+          `<tr><td>${l.sensor_id}</td><td>${(+l.temperatura).toFixed(1)}</td><td>${(+l.humedad_suelo).toFixed(1)}</td><td>${(+l.humedad_aire).toFixed(1)}</td><td>${new Date(l.ts).toLocaleString()}</td></tr>`
+        ).join('');
+        estado.className = 'ok';
+        estado.textContent = 'Sistema operativo';
+      } catch (e) {
+        estado.className = 'error';
+        estado.textContent = 'No se pudo contactar al servidor (' + e.message + '). Reintentando...';
+      }
+    }
+    refrescar();
+    setInterval(refrescar, 2000);
+  </script>
+</body>
+</html>

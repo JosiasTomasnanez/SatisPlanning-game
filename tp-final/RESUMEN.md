@@ -101,3 +101,94 @@ Kubernetes ──────┤  ¿podés atender? (incluye DB)  falla → sale
   versión adentro no se podría actualizar sin recrear el Deployment.
 - *¿El Secret es seguro?* Está en base64, no cifrado. En producción usaríamos Vault o Sealed
   Secrets y no lo versionaríamos; acá es un laboratorio.
+
+---
+
+## Fase 2 — Front versionado (1.0.0 / 1.1.0 / 1.2.0)
+
+### Qué se hizo
+Un **único Dockerfile** construye las tres versiones del front. Solo cambian dos
+argumentos de build: `APP_VERSION` y la carpeta de origen `SRC` (por defecto `v<versión>`).
+
+```
+app/front/
+├── Dockerfile      ← uno solo para todas las versiones
+├── nginx.conf      ← plantilla con __APP_VERSION__
+├── v1.0.0/         ← stable: el index.html del TP3 sin cambios
+├── v1.1.0/         ← canary: cambio visual exagerado, CSS/JS en /assets/
+└── v1.2.0/         ← rota a propósito: pantalla en blanco con HTTP 200
+```
+
+Build: `docker build --build-arg APP_VERSION=1.1.0 -t terrasense-front:1.1.0 .`
+(tags explícitos `terrasense-front:1.0.0 / 1.1.0 / 1.2.0`, nunca `latest`).
+
+### Dockerfile: decisiones
+- Base `nginx-unprivileged`: nginx corre como usuario 101 (no root) y escucha en 8080.
+- `USER root` solo durante el build para modificar archivos, y se vuelve a `USER 101`.
+  Principio de **mínimo privilegio**: en ejecución nunca es root.
+- **ARG**: variable que existe solo durante el build (no queda en el contenedor).
+
+### Las 3 marcas de versión
+| Marca | Dónde | Quién la usa |
+|---|---|---|
+| `<meta name="app-version">` | Dentro del HTML (DOM) | El navegador / k6 browser: confirma qué versión **renderizó** el usuario |
+| `/version.txt` | Archivo liviano | Probes de K8s y conteo con `curl` (qué % va a canary) |
+| Header `X-App-Version` | En **toda** respuesta de nginx (incluso 404) | k6 HTTP: detectar assets de otra versión (HTML 1.1.0 + CSS de 1.0.0) |
+
+Hacen falta las tres porque cada una responde una pregunta distinta: el header dice
+quién respondió **cada request**, el meta dice qué **vio** el usuario, y version.txt es
+la forma **más barata** de preguntarle a un pod su versión.
+
+### nginx.conf: decisiones
+- `add_header ... always`: el header sale también en errores (ahí es cuando más importa).
+- `Cache-Control: no-store`: sin caché, para que nadie vea una versión vieja guardada
+  y para que las mediciones del canary no se falseen.
+- `location /assets/ { try_files $uri =404; }`: un asset que no existe da **404 visible**.
+  Si cayera en index.html daría 200 con HTML adentro y el error quedaría oculto.
+- `location / { try_files $uri $uri/ /index.html; }`: fallback típico de SPA.
+
+### Problema de "assets mezclados"
+```
+Usuario ─ GET /                    → Ingress → pod CANARY → HTML 1.1.0 (pide app-1.1.0.css)
+        ─ GET /assets/app-1.1.0.css → Ingress → pod STABLE → 404 (no lo tiene)
+                                                   ⇒ página rota a medias
+```
+Por eso la v1.1.0 tiene CSS/JS externos con la versión en el nombre: para que el
+problema se pueda demostrar. La solución es la **afinidad por cookie** (Fase 3): el
+mismo usuario siempre va al mismo grupo de pods.
+
+### Las versiones
+- **1.0.0 (stable)**: tabla clásica, polling a la API cada 2 s.
+- **1.1.0 (canary)**: **mismo comportamiento** (polling 2 s a `/api/sensores` y `/api/stats`),
+  pero fondo verde #39ff14, banner fijo "ESTÁS VIENDO LA VERSIÓN CANARY 1.1.0", letra
+  monoespaciada y tarjetas. Exagerado para que en un video se distinga sin dudas.
+  Además muestra la versión del back (header leído gracias al CORS de la Fase 1) y arma
+  el DOM con `textContent` (no `innerHTML`) para evitar XSS.
+- **1.2.0 (rota)**: el HTML solo tiene `<div id="app">` y un JS que lee
+  `config.api.baseUrl` con `config` undefined → **TypeError** → no se dibuja nada.
+
+### ¿Por qué un chequeo HTTP no detecta la v1.2.0?
+```
+curl /                     → 200 OK, HTML válido      ✔
+curl /assets/app-1.2.0.js  → 200 OK, JS existe        ✔
+curl /version.txt          → 200 "1.2.0"              ✔  ← las probes dan OK
+Navegador: ejecuta el JS   → TypeError → body vacío   ✘  ← el usuario ve pantalla en blanco
+```
+El servidor entrega todo bien; el error ocurre **en el navegador** al ejecutar el JS.
+Ni las probes ni k6 HTTP ejecutan JavaScript. Solo un navegador real (k6/browser,
+Fase 4) lo detecta, midiendo si `body.innerText` está vacío.
+Es lo que pasó en el incidente de la madrugada de helada: monitoreo en verde y usuarios sin ver nada.
+
+### Frase para la presentación
+> "Las tres versiones salen del mismo Dockerfile y llevan su versión en tres lugares:
+> header, meta y version.txt. La 1.2.0 está rota a propósito: devuelve 200 en todo, pero
+> deja la pantalla en blanco; eso demuestra que un health check HTTP no alcanza y que
+> necesitamos un navegador real en el canary."
+
+### Posibles preguntas
+- *¿Por qué no usar `latest`?* No se sabe qué versión corre, no hay rollback a algo
+  conocido, y con `latest` K8s fuerza `imagePullPolicy: Always`.
+- *¿Por qué tres versiones?* 1.0.0 = lo que hay en producción; 1.1.0 = el cambio a
+  validar (debería pasar); 1.2.0 = prueba de que el proceso **frena** un release malo.
+- *¿El 404 de assets no es peor para el usuario?* Es peor ocultarlo: con 200 y HTML
+  adentro el error no aparece en ninguna métrica. Con 404 lo detecta k6 (`assets_rotos`).

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TerraSense - Monitoreo (canary 1.1.0)</title>
+  <!-- CSS y JS en archivos externos con la versión en el nombre: así se ve el
+       problema de "assets mezclados" (HTML de una versión y CSS/JS pedidos a
+       un pod de otra versión, que no los tiene → 404). -->
+  <link rel="stylesheet" href="/assets/app-1.1.0.css">
+</head>
+<body>
+  <div id="banner">ESTÁS VIENDO LA VERSIÓN CANARY 1.1.0</div>
+  <main>
+    <h1>TerraSense S.A.</h1>
+    <p>Últimas lecturas de la flota de sensores ESP32.</p>
+    <div id="estado" class="carga">Cargando...</div>
+    <p class="meta">
+      Total de lecturas: <strong id="total">-</strong> |
+      Atendido por pod: <code id="pod">-</code> |
+      Versión del back: <code id="version-back">-</code>
+    </p>
+    <section id="tarjetas"></section>
+  </main>
+  <script src="/assets/app-1.1.0.js"></script>
+</body>
+</html>
