@@ -69,6 +69,24 @@ El job `build` del CI verifica que las imágenes **arrancan** con esos mismos UI
   root) o un servicio administrado.
 - Registrados por hash en `horusecCliRiskAcceptHashes`.
 
+## Segundo run (#44003617085, commit `6e0af9f`)
+
+Después de las correcciones, quedaron **21 de 22 resueltos**. Quedó **1 hallazgo nuevo**:
+`HS-JAVASCRIPT-6` en `server.js`, en un **comentario** que explicaba el cambio y nombraba la
+función de random. La regla de Horusec es una expresión regular sobre el texto y no distingue
+código de comentarios. Se reescribió el comentario sin nombrar la función.
+
+Esto muestra una limitación del SAST por patrones: puede marcar texto que no se ejecuta.
+Siempre hace falta que una persona revise cada hallazgo.
+
+## Limitación detectada: no hay análisis de dependencias (SCA)
+
+El log del run avisa: `Error while running tool NpmAudit: file package-lock.json was not found`.
+Sin `package-lock.json`, Horusec **no revisa vulnerabilidades conocidas de las dependencias**
+del back (express, pg, cors). El pipeline actual cubre el código propio y la configuración de
+K8s, pero **no las librerías de terceros**. Propuesta: versionar `package-lock.json` y usar
+`npm ci` en el Dockerfile, para que el build sea reproducible y NpmAudit pueda analizarlo.
+
 ## Diferencia entre falso positivo y riesgo aceptado
 - **Falso positivo:** la herramienta se equivoca; no hay vulnerabilidad en este contexto.
 - **Riesgo aceptado:** el problema **existe**, pero se decide convivir con él por una razón
