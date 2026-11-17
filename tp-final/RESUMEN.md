@@ -572,3 +572,137 @@ Con la v1.2.0, el split da todo OK (200 en todo) y el browser da `pantalla_blanc
   carga. Con el header, cada corrida le pone **toda** la carga a una sola versión: comparación justa.
 - *¿Por qué escalar el canary a 2 réplicas para el estrés?* Para que tenga los mismos pods que la stable;
   si no, compararíamos 1 pod contra 2.
+
+---
+
+## Fase 5 — Scripts de despliegue y rollout
+
+### En pocas palabras
+Las fases 1 a 4 dejaron escritos los manifiestos y las pruebas. Esta fase agrega los scripts
+que **ejecutan** todo en orden: levantar el cluster, cambiar el peso del canary, contar el
+reparto y correr el plan de rollout completo, decidiendo en cada etapa si se avanza o se hace
+rollback. Que esté automatizado hace que el plan sea **reproducible** (se ejecuta igual cada vez)
+y que la decisión dependa de criterios escritos, no de quien lo mira.
+
+| Script | Qué hace |
+|---|---|
+| `deploy.sh` | Levanta todo desde cero en Minikube |
+| `peso.sh <N>` | Cambia el % de tráfico al canary y lo registra con la hora |
+| `conteo-curl.sh [N]` | Cuenta qué versión responde, con curl y con los logs del Ingress |
+| `rollout.sh` | Ejecuta el plan de rollout completo con decisiones automáticas |
+
+Se corren desde `tp-final/`: `./scripts/deploy.sh`.
+
+### `deploy.sh` — despliegue en un Minikube limpio
+```
+minikube start (driver docker)
+   └► addons: ingress (ingress-nginx) + metrics-server (CPU para el HPA)
+       └► build de 4 imágenes DENTRO de Minikube (docker-env)
+           terrasense-back:1.0.0, terrasense-front:1.0.0 / 1.1.0 / 1.2.0
+           └► esperar al Ingress controller
+               └► base (namespace, config, DB) → back + HPA → stable + canary
+                   └► Ingress (con reintentos) → /etc/hosts con la IP de Minikube
+```
+- **docker-env**: hace que `docker build` construya dentro del Docker de Minikube. Así el
+  cluster ya tiene las imágenes sin subirlas a un registry (por eso `imagePullPolicy: IfNotPresent`).
+- **Orden**: la DB primero, porque el back no pasa la readiness sin DB.
+- **Reintentos en el Ingress**: ingress-nginx tiene un *webhook de validación* (un servicio que
+  revisa cada Ingress antes de aceptarlo). Tarda unos segundos más que el pod en estar disponible;
+  si se aplica antes, rechaza el Ingress. Por eso se reintenta 12 veces cada 5 s.
+- **/etc/hosts**: asocia `terrasense.local` y `api.terrasense.local` a la IP de Minikube.
+
+### `peso.sh <N>` — cambiar el peso
+1. `kubectl annotate ... canary-weight=N`: el Ingress controller recarga en segundos, **sin reiniciar pods**.
+2. Actualiza el YAML con `sed`: el repo queda igual que el cluster (si alguien vuelve a
+   aplicar el YAML, no pisa el peso con un valor viejo).
+3. Escribe en `evidencias/reportes/cambios-de-peso.log`: `2026-11-18T10:05:00-03:00 peso 10 -> 25`.
+   Con esa hora se cruza cada cambio con las métricas y los videos.
+
+### `conteo-curl.sh [N]` — verificación independiente de k6
+- N curls (default 100) a `/version.txt` sin cookies → `sort | uniq -c`:
+  ```
+       74 1.0.0
+       26 1.1.0      ← con peso 25, ≈ 25%
+  ```
+- Además cuenta en los **logs del Ingress controller** cuántos requests fueron a `front-canary`.
+- Son dos fuentes distintas (cliente y servidor) que deben coincidir con el peso. Si k6 dice
+  25% y curl también, el dato es confiable.
+
+### `rollout.sh` — el plan de rollout automatizado
+```
+                    ┌─────────────────────────────────────┐
+                    │ preparar canary con VERSION_CANARY  │ (siempre con peso 0)
+                    └──────────────────┬──────────────────┘
+                                       ▼
+          ETAPA 0: peso 0 + navegador con cookie canary=always (3 visitas)
+                    ¿0 pantallas en blanco y 3/3 visitas en el canary?
+                       │ no                                │ sí
+                       ▼                                   ▼
+            FALLA (peso ya es 0:               para cada peso en 10 → 25 → 50 → 100:
+            ningún usuario expuesto)             peso.sh P
+                                                 en paralelo: split (k6 HTTP, 5 min)
+                                                              + navegador (20 visitas)
+                                                         │
+                                ¿thresholds del split OK?
+                                ¿0 pantallas en blanco?
+                                ¿canary recibió visitas?
+                                ¿p95 canary ≤ p95 stable +10%  o  diferencia < 5 ms?
+                                    │ alguna no                   │ todas sí
+                                    ▼                             ▼
+                   ROLLBACK: peso 0, medir cuánto        AVANZA → siguiente peso
+                   tardó, anotar en bitácora, cortar             │
+                                                                 ▼
+                                                   fin del plan (peso 100)
+                                                   PROMOVER=1 → promoción
+```
+**Cada etapa** queda en `evidencias/reportes/bitacora.csv`:
+`inicio, fin, etapa, versión, peso, % observado, visitas, p95 canary, p95 stable, errores canary,
+assets rotos, pantallas blancas, decisión (AVANZA/ROLLBACK/PROMOCION), motivo`.
+
+Detalles que hay que saber explicar:
+- **Etapa 0** prueba la versión nueva con un navegador real **sin exponer usuarios** (peso 0 +
+  cookie). Con la v1.2.0, el rollout se frena acá: ningún usuario real ve la pantalla en blanco.
+- **Split y navegador en paralelo**: el split mide miles de visitas (reparto, latencia, errores);
+  el navegador verifica lo que se ve. Se necesitan los dos (ver Fase 4).
+- **Criterio de latencia**: se compara el p95 de **página** del canary contra el de la stable
+  **medido en la misma etapa** (misma carga, mismo momento). La tolerancia de 5 ms evita hacer
+  rollback por ruido: en Minikube los tiempos son de pocos ms.
+- **Peso 100**: no hay visitas a la stable, así que se compara contra el p95 stable de la etapa anterior.
+- **Tiempo de rollback**: desde el `peso 0` hasta que 20 requests seguidos ya no reciben la
+  versión canary. Es una métrica de **recuperabilidad**.
+- **Promoción (PROMOVER=1)**, en este orden:
+  1. la stable pasa a la imagen nueva (sed en el YAML + `kubectl apply` + `rollout status`);
+  2. peso 0 → todo el tráfico a la stable, que ya es la versión nueva;
+  3. canary a 0 réplicas.
+
+  Si se invierte el orden, durante unos segundos el tráfico vuelve a la versión vieja.
+- **Sin `set -e`**: k6 termina con código 99 cuando fallan los thresholds. Ese caso no es un error
+  del script, es una decisión (rollback), así que se maneja a mano.
+
+Variantes de uso:
+| Comando | Para qué |
+|---|---|
+| `./scripts/rollout.sh` | Plan completo con la 1.1.0 (≈ 20 min) |
+| `DURATION=1m ./scripts/rollout.sh` | Ensayo rápido |
+| `SOLO_PROMOVER=1 ./scripts/rollout.sh` | Promover una versión ya validada |
+| `VERSION_CANARY=1.2.0 ./scripts/rollout.sh` | Demo: la etapa 0 frena la versión rota |
+| `VERSION_CANARY=1.2.0 SALTEAR_ETAPA0=1 PESOS="25" ./scripts/rollout.sh` | Demo: rollback con tráfico real y tiempo de rollback medido |
+
+### Frase para la presentación
+> "El plan de rollout está automatizado en rollout.sh: en cada peso corre k6 HTTP y un navegador
+> real en paralelo, y solo avanza si se cumplen criterios escritos antes. Si algo falla, vuelve a
+> peso 0, mide cuánto tardó y lo deja en la bitácora. Con la v1.2.0, el proceso la frena en la
+> etapa 0, antes de que la vea un usuario."
+
+### Posibles preguntas
+- *¿Por qué automatizar y no cambiar el peso a mano?* Para que la decisión dependa de criterios
+  fijados de antemano y quede registrada; a mano es fácil "dejar pasar" un resultado dudoso.
+- *¿Cuánto tarda un rollback?* Lo mide el script (queda en la bitácora). Es un cambio de anotación:
+  el Ingress controller recarga en segundos y no se reinicia ningún pod.
+- *¿Por qué la etapa 0 usa solo 3 visitas?* Es una verificación de humo de la UI: si la versión está
+  rota, falla siempre; no hace falta volumen.
+- *¿Por qué hay dos demos con la 1.2.0?* La primera muestra el caso ideal (se frena sin exponer a
+  nadie). La segunda muestra qué pasa si igual llega a usuarios reales: el navegador la detecta
+  en el 25% y el rollback la saca en segundos.
+- *¿Qué pasa si se corta la luz a mitad del rollout?* El peso queda en el último valor aplicado
+  (está en el cluster y en el YAML). Se vuelve a correr desde la etapa que corresponda con `PESOS`.
