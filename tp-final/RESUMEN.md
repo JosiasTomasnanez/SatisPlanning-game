@@ -4,7 +4,7 @@ Apunte de estudio, fase por fase: qué se hizo, para qué sirve, cómo se conect
 con lo anterior y cómo explicarlo en la presentación.
 
 **Cómo leer este apunte:** primero leé "El TP en 2 minutos" (el mapa). Después cada
-fase arranca con **En criollo** (la idea sin tecnicismos) y recién ahí viene el detalle.
+fase arranca con **En pocas palabras** (qué problema resuelve) y recién ahí viene el detalle.
 
 ---
 
@@ -20,28 +20,28 @@ datos justo cuando más importaban.
 
 **La pregunta del TP:** ¿cómo sacamos una versión nueva sin que pueda volver a pasar eso?
 
-### La respuesta: "probar con pocos antes de dárselo a todos"
-Analogía: un restaurante que cambia una receta. No la cambia para todos de golpe: se la sirve
-primero a **1 de cada 10 mesas**, mira si les gusta, y recién después a 1 de cada 4, a la
-mitad, a todos. Si a esas primeras mesas les cae mal, vuelve a la receta vieja y casi nadie se
-enteró. Eso es un **canary**.
+### La respuesta: canary release
+La versión nueva se despliega **junto** a la actual y recibe solo un porcentaje del
+tráfico real. En cada porcentaje se mide (errores, latencia, pantalla en blanco). Si los
+números cumplen los criterios fijados de antemano, se sube el porcentaje; si no, se vuelve
+a 0% (rollback) y el problema afectó solo a ese porcentaje de usuarios, durante poco tiempo.
 
 ```
- Versión vieja (1.0.0) ─┐
-                        ├─► "portero" (Ingress) decide quién ve cuál ─► usuarios
- Versión nueva (1.1.0) ─┘     10% → 25% → 50% → 100%   (si algo falla → 0%)
+ Versión actual (1.0.0) ─┐
+                         ├─► Ingress Controller (decide qué versión recibe cada request) ─► usuarios
+ Versión nueva  (1.1.0) ─┘     10% → 25% → 50% → 100%   (si algo falla → 0%)
 ```
 
 ### Las piezas, en una línea cada una
-| Pieza | En criollo | Fase |
+| Pieza | Qué hace | Fase |
 |---|---|---|
-| Back + base de datos en Kubernetes | El servidor, que se reinicia solo si se cae y suma copias si hay mucha carga | 1 (era el TP3) |
-| k6 de carga | "Simulador de sensores": mide cuánto aguanta el servidor antes de cambiar nada (línea base) | 1 |
+| Back + base de datos en Kubernetes | El servidor, que se reinicia solo si se cae y agrega réplicas si hay mucha carga | 1 (era el TP3) |
+| k6 de carga | Genera tráfico de sensores y mide cuánto aguanta el back antes de cambiar nada (línea base) | 1 |
 | Tres versiones del front | 1.0.0 = la actual; 1.1.0 = la nueva (verde, para que se note); 1.2.0 = **rota a propósito** | 2 |
-| Stable + canary + Ingress | Las dos versiones corriendo juntas y el "portero" que reparte usuarios | 3 |
-| k6 del canary y de estrés | "Clientes de prueba": miden si la nueva anda igual o mejor que la vieja | 4 |
-| Scripts (rollout.sh) | El "piloto automático": sube el % solo si las mediciones dan bien; si no, vuelve a 0 | 5 |
-| CI (GitHub Actions) | El "control de calidad en la puerta": revisa el código (linters, Horusec) antes de construir nada | 6 |
+| Stable + canary + Ingress | Las dos versiones corriendo juntas y el Ingress repartiendo el tráfico entre ellas | 3 |
+| k6 del canary y de estrés | Miden qué versión recibió cada visita, latencia, errores y si la pantalla quedó en blanco | 4 |
+| Scripts (rollout.sh) | Automatizan el plan: suben el % solo si las mediciones cumplen; si no, rollback a 0 | 5 |
+| CI (GitHub Actions) | Corre linters y Horusec sobre el código; si fallan, no se construyen las imágenes | 6 |
 | Informe + ISO 25000 | Qué característica de calidad mide cada prueba y qué queda sin medir | 7 |
 
 ### Las 3 cosas que tenés que poder decir sí o sí
@@ -76,6 +76,26 @@ main ──●──● 51c78a0 (código del juego SatisPlanning, no se toca)
 - El TP Final se trabaja en la rama `tp-final`, creada desde `main` actualizado.
 - Ramas de TPs anteriores: TP1 linters → `feature/configurar-linter`;
   TP2 Horusec → `dev` (workflow) y `TP2-Horusec` (análisis).
+
+### Relación entre el juego (SatisPlanning) y TerraSense
+**No hay relación técnica entre las dos aplicaciones; solo comparten el repositorio.**
+```
+Repo Calidad_software
+├── main: juego SatisPlanning (Python + pygame), proyecto de Ingeniería de Software
+│     ├── TP1: Ruff + Pylint analizando el código del JUEGO
+│     └── TP2: Horusec (SAST) analizando el código del JUEGO
+└── tp-final: TerraSense (Node.js + nginx + PostgreSQL en Kubernetes)
+      ├── TP3 (línea base): k8s + HPA + k6 sobre TERRASENSE
+      └── TP Final: canary + estrés + ISO 25000 sobre TERRASENSE
+```
+- TP1 y TP2 usaron el juego como código sobre el cual aplicar **análisis estático**.
+- Desde el TP3 la consigna cambia de sistema: TerraSense es una app web cliente-servidor,
+  que se puede desplegar en Kubernetes y someter a carga; el juego es una app de escritorio.
+- Lo que se reutiliza de TP1 y TP2 son **las herramientas, no el código**: en la Fase 6 el
+  pipeline de CI corre linters y Horusec sobre el código de TerraSense, como quality gate
+  antes de construir las imágenes.
+- Frase: *"TP1 y TP2 aplicaron análisis estático a un proyecto Python; en el final esas mismas
+  herramientas son la primera quality gate del pipeline de TerraSense."*
 
 ---
 
@@ -257,9 +277,7 @@ Es lo que pasó en el incidente de la madrugada de helada: monitoreo en verde y 
 ### Qué es un canary
 **Canary release**: desplegar la versión nueva **al lado** de la vieja y mandarle solo
 una parte del tráfico real. Se miden métricas y, si están bien, se sube el porcentaje
-de a poco; si están mal, se vuelve a 0% (**rollback**) y casi nadie se enteró.
-(El nombre viene del canario que los mineros llevaban: si el canario se moría, había gas
-y se salía antes de que le pasara algo a la gente.)
+de a poco; si están mal, se vuelve a 0% (**rollback**) y el impacto queda acotado a ese porcentaje.
 
 Diferencias con otras estrategias:
 | Estrategia | Cómo funciona | Riesgo |
@@ -396,7 +414,7 @@ las probes dicen "el pod sirve archivos", no "la página funciona" (eso lo mide 
 
 ## Cuándo sacar capturas y filmar (en Ubuntu)
 
-**En criollo:** mientras escribimos el código no hay nada que capturar. La evidencia sale
+**En pocas palabras:** mientras escribimos el código no hay nada que capturar. La evidencia sale
 cuando se **ejecuta** en Ubuntu. Es la prueba de que lo que decimos realmente pasó.
 El paso a paso detallado va a estar en `GUIA_EJECUCION.md`.
 
@@ -425,3 +443,132 @@ El paso a paso detallado va a estar en `GUIA_EJECUCION.md`.
 - Video con pantalla partida: terminal + navegador o `kubectl -w`.
 - Nombre descriptivo, ej. `evidencias/videos/05-rollback-v1.2.0.mp4`.
 - Grabar en Ubuntu: SimpleScreenRecorder o el atajo `Ctrl+Alt+Shift+R` de GNOME.
+
+---
+
+## Fase 4 — Scripts k6 del canary y del estrés
+
+### En pocas palabras
+La Fase 3 dejó el Ingress repartiendo tráfico entre stable y canary. Esta fase agrega las
+**mediciones** que deciden si el canary avanza o vuelve a 0: qué versión recibió cada visita,
+cuánto tardó, si hubo errores, si hubo assets mezclados y si la pantalla quedó en blanco.
+
+Son 4 archivos. Cada uno responde **una pregunta**:
+
+| Script | Pregunta que responde |
+|---|---|
+| `front-common.js` | (no es una prueba) Función compartida: carga una página completa (HTML + assets) y verifica versiones |
+| `front-canary-split.js` | ¿El Ingress reparte según el peso configurado? ¿El canary tiene latencia y errores aceptables? |
+| `browser-canary.js` | ¿El usuario **ve** la página o ve una pantalla en blanco? (Chromium real, ejecuta el JS) |
+| `front-stress.js` | ¿Hasta qué carga (cargas de página/s) cada versión cumple el SLO? |
+
+### Conceptos nuevos
+- **Threshold**: una regla "pasa / no pasa" escrita **antes** de correr la prueba
+  (ej. "menos de 1% de errores"). Si no se cumple, k6 termina con error (código 99) y
+  `rollout.sh` lo usa para decidir si avanza o hace rollback. Es el SLO convertido en código.
+- **p95**: el 95% de las visitas tardó menos que este valor. Se usa en vez del promedio porque
+  el promedio esconde a los usuarios que esperaron mucho.
+- **Counter / Trend / Rate** (tipos de métrica de k6):
+  Counter = cuenta (visitas). Trend = guarda tiempos y calcula p95. Rate = porcentaje de "sí" (errores).
+- **handleSummary**: función que k6 corre al final; acá la usamos para guardar un **JSON de evidencia**
+  en `evidencias/reportes/` y para mostrar un resumen corto en español.
+- **Tag**: etiqueta que se le pone a un request (ej. `escalon: 200`) para filtrar métricas después.
+
+### 1) `front-common.js` — cómo carga una página un visitante
+```
+visitante nuevo (sin cookies)
+   │ GET /            → lee X-App-Version del HTML (ej. 1.1.0)
+   │ busca en el HTML los /assets/ (CSS, JS)
+   │ GET /assets/...  → (en paralelo, como el navegador)
+   ▼
+asset SANO = status 200  Y  misma versión que el HTML
+asset ROTO = 404, o vino de la otra versión (assets mezclados)
+```
+- Cada vuelta **borra las cookies**: así cada visita es un usuario nuevo y el Ingress la
+  sortea de nuevo por peso. Si no, un usuario virtual de k6 se quedaría pegado a la primera versión
+  que le tocó y el % medido sería falso.
+- Mide dos tiempos: **solo HTML** (lo que mide un chequeo HTTP simple) y **página** (HTML + el
+  asset más lento; más parecido a lo que espera el usuario).
+
+### 2) `front-canary-split.js` — el reparto y la salud de cada versión
+- Llegan **20 visitas por segundo durante 5 minutos** (`RATE`, `DURATION`), **sin** cookie ni
+  header: tráfico equivalente al de usuarios reales, que el Ingress reparte por peso.
+- Anota por separado canary y stable: visitas, tiempos (HTML y página) y errores. También los assets rotos.
+- **Thresholds (criterios para avanzar de etapa):**
+  | Regla | Por qué |
+  |---|---|
+  | `http_req_failed < 1%` | El sistema en general no falla |
+  | `err_canary < 1%` | La versión nueva no falla |
+  | `lat_canary p95 < 300 ms` | La versión nueva es rápida (mismo SLO que el back) |
+  | `assets_rotos < 1%` | La afinidad funciona: nadie recibe una página mezclada |
+- Guarda `evidencias/reportes/<ETAPA>-split.json` con **% canary observado vs peso configurado**
+  (ej. peso 10 → observado 9,8%). El sorteo es aleatorio: es normal que no dé exacto.
+
+### 3) `browser-canary.js` — lo que ve el usuario
+- **Chromium de verdad**: ejecuta el JavaScript, que es lo que k6 HTTP no hace.
+- 20 visitas (`N`), cada una en un **contexto nuevo** (= un usuario distinto, sin cookies).
+- Espera 2,5 s (para que el JS dibuje), lee el `<meta app-version>` y mira si
+  `body.innerText` está vacío → **pantalla en blanco**.
+- Threshold `pantalla_blanca rate == 0`: **tolerancia cero**. Una sola pantalla en blanco ya es un incidente.
+- Saca una captura de cada visita: `evidencias/capturas/<ETAPA>-visita-07-v1.1.0.png`
+  (o `...-v1.2.0-BLANCA.png`). **Evidencia automática.**
+- `FORZAR_CANARY=1` pone la cookie `canary=always` → prueba el canary con **peso 0** (etapa 0).
+
+### 4) `front-stress.js` — estrés A/B (Actividad 2)
+- **A/B**: la misma prueba contra cada versión **por separado**, para comparar.
+  `TARGET=stable` manda `X-Canary: never`; `TARGET=canary` manda `X-Canary: always`.
+- Carga en escalones (cargas de página por segundo):
+```
+ 800 |                                              ┌──────┐
+ 400 |                                   ┌──────┐  ╱       │
+ 200 |                       ┌──────┐   ╱        ╲╱        │  ← la hipótesis se evalúa ACÁ
+ 100 |            ┌───┐     ╱        ╲_╱                    │
+  50 |  ┌───┐    ╱     ╲___╱                                │
+     └──┴───┴───┴───────────────────────────────────────────┴── tiempo (≈ 9 min)
+      10s de subida antes de cada meseta; 1 min las dos primeras, 2 min el resto
+```
+- Cada request lleva el tag `escalon` (50, 100, 200...) según el tiempo transcurrido; los
+  10 s de subida se etiquetan "subida" para no mezclarlos con la meseta.
+- **Thresholds sobre el escalón 200** (el de la hipótesis): errores < 1%, p95 < 300 ms.
+  Además, `version_inesperada == 0`: si apareciera la otra versión, el header no funcionó y
+  la medición no serviría.
+- Guarda `evidencias/reportes/estres-front-<TARGET>.json` con el **p95 por escalón**, los
+  errores, los **bytes por página** y las **iteraciones descartadas**.
+
+### Cómo leer los resultados
+1. Mirá primero **`thresholds: OK / FALLARON`**: es la respuesta corta.
+2. En el split: **% observado ≈ peso** (±3 puntos está bien con unos miles de visitas).
+   Si el canary tuviera 0 visitas con peso 25, el Ingress canary no se aplicó.
+3. **p95 canary vs p95 stable**: la regla de la Fase 5 es "canary ≤ stable + 10%, o la diferencia < 5 ms".
+   La tolerancia de 5 ms existe porque en Minikube los tiempos son de pocos ms: un 10% de 4 ms es
+   ruido, no una diferencia real. Además, la v1.1.0 pide 2 assets que la v1.0.0 no pide (tiene el CSS
+   adentro), así que su "página" siempre suma un poco más.
+4. En el estrés: buscá **en qué escalón el p95 se dispara o aparecen errores** (punto de quiebre)
+   y comparalo entre stable y canary.
+5. **Iteraciones descartadas** altas = la PC que genera la carga no dio abasto: ese escalón no es
+   confiable (el límite lo puso k6, no la app).
+
+### Por qué un canary necesita los dos tipos de prueba
+```
+k6 HTTP (split/estrés)   → miles de visitas, mide tiempos y errores    → NO ve la pantalla en blanco
+k6 browser               → pocas visitas, ejecuta JS como un usuario   → SÍ ve la pantalla en blanco
+```
+Uno mide **cantidad** (rendimiento, fiabilidad) y el otro **lo que ve la persona** (calidad en uso).
+Con la v1.2.0, el split da todo OK (200 en todo) y el browser da `pantalla_blanca` = 100% → rollback.
+
+### Frase para la presentación
+> "Escribimos los criterios de aceptación antes de correr, como thresholds de k6. El split mide
+> si el reparto es el configurado y si el canary es igual de rápido y sin errores; el navegador
+> real detecta la pantalla en blanco que el HTTP no ve; y el estrés A/B compara las dos versiones
+> en igualdad de condiciones para contrastar la hipótesis."
+
+### Posibles preguntas
+- *¿Por qué constant-arrival-rate y no N usuarios fijos?* Con usuarios fijos, si el sistema se pone
+  lento, cada usuario manda menos requests y la carga **baja sola**: se esconde el problema.
+  Con llegada constante, la carga se mantiene como en la realidad.
+- *¿Por qué el browser hace solo 20 visitas?* Un navegador real consume mucha CPU y memoria. Para
+  detectar una pantalla en blanco alcanza con pocas visitas: si la versión está rota, falla siempre.
+- *¿Por qué el estrés usa header y no peso?* Con peso, cada versión recibe una parte distinta de la
+  carga. Con el header, cada corrida le pone **toda** la carga a una sola versión: comparación justa.
+- *¿Por qué escalar el canary a 2 réplicas para el estrés?* Para que tenga los mismos pods que la stable;
+  si no, compararíamos 1 pod contra 2.
