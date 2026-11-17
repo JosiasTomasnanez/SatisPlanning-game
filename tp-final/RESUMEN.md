@@ -783,16 +783,32 @@ credencial en el código**.
 | Final | — | Job `build` que depende de los dos: la imagen solo existe si el código pasó las gates |
 
 ### Qué mostrar en la presentación: pipeline en rojo y después en verde
-1. Crear una rama de demo y meter un error a propósito en `server.js`, por ejemplo una variable sin usar:
-   `const sinUsar = 1;` → push.
-2. En GitHub → Actions: `lint` en **rojo**, `build` en **skipped** (gris) → **captura**.
-3. Revertir el cambio → push → todo en **verde** y `build` construye las 4 imágenes → **captura**.
-4. Mostrar el artifact `horusec-report-tp-final` descargado.
+Ya no hace falta forzar un error: el rojo → verde **pasó de verdad** (tabla de abajo).
+Capturas a sacar en GitHub → Actions: el run #43995990963 (rojo, build skipped), el
+#44008882096 (todo verde) y el artifact `horusec-report-tp-final` de cada uno.
 
-Ojo: el **primer** run real puede encontrar hallazgos de Horusec que no se pueden prever sin
-ejecutarlo (por ejemplo, en los endpoints de laboratorio `/api/debug/*`). Si pasa, se analiza cada
-hallazgo: se corrige, o se justifica como falso positivo, como en el TP2. Ese análisis también es
-contenido para el informe.
+### Lo que pasó de verdad en el CI (rojo → verde): evidencia real
+| Run | Commit | Resultado | Qué pasó |
+|---|---|---|---|
+| #43995990963 | `e00a083` | ❌ horusec, build skipped | 22 hallazgos: contenedores sin `securityContext` (Trivy) y `Math.random()` (HS-JAVASCRIPT-6) |
+| #44003617085 | `6e0af9f` | ❌ horusec, build skipped | 21 de 22 resueltos; 1 nuevo: un **comentario** que nombraba la función de random |
+| #44008882096 | `7dd88a8` | ✅ lint, horusec y build | Imágenes construidas y probadas arrancando con UID no root |
+
+Detalle y justificación de cada hallazgo: `tp-final/ci/HALLAZGOS-HORUSEC.md`.
+
+Qué contar en la presentación:
+1. **La gate funcionó**: con hallazgos, `build` no corrió y no hubo imagen candidata.
+2. Se **corrigieron** 14 hallazgos: `securityContext` (no root, UID/GID > 10000, sin escalada, sin
+   capabilities) y la eliminación del random innecesario en el back.
+3. Se registraron **5 falsos positivos** (random en k6 para datos de prueba) y **3 riesgos aceptados**
+   (PostgreSQL arranca como root), cada uno por hash en `horusec-config.json` y con su justificación.
+4. El segundo run mostró una **limitación del SAST por patrones**: marcó un comentario.
+5. Otra limitación: **sin `package-lock.json` no hay análisis de dependencias** (NpmAudit no corre).
+6. El job `build` además **arranca** cada imagen con las mismas restricciones que en Kubernetes,
+   para detectar antes de desplegar si el endurecimiento rompe algo.
+
+- **securityContext**: bloque del manifiesto que define con qué usuario y permisos corre el contenedor.
+- **Trivy**: escáner de configuración (entre otras cosas) que Horusec ejecuta sobre los YAML de Kubernetes.
 
 ### Frase para la presentación
 > "El pipeline de CI es la primera quality gate: linters y Horusec sobre el código, reutilizando
@@ -807,3 +823,91 @@ contenido para el informe.
 - *¿Qué no detecta este pipeline?* Nada en ejecución: ni la pantalla en blanco de la v1.2.0 (el JS es
   sintácticamente válido, y ESLint no corre sobre el front) ni problemas de rendimiento. Para eso está el canary.
 - *¿Por qué ignorar LOW?* Para que el gate bloquee por riesgos reales. Los LOW quedan igual en el reporte.
+
+---
+
+## Fase 7 — Documentación
+
+### En pocas palabras
+Esta fase no agrega funcionalidad: deja escrito **qué se hizo, por qué y qué resultó**, en tres
+documentos, cada uno para un uso distinto:
+
+| Documento | Para qué | Cuándo se usa |
+|---|---|---|
+| `README.md` | **Informe técnico** que lee la cátedra | Se entrega; las tablas **_completar_** se llenan con los datos de Ubuntu |
+| `GUIA_EJECUCION.md` | Orden exacto de comandos en Ubuntu y qué capturar en cada paso | Mientras se ejecuta |
+| `presentacion/GUION-15-MIN.md` | Qué decir minuto a minuto y qué mostrar | Para preparar y dar la presentación |
+
+### Estructura del README (la pide la consigna)
+1. **Despliegue** en un Minikube limpio (`deploy.sh`) + CI.
+2. **Plan de rollout** (tabla etapa / peso / duración / criterio / si falla) + **bitácora** vacía para
+   completar con `bitacora.csv`. El plan se escribe **antes** de ejecutar: es lo que hace que la
+   decisión sea objetiva.
+3. **Estrés**: la hipótesis escrita antes, por qué A/B, las condiciones comparables y el lugar para los resultados.
+4. **Mapa ISO/IEC 25000** (ver abajo).
+5. **Índice de evidencia**: qué demuestra cada archivo.
+6. **Veredicto go/no-go** para la v1.1.0 y para 10.000 sensores (≈ 333 req/s).
+7. **Aprendizaje**: problemas encontrados y cómo se resolvieron.
+
+### ISO/IEC 25000 (SQuaRE): lo que hay que saber explicar
+**SQuaRE** es la familia de normas ISO/IEC 25000 sobre calidad de software. Se divide en partes:
+
+| División | Qué define | En el TP |
+|---|---|---|
+| 2501n — **Modelo** | Qué es "calidad": 25010 (producto) y 25019 (en uso) | El mapa prueba → característica |
+| 2503n — **Requisitos** | Cómo especificar requisitos de calidad | Los SLOs y umbrales: p95 < 300 ms, errores < 1%, 0 pantallas en blanco, +10%, 333 req/s |
+| 2502n — **Medición** | Cómo medir | Las métricas de k6, kubectl y los scripts |
+| 2504n — **Evaluación** | Cómo comparar medidas con requisitos y decidir | `rollout.sh`, la hipótesis, el go/no-go. **25045** = evaluación de la **recuperabilidad**: E1, E2 y rollback |
+
+Orden lógico: **modelo** (qué importa) → **requisito** (cuánto se exige) → **medición** (cuánto dio) → **evaluación** (pasa o no pasa).
+
+**ISO/IEC 25010:2023**: las 9 características de calidad del producto:
+adecuación funcional, eficiencia de desempeño, compatibilidad, capacidad de interacción (antes
+"usabilidad"), fiabilidad, seguridad, mantenibilidad, flexibilidad (antes "portabilidad") y
+protección (*safety*, nueva en 2023).
+
+Qué prueba evidencia qué (resumen del README §4.1):
+| Prueba | Característica → subcaracterística |
+|---|---|
+| Linters | Mantenibilidad → analizabilidad, modificabilidad |
+| Horusec / Trivy | Seguridad → confidencialidad, integridad, resistencia |
+| Probes, E1, E2 | Fiabilidad → disponibilidad, tolerancia a fallos, recuperabilidad |
+| HPA | Eficiencia de desempeño → capacidad, utilización de recursos; Flexibilidad → escalabilidad |
+| k6 carga y estrés | Eficiencia de desempeño → comportamiento temporal, capacidad |
+| Canary + navegador | Fiabilidad → ausencia de fallos, recuperabilidad; Adecuación funcional → corrección; Compatibilidad → coexistencia |
+
+**25010 vs 25019:**
+- 25010 = calidad del **producto**, medida sobre el sistema (ej. p95 de un endpoint).
+- 25019 = calidad **en uso**: el efecto sobre usuarios reales en su contexto. Características:
+  beneficio, ausencia de riesgo y aceptabilidad.
+- La v1.2.0 es el ejemplo: para las probes el producto está "bien" (todo 200), pero la calidad en uso
+  es nula (pantalla en blanco). k6/browser y el canary con usuarios reales son las partes del TP que
+  se acercan a la calidad en uso. Límite: los usuarios son simulados.
+
+**Sin cubrir (y propuesta):** capacidad de interacción / accesibilidad (Lighthouse CI, axe-core);
+compatibilidad / interoperabilidad (contract testing con Pact); seguridad en ejecución (DAST con
+OWASP ZAP); dependencias (lockfile + npm audit); backup y restauración de la DB.
+
+### Frase para la presentación
+> "Cada prueba del TP evidencia una característica de ISO/IEC 25010. Los SLOs son los requisitos
+> (2503n), k6 y los scripts miden (2502n) y rollout.sh evalúa y decide (2504n). El navegador real nos
+> acerca a la calidad en uso de 25019, que es justamente lo que falló en la helada."
+
+### Posibles preguntas
+- *¿Por qué 25045 y no solo 25040?* 25040 es el proceso general de evaluación; 25045 es el módulo
+  específico para evaluar la **recuperabilidad** mediante inyección de fallas, que es lo que hacen E1,
+  E2 y el rollback.
+- *¿Dónde están los requisitos de calidad?* En el plan de rollout y en la hipótesis, escritos **antes** de
+  medir, y en el código como `thresholds` de k6.
+- *¿El TP mide calidad en uso?* Parcialmente: el navegador simula lo que ve un usuario y el canary expone a
+  usuarios reales acotando el riesgo. Medirla de verdad requeriría métricas de usuarios reales (RUM) o encuestas.
+- *¿Qué característica no cubre?* Capacidad de interacción (accesibilidad), interoperabilidad y seguridad en
+  ejecución. Para cada una hay una propuesta en el README §4.4.
+
+---
+
+## Cómo usar este material para preparar la defensa
+1. Leé "El TP en 2 minutos" (arriba de todo).
+2. Leé `presentacion/GUION-15-MIN.md`: es el orden de la presentación.
+3. Para cada fila del guion, leé la fase correspondiente de este RESUMEN (frase + posibles preguntas).
+4. Después de ejecutar en Ubuntu, completá los **_completar_** del README y del guion con los números reales.
