@@ -740,7 +740,7 @@ push / PR que toca tp-final/**
 ### Archivos
 | Archivo | Qué es |
 |---|---|
-| `.github/workflows/tp-final-ci.yml` (raíz del repo) | El pipeline activo. Va en la raíz porque GitHub solo ejecuta workflows de `.github/workflows/` |
+| `.github/workflows/tp-final-ci.yml` (raíz del repo) | El pipeline activo. Va en la raíz porque GitHub solo ejecuta workflows de `.github/workflows/`. El job de linters se llama `lint` porque la regla de protección de `main` exige un check con ese nombre (además de 3 aprobaciones) |
 | `tp-final/app/back/eslint.config.js` | Reglas de ESLint escritas a mano, **sin dependencias externas** (no hace falta `npm install`) |
 | `tp-final/ci/linter.yml` | Copia del workflow del TP1 (rama `feature/configurar-linter`) |
 | `tp-final/ci/horusec.yml` | Copia del workflow del TP2 (rama `dev`) |

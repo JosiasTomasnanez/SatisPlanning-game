@@ -25,7 +25,11 @@ permissions:
 
 jobs:
   lint:
-    name: Linters (HTML, JS, Dockerfile)
+    # El nombre tiene que ser exactamente "lint": la regla de protección de
+    # main exige un check obligatorio con ese nombre (heredado del TP1). Con
+    # otro nombre, el merge queda bloqueado esperando un check que nunca llega.
+    # Este job corre htmlhint, ESLint y hadolint.
+    name: lint
     runs-on: ubuntu-latest
     steps:
       - name: Descargar el código
