@@ -1,0 +1,33 @@
+# HPA: agrega/quita réplicas del back según el uso de CPU.
+# Necesita metrics-server (addon de Minikube) y que el Deployment tenga
+# requests de CPU: el 60% se calcula SOBRE el request (60% de 100m = 60m).
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: back-hpa
+  namespace: terrasense
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: back
+  minReplicas: 2      # alta disponibilidad: si muere un pod, queda otro
+  maxReplicas: 8      # tope acorde a los recursos del nodo de Minikube
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 60
+  behavior:
+    # Subir rápido (hasta 2 pods cada 15 s) para reaccionar a picos...
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        - type: Pods
+          value: 2
+          periodSeconds: 15
+    # ...y bajar con calma (60 s) para no oscilar si la carga va y viene.
+    scaleDown:
+      stabilizationWindowSeconds: 60

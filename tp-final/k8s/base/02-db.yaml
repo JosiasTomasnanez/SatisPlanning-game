@@ -1,0 +1,72 @@
+# Service "db": nombre DNS estable (db.terrasense.svc) para que el back
+# encuentre a PostgreSQL aunque el pod cambie de IP al reiniciarse.
+apiVersion: v1
+kind: Service
+metadata:
+  name: db
+  namespace: terrasense
+spec:
+  ports:
+    - port: 5432
+  selector:
+    app: db
+---
+# StatefulSet (y no Deployment): la DB necesita identidad estable (db-0) y
+# su propio disco persistente que sobreviva a reinicios del pod.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: db
+  namespace: terrasense
+spec:
+  serviceName: "db"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15-alpine
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef: { name: db-secret, key: POSTGRES_USER }
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: db-secret, key: POSTGRES_PASSWORD }
+            - name: POSTGRES_DB
+              value: "iot_db"
+            # Subcarpeta: el volumen trae un "lost+found" y postgres exige un
+            # directorio vacío para inicializar.
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          ports:
+            - containerPort: 5432
+          # Lista solo cuando acepta conexiones; usa la variable en vez de
+          # repetir el usuario hardcodeado.
+          readinessProbe:
+            exec:
+              command: ["sh", "-c", "pg_isready -U \"$POSTGRES_USER\" -d iot_db"]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests: { cpu: "250m", memory: "256Mi" }
+            limits: { cpu: "1", memory: "512Mi" }
+          volumeMounts:
+            - name: db-data
+              mountPath: /var/lib/postgresql/data
+  # PVC por réplica: Minikube lo provee con su storage-class por defecto.
+  # Si se borra el pod, los datos quedan en el PVC.
+  volumeClaimTemplates:
+    - metadata:
+        name: db-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi

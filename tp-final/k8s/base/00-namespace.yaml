@@ -1,0 +1,6 @@
+# Namespace: "carpeta" lógica que agrupa todo lo de TerraSense.
+# Permite borrar/listar todo junto y no mezclarlo con otros recursos del cluster.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: terrasense

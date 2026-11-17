@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: back
+  namespace: terrasense
+  labels:
+    app: back
+    version: "1.0.0"
+spec:
+  # Punto de partida; después el HPA es quien decide la cantidad de réplicas.
+  replicas: 2
+  # El selector solo usa "app" (es inmutable): si incluyera "version", no
+  # podríamos actualizar la versión sin borrar y recrear el Deployment.
+  selector:
+    matchLabels:
+      app: back
+  template:
+    metadata:
+      labels:
+        app: back
+        version: "1.0.0"
+    spec:
+      containers:
+        - name: back
+          # Tag explícito (nunca latest): saber exactamente qué versión corre
+          # y poder volver atrás a una versión conocida.
+          image: terrasense-back:1.0.0
+          # IfNotPresent: usa la imagen construida dentro de Minikube sin ir a
+          # un registry (con "latest" K8s intentaría descargarla siempre).
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+          env:
+            - name: APP_VERSION
+              value: "1.0.0"
+          envFrom:
+            - configMapRef:
+                name: back-config
+            - secretRef:
+                name: db-secret
+          # requests: lo que el scheduler reserva y la BASE del % del HPA.
+          # limits: techo; si supera memoria -> OOMKilled, si supera CPU -> throttling.
+          resources:
+            requests: { cpu: "100m", memory: "128Mi" }
+            limits: { cpu: "250m", memory: "256Mi" }
+          # Readiness: chequeo frecuente; con 2 fallos el pod sale del Service
+          # rápido y no recibe tráfico que no puede atender.
+          readinessProbe:
+            httpGet: { path: /readyz, port: 3000 }
+            initialDelaySeconds: 3
+            periodSeconds: 3
+            failureThreshold: 2
+          # Liveness: más tolerante (3 x 10 s) para no reiniciar un pod que
+          # solo está lento bajo carga.
+          livenessProbe:
+            httpGet: { path: /healthz, port: 3000 }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+---
+# Service ClusterIP: IP/DNS interna estable que balancea entre los pods
+# "ready" del back. El Ingress de la API apunta acá.
+apiVersion: v1
+kind: Service
+metadata:
+  name: back
+  namespace: terrasense
+spec:
+  type: ClusterIP
+  selector:
+    app: back
+  ports:
+    - port: 3000
+      targetPort: 3000
