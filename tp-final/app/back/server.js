@@ -123,10 +123,14 @@ app.get('/api/stats', async (_req, res) => {
 
 // ---- Endpoints de laboratorio para las pruebas de fallas (NO usar en producción) ----
 // CPU: ocupa el event loop N ms para que el HPA vea uso de CPU. Ej: /api/debug/burn?ms=200
+// El cálculo es determinístico a propósito: antes usaba Math.random(), que
+// Horusec marca como generador débil (HS-JAVASCRIPT-6). Acá no hace falta
+// azar, solo gastar CPU, así que se eliminó en vez de justificarlo.
 app.get('/api/debug/burn', (req, res) => {
   const ms = Math.min(Number(req.query.ms || 100), 5000);
   const end = Date.now() + ms;
-  while (Date.now() < end) { Math.sqrt(Math.random()); }
+  let x = 0;
+  while (Date.now() < end) { x = Math.sqrt(x + 1); }
   res.json({ burned_ms: ms, pod: process.env.HOSTNAME });
 });
 

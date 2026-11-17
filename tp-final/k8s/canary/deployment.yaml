@@ -33,6 +33,19 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
+          # Mismo endurecimiento que la stable (ver comentarios allá).
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10101
+            runAsGroup: 10101
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: nginx-cache
+              mountPath: /var/cache/nginx
+            - name: tmp
+              mountPath: /tmp
           # Mismos recursos y probes que la stable: comparación justa.
           resources:
             requests: { cpu: "50m", memory: "64Mi" }
@@ -48,3 +61,8 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 2
             failureThreshold: 3
+      volumes:
+        - name: nginx-cache
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}

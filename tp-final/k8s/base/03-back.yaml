@@ -30,6 +30,21 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3000
+          # Endurecimiento (hallazgos Trivy vía Horusec en el CI):
+          # - runAsNonRoot + UID/GID > 10000: aunque la imagen ya usa "node"
+          #   (UID 1000), el manifiesto lo EXIGE; si alguien cambia la imagen
+          #   por una que corre como root, K8s se niega a arrancarla. UID alto
+          #   para no coincidir con usuarios del nodo.
+          # - allowPrivilegeEscalation false: ningún proceso puede ganar más
+          #   privilegios (ej. con un binario setuid).
+          # - capabilities drop ALL: Node escuchando en 3000 no necesita ninguna.
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
           env:
             - name: APP_VERSION
               value: "1.0.0"

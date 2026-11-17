@@ -47,6 +47,15 @@ spec:
               value: /var/lib/postgresql/data/pgdata
           ports:
             - containerPort: 5432
+          # Endurecimiento PARCIAL (ver tp-final/ci/HALLAZGOS-HORUSEC.md):
+          # la imagen oficial de PostgreSQL arranca como root para preparar el
+          # volumen y después baja al usuario "postgres" (su-exec). Bloquear la
+          # escalada de privilegios no interfiere con eso (bajar de root no es
+          # escalar). Correr como no-root desde el inicio se aceptó como riesgo:
+          # la DB no se expone fuera del cluster y cambiarlo exige preparar
+          # los permisos del volumen a mano.
+          securityContext:
+            allowPrivilegeEscalation: false
           # Lista solo cuando acepta conexiones; usa la variable en vez de
           # repetir el usuario hardcodeado.
           readinessProbe:

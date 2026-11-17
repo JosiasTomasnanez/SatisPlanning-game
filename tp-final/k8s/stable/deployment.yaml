@@ -33,6 +33,24 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
+          # Endurecimiento (hallazgos Trivy vía Horusec en el CI): no root,
+          # UID/GID > 10000, sin escalada de privilegios y sin capabilities
+          # (nginx escucha en 8080, no necesita permisos especiales).
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10101
+            runAsGroup: 10101
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          # Con un UID distinto al de la imagen (101), nginx no puede escribir
+          # en sus carpetas de trabajo. Se le dan volúmenes temporales vacíos
+          # (emptyDir) para el caché y el archivo pid (/tmp/nginx.pid).
+          volumeMounts:
+            - name: nginx-cache
+              mountPath: /var/cache/nginx
+            - name: tmp
+              mountPath: /tmp
           # Mismos recursos que el canary: si el canary tuviera más CPU,
           # "andar más rápido" no diría nada de la versión nueva.
           resources:
@@ -51,3 +69,8 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 2
             failureThreshold: 3
+      volumes:
+        - name: nginx-cache
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}

@@ -29,10 +29,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Descargar el código
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Instalar Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: '20'
 
@@ -60,10 +60,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Descargar el código
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Instalar Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v7
         with:
           go-version: '1.19'
 
@@ -77,9 +77,12 @@ jobs:
 
       # -s LOW: se ignoran los hallazgos de severidad baja (ruido).
       # -e true: si hay hallazgos MEDIUM o más, el job FALLA → no hay build.
+      # horusec-config.json: falsos positivos y riesgos aceptados, cada uno
+      # por su hash y justificado en tp-final/ci/HALLAZGOS-HORUSEC.md.
       - name: Ejecutar Horusec sobre tp-final/
         run: |
           /tmp/horusec-fixed start -p tp-final \
+            --config-file-path="tp-final/horusec-config.json" \
             -i="**/node_modules/**,**/evidencias/**,**/presentacion/**" \
             -s="LOW" \
             -e="true" \
@@ -89,7 +92,7 @@ jobs:
       # ahí es cuando más se necesita leerlo.
       - name: Guardar el reporte
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: horusec-report-tp-final
           path: horusec-report.txt
@@ -100,7 +103,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Descargar el código
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # Mismos tags explícitos que usa deploy.sh (nunca latest).
       - name: Build terrasense-back:1.0.0
@@ -121,3 +124,39 @@ jobs:
             [ "$got" = "$v" ]
           done
           docker images | grep terrasense
+
+      # Prueba de humo del endurecimiento: los manifiestos fuerzan UID/GID
+      # altos y sin escalada de privilegios. Acá se arrancan las imágenes con
+      # esas MISMAS restricciones para confirmar que funcionan, antes de
+      # llegar al cluster. (--tmpfs emula los emptyDir del front;
+      # no-new-privileges equivale a allowPrivilegeEscalation: false.)
+      - name: Front arranca como UID 10101 sin privilegios
+        run: |
+          docker run -d --name front --user 10101:10101 \
+            --security-opt no-new-privileges --cap-drop ALL \
+            --tmpfs /var/cache/nginx:mode=1777 --tmpfs /tmp:mode=1777 \
+            -p 8080:8080 terrasense-front:1.1.0
+          for i in $(seq 1 15); do curl -fs localhost:8080/version.txt && break; sleep 1; done
+          curl -fsI localhost:8080/ | grep -i "x-app-version: 1.1.0"
+          curl -fs -o /dev/null localhost:8080/assets/app-1.1.0.css
+          # Un asset inexistente debe dar 404 (no caer en index.html).
+          test "$(curl -s -o /dev/null -w '%{http_code}' localhost:8080/assets/no-existe.css)" = "404"
+          docker logs front
+
+      - name: Back arranca como UID 10001 sin privilegios
+        run: |
+          docker run -d --name back --user 10001:10001 \
+            --security-opt no-new-privileges --cap-drop ALL \
+            -e DB_PASSWORD=solo-para-ci -e DB_HOST=127.0.0.1 -e APP_VERSION=1.0.0 \
+            -p 3000:3000 terrasense-back:1.0.0
+          # /healthz no depende de la DB: prueba que el proceso arranca y responde.
+          for i in $(seq 1 15); do curl -fs localhost:3000/healthz && break; sleep 1; done
+          curl -fsI localhost:3000/healthz | grep -i "x-app-version: 1.0.0"
+          docker logs back
+
+      - name: PostgreSQL arranca con no-new-privileges
+        run: |
+          docker run -d --name db --security-opt no-new-privileges \
+            -e POSTGRES_PASSWORD=solo-para-ci -e POSTGRES_DB=iot_db postgres:15-alpine
+          for i in $(seq 1 30); do docker exec db pg_isready -U postgres -d iot_db && exit 0; sleep 1; done
+          docker logs db; exit 1
