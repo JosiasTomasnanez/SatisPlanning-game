@@ -7,8 +7,8 @@ const PORT = process.env.PORT || 3000;
 // "diga" qué versión está corriendo sin tener que reconstruir la imagen.
 const APP_VERSION = process.env.APP_VERSION || 'desconocida';
 
-// Sin contraseña por defecto: antes había una hardcodeada ('supersecreto123'),
-// que es un hallazgo típico de SAST (Horusec). Ahora la credencial viene SOLO
+// Sin contraseña por defecto: antes había una escrita en el código, que es
+// un hallazgo típico de SAST (Horusec). Ahora la credencial viene SOLO
 // del Secret de Kubernetes; si falta, preferimos fallar al arrancar (fail fast)
 // antes que conectarnos con un valor inventado.
 if (!process.env.DB_PASSWORD) {

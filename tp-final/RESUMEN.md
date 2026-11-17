@@ -119,7 +119,7 @@ hacer cambios en el front, para tener contra qué comparar.
 | Archivo | Recurso | Para qué |
 |---|---|---|
 | 00-namespace | Namespace `terrasense` | Agrupar todo lo del proyecto |
-| 01-config | ConfigMap + Secret | Configuración separada de la imagen; credenciales aparte |
+| 01-config | ConfigMap | Configuración separada de la imagen. El **Secret** con la contraseña de la DB no está en el repo: lo crea `deploy.sh` con una contraseña aleatoria (cambio de la Fase 6) |
 | 02-db | StatefulSet PostgreSQL + PVC + Service `db` | DB con nombre fijo (`db-0`) y disco que sobrevive reinicios |
 | 03-back | Deployment `back` (2 réplicas) + Service | El back, con imagen `terrasense-back:1.0.0` |
 | 04-hpa | HorizontalPodAutoscaler | Escala el back de 2 a 8 pods según CPU (objetivo 60%) |
@@ -176,8 +176,9 @@ Kubernetes ──────┤  ¿podés atender? (incluye DB)  falla → sale
 - *¿Qué pasa si se borra el Secret?* El back no arranca: no hay contraseña por defecto, a propósito.
 - *¿Por qué el selector del Deployment no incluye `version`?* El selector es inmutable; con la
   versión adentro no se podría actualizar sin recrear el Deployment.
-- *¿El Secret es seguro?* Está en base64, no cifrado. En producción usaríamos Vault o Sealed
-  Secrets y no lo versionaríamos; acá es un laboratorio.
+- *¿El Secret es seguro?* Dentro del cluster está en base64, no cifrado. Lo que sí cuidamos es
+  que **no esté en git**: lo genera `deploy.sh` al desplegar. En producción usaríamos Vault,
+  Sealed Secrets o External Secrets.
 
 ---
 
@@ -706,3 +707,103 @@ Variantes de uso:
   en el 25% y el rollback la saca en segundos.
 - *¿Qué pasa si se corta la luz a mitad del rollout?* El peso queda en el último valor aplicado
   (está en el cluster y en el YAML). Se vuelve a correr desde la etapa que corresponda con `PESOS`.
+
+---
+
+## Fase 6 — CI: primera quality gate del release
+
+### En pocas palabras
+Antes de que una versión llegue al canary tiene que pasar controles automáticos sobre el
+**código**: linters (estilo y errores) y Horusec (seguridad). Si alguno falla, GitHub Actions
+**no construye las imágenes**, y sin imagen no hay nada que desplegar. Es la primera barrera.
+El canary (Fases 3–5) es la segunda: controla el **comportamiento en ejecución**.
+
+```
+push / PR que toca tp-final/**
+        │
+        ├── job lint ──────┐   htmlhint (front) + ESLint (back) + hadolint (Dockerfiles)
+        │                  ├──► job build (needs: lint + horusec)
+        └── job horusec ───┘    docker build terrasense-back:1.0.0 y terrasense-front:1.0.0/1.1.0/1.2.0
+                                + verificación: version.txt de cada imagen = su tag
+   si lint o horusec fallan → build NO corre → no hay imagen candidata
+```
+
+### Conceptos
+- **CI** (Integración Continua): cada cambio que se sube dispara automáticamente controles.
+- **Quality gate**: un control con resultado pasa/no pasa que **bloquea** el avance si falla.
+- **Job / needs**: un workflow tiene jobs; `needs: [lint, horusec]` hace que `build` espere a
+  que los dos terminen **bien**. Si uno falla, `build` queda "skipped".
+- **SAST** (Static Application Security Testing): análisis de seguridad leyendo el código,
+  sin ejecutarlo. Es lo que hace Horusec.
+- **Artifact**: archivo que el pipeline guarda para descargarlo después (el reporte de Horusec).
+
+### Archivos
+| Archivo | Qué es |
+|---|---|
+| `.github/workflows/tp-final-ci.yml` (raíz del repo) | El pipeline activo. Va en la raíz porque GitHub solo ejecuta workflows de `.github/workflows/` |
+| `tp-final/app/back/eslint.config.js` | Reglas de ESLint escritas a mano, **sin dependencias externas** (no hace falta `npm install`) |
+| `tp-final/ci/linter.yml` | Copia del workflow del TP1 (rama `feature/configurar-linter`) |
+| `tp-final/ci/horusec.yml` | Copia del workflow del TP2 (rama `dev`) |
+| `tp-final/ci/README.md` | De dónde sale cada copia y qué se reutiliza |
+
+### Herramientas del job lint
+| Herramienta | Analiza | Ejemplos de lo que detecta |
+|---|---|---|
+| htmlhint | Los `index.html` de las 3 versiones | Etiquetas sin cerrar, atributos duplicados, falta de doctype |
+| ESLint | `server.js` | Variables sin declarar o sin usar, `==` en vez de `===`, `eval`, handlers que a veces no responden (`consistent-return`) |
+| hadolint | Los 2 Dockerfiles | Correr como root, tags `latest`, malas prácticas en `RUN` |
+
+Las versiones de las herramientas están **fijas** (`eslint@10.15.0`, `htmlhint@1.9.2`,
+`hadolint:v2.12.0`): si sale una versión nueva con reglas nuevas, el pipeline no se rompe solo,
+sin que haya cambiado el código.
+
+### Job horusec
+- Mismo método que el TP2: compilar Horusec desde el código fuente con Go 1.19, porque la release
+  v2.8.0 tiene un bug con Docker moderno.
+- `-p tp-final`: analiza solo el TP Final (no el juego).
+- `-s LOW`: ignora los hallazgos de severidad baja. En el TP2, todos los hallazgos LOW eran
+  `random` usado en el juego, que no es un problema de seguridad.
+- `-e true`: si queda algún hallazgo (MEDIUM o más), el job **falla** y corta el build.
+- `if: always()` en la subida del reporte: se guarda aunque el análisis falle, que es justamente
+  cuando hay que leerlo.
+
+### Cambio de seguridad hecho en esta fase
+El Secret de la DB tenía una contraseña escrita en `k8s/base/01-config.yaml`. Una contraseña
+versionada en git queda en el historial y es un hallazgo de SAST. Se sacó del YAML: ahora
+`deploy.sh` crea el Secret con una contraseña **aleatoria** al desplegar, y no la regenera si ya
+existe (PostgreSQL guarda la contraseña en su volumen la primera vez).
+Junto con lo de la Fase 1 (sacar la contraseña por defecto de `server.js`), **no queda ninguna
+credencial en el código**.
+
+### Cómo se conecta con TP1 y TP2
+| TP | Qué hizo | Qué toma el TP Final |
+|---|---|---|
+| TP1 | Ruff + Pylint sobre el juego (Python), en cada PR | La idea de linter como gate; acá con herramientas para HTML, JS y Dockerfile, porque TerraSense no tiene Python |
+| TP2 | Horusec sobre el juego, reporte como artifact | El mismo workflow, apuntado a `tp-final/` y con `-e true` para que bloquee |
+| Final | — | Job `build` que depende de los dos: la imagen solo existe si el código pasó las gates |
+
+### Qué mostrar en la presentación: pipeline en rojo y después en verde
+1. Crear una rama de demo y meter un error a propósito en `server.js`, por ejemplo una variable sin usar:
+   `const sinUsar = 1;` → push.
+2. En GitHub → Actions: `lint` en **rojo**, `build` en **skipped** (gris) → **captura**.
+3. Revertir el cambio → push → todo en **verde** y `build` construye las 4 imágenes → **captura**.
+4. Mostrar el artifact `horusec-report-tp-final` descargado.
+
+Ojo: el **primer** run real puede encontrar hallazgos de Horusec que no se pueden prever sin
+ejecutarlo (por ejemplo, en los endpoints de laboratorio `/api/debug/*`). Si pasa, se analiza cada
+hallazgo: se corrige, o se justifica como falso positivo, como en el TP2. Ese análisis también es
+contenido para el informe.
+
+### Frase para la presentación
+> "El pipeline de CI es la primera quality gate: linters y Horusec sobre el código, reutilizando
+> lo de TP1 y TP2. Las imágenes candidatas solo se construyen si las dos gates pasan; después, el
+> canary es la segunda gate, ya con la aplicación corriendo."
+
+### Posibles preguntas
+- *¿Por qué no Ruff/Pylint como en el TP1?* Son linters de Python; TerraSense es JS, HTML y Dockerfile.
+  Se mantuvo la práctica (linter como gate), cambiando la herramienta según el lenguaje.
+- *¿El CI despliega en Minikube?* No: GitHub no tiene acceso al Minikube local. El CI valida el código
+  y construye las imágenes; el despliegue y el canary se hacen con `deploy.sh` y `rollout.sh`.
+- *¿Qué no detecta este pipeline?* Nada en ejecución: ni la pantalla en blanco de la v1.2.0 (el JS es
+  sintácticamente válido, y ESLint no corre sobre el front) ni problemas de rendimiento. Para eso está el canary.
+- *¿Por qué ignorar LOW?* Para que el gate bloquee por riesgos reales. Los LOW quedan igual en el reporte.

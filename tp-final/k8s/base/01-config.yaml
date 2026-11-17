@@ -11,19 +11,10 @@ data:
   DB_PORT: "5432"
   DB_NAME: "iot_db"
   DB_POOL_MAX: "10"
----
-# Secret: credenciales. Es el ÚNICO lugar donde vive la contraseña (el código
-# ya no tiene un valor por defecto). Ojo: un Secret solo está codificado en
-# base64, no cifrado; en un entorno real se usaría un gestor de secretos
-# (Vault, Sealed Secrets) y no se versionaría en git. Acá es un laboratorio.
-apiVersion: v1
-kind: Secret
-metadata:
-  name: db-secret
-  namespace: terrasense
-type: Opaque
-stringData:
-  POSTGRES_USER: "admin"
-  POSTGRES_PASSWORD: "cambiar-en-lab"
-  DB_USER: "admin"
-  DB_PASSWORD: "cambiar-en-lab"
+
+# El Secret "db-secret" (usuario y contraseña de PostgreSQL) NO está en este
+# archivo a propósito: una contraseña versionada en git queda en el historial
+# para siempre y es un hallazgo de SAST (Horusec). Lo crea scripts/deploy.sh
+# con una contraseña aleatoria generada al desplegar (o la de la variable
+# DB_PASSWORD). En producción se usaría un gestor de secretos (Vault,
+# Sealed Secrets, External Secrets).

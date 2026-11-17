@@ -58,6 +58,23 @@ kubectl -n ingress-nginx wait --for=condition=ready pod \
 paso "Aplicando base (namespace, config, DB)"
 kubectl apply -f k8s/base/00-namespace.yaml
 kubectl apply -f k8s/base/01-config.yaml
+
+# Secret de la DB: se crea acá y no en un YAML versionado (ver 01-config.yaml).
+# Si ya existe NO se regenera: PostgreSQL guarda la contraseña en su volumen
+# la primera vez que inicializa; cambiarla después dejaría al back sin acceso.
+if kubectl -n "$NS" get secret db-secret >/dev/null 2>&1; then
+  echo "Secret db-secret ya existe; se conserva."
+else
+  DB_USER="${DB_USER:-admin}"
+  DB_PASSWORD="${DB_PASSWORD:-$(head -c 24 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | head -c 24)}"
+  kubectl -n "$NS" create secret generic db-secret \
+    --from-literal=POSTGRES_USER="$DB_USER" \
+    --from-literal=POSTGRES_PASSWORD="$DB_PASSWORD" \
+    --from-literal=DB_USER="$DB_USER" \
+    --from-literal=DB_PASSWORD="$DB_PASSWORD"
+  echo "Secret db-secret creado con contraseña aleatoria."
+fi
+
 kubectl apply -f k8s/base/02-db.yaml
 kubectl -n "$NS" rollout status statefulset/db --timeout=300s
 

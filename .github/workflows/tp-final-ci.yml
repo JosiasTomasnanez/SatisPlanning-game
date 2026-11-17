@@ -1,0 +1,123 @@
+# CI del TP Final (TerraSense): primera quality gate del release.
+#
+#   lint ─────┐
+#             ├──► build (imágenes candidatas)
+#   horusec ──┘
+#
+# La imagen candidata SOLO se construye si pasaron las dos gates (needs).
+# Reutiliza las herramientas de TP1 (linters) y TP2 (Horusec), ahora sobre el
+# código de TerraSense (ver tp-final/ci/README.md).
+name: TP Final - CI TerraSense
+
+on:
+  push:
+    paths:
+      - 'tp-final/**'
+      - '.github/workflows/tp-final-ci.yml'
+  pull_request:
+    paths:
+      - 'tp-final/**'
+      - '.github/workflows/tp-final-ci.yml'
+
+# Mínimo privilegio: el pipeline solo necesita leer el repo.
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Linters (HTML, JS, Dockerfile)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Instalar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Versiones fijas: si mañana sale una versión nueva del linter con
+      # reglas nuevas, el pipeline no se rompe solo sin que cambie el código.
+      - name: htmlhint sobre las 3 versiones del front
+        run: npx --yes htmlhint@1.9.2 "tp-final/app/front/**/*.html"
+
+      - name: ESLint sobre el back (eslint.config.js sin dependencias externas)
+        working-directory: tp-final/app/back
+        run: npx --yes eslint@10.15.0 .
+
+      # hadolint: buenas prácticas de Dockerfile (usuario no root, tags fijos, etc.).
+      # failure-threshold warning: las sugerencias "info" no cortan el pipeline.
+      - name: hadolint sobre los Dockerfiles
+        run: |
+          for f in tp-final/app/back/Dockerfile tp-final/app/front/Dockerfile; do
+            echo "--- $f"
+            docker run --rm -i hadolint/hadolint:v2.12.0 \
+              hadolint --failure-threshold warning - < "$f"
+          done
+
+  horusec:
+    name: SAST con Horusec
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Instalar Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.19'
+
+      # Mismo enfoque que el TP2: la release v2.8.0 tiene un bug con Docker
+      # moderno, así que se compila desde el código fuente.
+      - name: Compilar Horusec desde el código fuente
+        run: |
+          git clone --depth 1 https://github.com/ZupIT/horusec.git /tmp/horusec
+          cd /tmp/horusec
+          CGO_ENABLED=0 go build -buildvcs=false -o /tmp/horusec-fixed ./cmd/app
+
+      # -s LOW: se ignoran los hallazgos de severidad baja (ruido).
+      # -e true: si hay hallazgos MEDIUM o más, el job FALLA → no hay build.
+      - name: Ejecutar Horusec sobre tp-final/
+        run: |
+          /tmp/horusec-fixed start -p tp-final \
+            -i="**/node_modules/**,**/evidencias/**,**/presentacion/**" \
+            -s="LOW" \
+            -e="true" \
+            -o="text" -O="horusec-report.txt"
+
+      # always(): el reporte se sube aunque el análisis falle; justamente
+      # ahí es cuando más se necesita leerlo.
+      - name: Guardar el reporte
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: horusec-report-tp-final
+          path: horusec-report.txt
+
+  build:
+    name: Build de imágenes candidatas
+    needs: [lint, horusec]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      # Mismos tags explícitos que usa deploy.sh (nunca latest).
+      - name: Build terrasense-back:1.0.0
+        run: docker build -t terrasense-back:1.0.0 tp-final/app/back
+
+      - name: Build terrasense-front:1.0.0 / 1.1.0 / 1.2.0
+        run: |
+          for v in 1.0.0 1.1.0 1.2.0; do
+            docker build --build-arg APP_VERSION="$v" -t "terrasense-front:$v" tp-final/app/front
+          done
+
+      # Verificación mínima de la imagen: la marca de versión quedó adentro.
+      - name: Verificar version.txt dentro de cada imagen del front
+        run: |
+          for v in 1.0.0 1.1.0 1.2.0; do
+            got=$(docker run --rm --entrypoint cat "terrasense-front:$v" /usr/share/nginx/html/version.txt)
+            echo "terrasense-front:$v → version.txt=$got"
+            [ "$got" = "$v" ]
+          done
+          docker images | grep terrasense
