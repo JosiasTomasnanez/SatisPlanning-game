@@ -1,0 +1,46 @@
+# Ingress CANARY: mismo host y path que terrasense-ingress, pero marcado como
+# canary. ingress-nginx no crea una ruta nueva: agrega front-canary como
+# destino alternativo de la ruta existente y decide request por request.
+#
+# Orden de decisión (precedencia) del controller:
+#   1) header  X-Canary: always → canary | never → stable | otro valor → sigue
+#   2) cookie  canary=always    → canary | never → stable | otro valor → sigue
+#   3) peso    canary-weight %  → sorteo aleatorio
+# Header y cookie permiten forzar la versión (QA, k6) sin tocar el peso que
+# ven los usuarios reales.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: terrasense-ingress-canary
+  namespace: terrasense
+  annotations:
+    nginx.ingress.kubernetes.io/canary: "true"
+    # Arranca en 0: el canary está desplegado pero sin usuarios reales.
+    # Solo se llega con header/cookie (etapa 0 del plan). scripts/peso.sh lo cambia.
+    nginx.ingress.kubernetes.io/canary-weight: "0"
+    nginx.ingress.kubernetes.io/canary-by-cookie: "canary"
+    nginx.ingress.kubernetes.io/canary-by-header: "X-Canary"
+    # En un Ingress canary el controller ignora casi todas las anotaciones
+    # (las hereda del principal), EXCEPTO las de afinidad: hay que repetirlas
+    # para que los usuarios del canary también queden pegados a su pod.
+    nginx.ingress.kubernetes.io/affinity: "cookie"
+    nginx.ingress.kubernetes.io/session-cookie-name: "terrasense-front"
+    nginx.ingress.kubernetes.io/session-cookie-max-age: "3600"
+    # "sticky" (valor por defecto, lo explicitamos para documentarlo): si un
+    # usuario ya cayó en el canary, sigue en el canary aunque el sorteo por
+    # peso diga otra cosa. Sin esto, la afinidad no aplicaría a la decisión
+    # canary/stable y volverían los assets mezclados.
+    nginx.ingress.kubernetes.io/affinity-canary-behavior: "sticky"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: terrasense.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: front-canary
+                port:
+                  number: 8080

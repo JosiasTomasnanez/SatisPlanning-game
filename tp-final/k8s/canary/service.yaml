@@ -1,0 +1,15 @@
+# Service del canary: solo pods con track=canary. Es el destino al que
+# apunta el Ingress canary.
+apiVersion: v1
+kind: Service
+metadata:
+  name: front-canary
+  namespace: terrasense
+spec:
+  type: ClusterIP
+  selector:
+    app: front
+    track: canary
+  ports:
+    - port: 8080
+      targetPort: 8080

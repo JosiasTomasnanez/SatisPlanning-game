@@ -1,0 +1,63 @@
+# Dos Ingress separados (en el TP3 había uno solo con los dos hosts).
+# Separarlos permite configurar API y front de forma distinta: la afinidad por
+# cookie es necesaria para el front, pero dañina para la API.
+#
+# 1) API: api.terrasense.local → Service back:3000
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: terrasense-ingress-api
+  namespace: terrasense
+  annotations:
+    # Mismo tope que express.json({ limit: '1mb' }) en el back: un body
+    # gigante se corta en el borde y no llega a gastar recursos del back.
+    nginx.ingress.kubernetes.io/proxy-body-size: "1m"
+    # SIN afinidad a propósito: k6 guarda cookies por usuario virtual. Con
+    # afinidad, cada VU quedaría pegado a un único pod del back, los pods
+    # nuevos que crea el HPA casi no recibirían tráfico y la medición del
+    # escalado quedaría distorsionada.
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: api.terrasense.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: back
+                port:
+                  number: 3000
+---
+# 2) Front principal: terrasense.local → front-stable:8080
+# Es el Ingress "dueño" del host. El Ingress canary (k8s/canary/) se apoya en
+# este: mismo host y path, y le "roba" una parte del tráfico.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: terrasense-ingress
+  namespace: terrasense
+  annotations:
+    # Afinidad por cookie: el primer request elige un pod y el controller
+    # devuelve la cookie "terrasense-front"; los siguientes requests del mismo
+    # navegador (HTML, CSS, JS) van al MISMO pod. Evita los "assets mezclados"
+    # (HTML de la 1.1.0 y CSS pedido a un pod 1.0.0 → 404).
+    nginx.ingress.kubernetes.io/affinity: "cookie"
+    nginx.ingress.kubernetes.io/session-cookie-name: "terrasense-front"
+    # 1 hora: dura más que cualquier sesión de prueba pero no es eterna, así
+    # que al cambiar el peso los usuarios se redistribuyen con el tiempo.
+    nginx.ingress.kubernetes.io/session-cookie-max-age: "3600"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: terrasense.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: front-stable
+                port:
+                  number: 8080

@@ -1,0 +1,50 @@
+# front-canary: la versión candidata (1.1.0), expuesta a una parte del tráfico.
+# Es IDÉNTICA a la stable salvo nombre, track, versión y réplicas: si algo
+# cambia en las métricas, la única causa posible es la versión nueva.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: front-canary
+  namespace: terrasense
+  labels:
+    app: front
+    track: canary
+    version: "1.1.0"
+spec:
+  # 1 réplica: el canary arranca chico (si falla, afecta poco).
+  # OJO: el peso del Ingress no sabe cuántos pods hay. Con peso 50, este
+  # único pod recibe tanto tráfico como los 2 de la stable juntos.
+  # Para el estrés A/B se escala a 2 (condiciones comparables).
+  replicas: 1
+  selector:
+    matchLabels:
+      app: front
+      track: canary
+  template:
+    metadata:
+      labels:
+        app: front
+        track: canary
+        version: "1.1.0"
+    spec:
+      containers:
+        - name: front
+          image: terrasense-front:1.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          # Mismos recursos y probes que la stable: comparación justa.
+          resources:
+            requests: { cpu: "50m", memory: "64Mi" }
+            limits: { cpu: "250m", memory: "128Mi" }
+          readinessProbe:
+            httpGet: { path: /version.txt, port: 8080 }
+            initialDelaySeconds: 2
+            periodSeconds: 5
+            failureThreshold: 2
+          livenessProbe:
+            httpGet: { path: /version.txt, port: 8080 }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3

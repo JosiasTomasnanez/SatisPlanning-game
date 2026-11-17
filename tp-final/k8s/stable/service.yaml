@@ -1,0 +1,18 @@
+# Service propio para la stable. El Ingress controller necesita DOS Services
+# distintos (stable y canary) para poder repartir tráfico entre ellos: el
+# reparto lo hace el Ingress, no Kubernetes.
+apiVersion: v1
+kind: Service
+metadata:
+  name: front-stable
+  namespace: terrasense
+spec:
+  type: ClusterIP
+  # app + track: si seleccionara solo "app: front", este Service incluiría
+  # también los pods canary y el peso del Ingress dejaría de tener sentido.
+  selector:
+    app: front
+    track: stable
+  ports:
+    - port: 8080
+      targetPort: 8080

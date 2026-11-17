@@ -1,0 +1,53 @@
+# front-stable: la versión que hoy está en producción (1.0.0).
+# Es el "grupo de control" del canary: recibe todo el tráfico que el canary no toma.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: front-stable
+  namespace: terrasense
+  labels:
+    app: front
+    track: stable
+    version: "1.0.0"
+spec:
+  replicas: 2
+  # Selector = app + track. El selector es INMUTABLE: por eso NO incluye
+  # "version". Así, al promover, la stable cambia de imagen (1.0.0 → 1.1.0)
+  # con un simple apply, sin borrar y recrear el Deployment.
+  selector:
+    matchLabels:
+      app: front
+      track: stable
+  template:
+    metadata:
+      labels:
+        app: front
+        track: stable
+        # "version" es informativa (kubectl get pods -L version), no se usa
+        # para enrutar: el ruteo lo decide el label "track".
+        version: "1.0.0"
+    spec:
+      containers:
+        - name: front
+          image: terrasense-front:1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          # Mismos recursos que el canary: si el canary tuviera más CPU,
+          # "andar más rápido" no diría nada de la versión nueva.
+          resources:
+            requests: { cpu: "50m", memory: "64Mi" }
+            limits: { cpu: "250m", memory: "128Mi" }
+          # /version.txt: archivo estático y liviano. Prueba que nginx sirve
+          # archivos de ESTA imagen sin cargar el HTML completo.
+          readinessProbe:
+            httpGet: { path: /version.txt, port: 8080 }
+            initialDelaySeconds: 2
+            periodSeconds: 5
+            failureThreshold: 2
+          livenessProbe:
+            httpGet: { path: /version.txt, port: 8080 }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
